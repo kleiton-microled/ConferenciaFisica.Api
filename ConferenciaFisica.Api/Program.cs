@@ -1,16 +1,39 @@
+ï»¿using ConferenciaFisica.Application.UseCases.Agendamento;
+using ConferenciaFisica.Application.UseCases.Agendamento.Interfaces;
+using ConferenciaFisica.Application.UseCases.Conferencia;
+using ConferenciaFisica.Domain.Repositories;
+using ConferenciaFisica.Infra;
 using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.HealthChecks;
-using Microsoft.AspNetCore.Builder;
+using ConferenciaFisica.Infra.Repositories;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adicionando serviços ao container
-builder.Services.AddOpenApi();
-builder.Services.AddSingleton<OracleConnectionFactory>();
+// Habilitando CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin() // Libera qualquer origem
+                        .AllowAnyMethod() // Permite qualquer mÃ©todo (GET, POST, PUT, DELETE, etc.)
+                        .AllowAnyHeader()); // Permite qualquer cabeÃ§alho
+});
+
+// Adicionando serviÃ§os ao container
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+//builder.Services.AddOpenApi();
 builder.Services.AddSingleton<SqlServerConnectionFactory>();
+
+builder.Services.AddScoped<IBuscarConferenciaUseCase, BuscarConferenciaUseCase>();
+builder.Services.AddScoped<IConferenciaRepository, ConferenciaRepository>();
+
+builder.Services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
+builder.Services.AddScoped<ICarregarLotesAgendamentoUseCase, CarregarLotesAgendamentoUseCase>();
+builder.Services.AddScoped<ICarregarCntrAgendamentoUseCase, CarregarCntrAgendamentoUseCase>();
+
 
 
 // Adicionando Health Check
@@ -20,14 +43,23 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
-// Configuração do pipeline de requisição HTTP
+// ConfiguraÃ§Ã£o do pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-app.UseRouting(); // ?? ADICIONADO: Garante que os endpoints sejam roteados corretamente
+
+app.UseCors("AllowAll");
+
+
+app.UseRouting();
+
+// ðŸ”¥ Middleware Global de Tratamento de Erros
+app.UseMiddleware<GlobalExceptionMiddleware>();
+app.MapControllers();
 
 // Criando um endpoint para Health Check
 app.UseEndpoints(endpoints =>
@@ -40,31 +72,7 @@ app.UseEndpoints(endpoints =>
             await context.Response.WriteAsync(result);
         }
     });
-
-    // Mapeando outras rotas
-    endpoints.MapGet("/weatherforecast", () =>
-    {
-        var summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-            new WeatherForecast
-            (
-                DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                Random.Shared.Next(-20, 55),
-                summaries[Random.Shared.Next(summaries.Length)]
-            ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast");
 });
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
