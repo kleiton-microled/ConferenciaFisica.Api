@@ -1,0 +1,56 @@
+﻿using ConferenciaFisica.Application.Commands;
+using ConferenciaFisica.Application.Common.Models;
+using ConferenciaFisica.Contracts.Commands;
+using ConferenciaFisica.Domain.Repositories;
+
+namespace ConferenciaFisica.Application.UseCases.Conferencia
+{
+    public class IniciarConferenciaUseCase : IIniciarConferenciaUseCase
+    {
+        private readonly IConferenciaRepository _conferenciaRepository;
+        public IniciarConferenciaUseCase(IConferenciaRepository repository)
+        {
+            _conferenciaRepository = repository;
+        }
+        public async Task<ServiceResult<bool>> ExecuteAsync(ConferenciaFisicaRequest request)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+
+            var command = ConferenciaFisicaCommand.New(null,
+                                                       request.Conteiner, 
+                                                       request.Bl, 
+                                                       request.Inicio, 
+                                                       request.Termino, 
+                                                       request.CpfConferente, 
+                                                       request.NomeConferente,
+                                                       request.CpfCliente, 
+                                                       request.NomeCliente, 
+                                                       request.QtdeDivergente, 
+                                                       request.DivergenciaQualificacao, 
+                                                       request.ObservacaoDivergencia, 
+                                                       request.RetiradaAmostra, 
+                                                       request.ConferenciaRemota, 
+                                                       request.Operacao,
+                                                       request.QtdeVolumesDivergentes, 
+                                                       request.QtdeRepresentantes, 
+                                                       request.QuantidadeAjudantes, 
+                                                       request.QuantidadeOperadores,
+                                                       request.Movimentacao, 
+                                                       request.Desuniticacao, 
+                                                       request.QuantidadeDocumentos);
+
+            var ret = await _conferenciaRepository.IniciarConferencia(command);
+
+            if (ret)
+            {
+                _serviceResult.Result = true;
+            }
+            else
+            {
+                _serviceResult.Result = false;
+            }
+
+            return _serviceResult;
+        }
+    }
+}

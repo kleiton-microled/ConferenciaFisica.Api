@@ -1,6 +1,7 @@
 ﻿using ConferenciaFisica.Application.UseCases.Agendamento;
 using ConferenciaFisica.Application.UseCases.Agendamento.Interfaces;
 using ConferenciaFisica.Application.UseCases.Conferencia;
+using ConferenciaFisica.Application.UseCases.Conferencia.Interfaces;
 using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Infra;
 using ConferenciaFisica.Infra.Data;
@@ -8,6 +9,8 @@ using ConferenciaFisica.Infra.HealthChecks;
 using ConferenciaFisica.Infra.Repositories;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +24,14 @@ builder.Services.AddCors(options =>
 });
 
 // Adicionando serviços ao container
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
+    }); ;
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //builder.Services.AddOpenApi();
@@ -33,6 +43,9 @@ builder.Services.AddScoped<IConferenciaRepository, ConferenciaRepository>();
 builder.Services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
 builder.Services.AddScoped<ICarregarLotesAgendamentoUseCase, CarregarLotesAgendamentoUseCase>();
 builder.Services.AddScoped<ICarregarCntrAgendamentoUseCase, CarregarCntrAgendamentoUseCase>();
+builder.Services.AddScoped<IIniciarConferenciaUseCase, IniciarConferenciaUseCase>();
+builder.Services.AddScoped<IAtualizarConferenciaUseCase, AtualizarConferenciaUseCase>();
+builder.Services.AddScoped<ICadastrosAdicionaisUseCase, CadastrosAdicionaisUseCase>();
 
 
 

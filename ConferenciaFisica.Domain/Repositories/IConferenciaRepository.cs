@@ -1,4 +1,6 @@
-﻿using ConferenciaFisica.Domain.Entities;
+﻿using ConferenciaFisica.Contracts.Commands;
+using ConferenciaFisica.Contracts.DTOs;
+using ConferenciaFisica.Domain.Entities;
 
 namespace ConferenciaFisica.Domain.Repositories
 {
@@ -6,5 +8,10 @@ namespace ConferenciaFisica.Domain.Repositories
     {
         Task<Conferencia> BuscarPorConteinerAsync(string idConteiner);
         Task<Conferencia> BuscarPorLoteAsync(string idLote);
+        Task<Conferencia> BuscarPorReservaAsync(string idLote);
+        Task<bool> IniciarConferencia(ConferenciaFisicaCommand command);
+        Task<bool> AtualizarConferencia(ConferenciaFisicaCommand command);
+        Task<bool> CadastroAdicional(CadastroAdicionalCommand command);
+        Task<IEnumerable<CadastrosAdicionaisDTO>> CarregarCadastrosAdicionais(int idReferencia);
     }
 }

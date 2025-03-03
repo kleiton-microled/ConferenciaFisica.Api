@@ -1,6 +1,6 @@
 ﻿using ConferenciaFisica.Application.Common.Models;
+using ConferenciaFisica.Application.UseCases.Conferencia.Interfaces;
 using ConferenciaFisica.Domain.Repositories;
-using System.Threading.Tasks;
 
 namespace ConferenciaFisica.Application.UseCases.Conferencia
 {
@@ -25,10 +25,15 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
             if (!string.IsNullOrEmpty(idConteiner))
             {
                 conferencia = await _conferenciaRepository.BuscarPorConteinerAsync(idConteiner);
+               
             }
             else if (!string.IsNullOrEmpty(idLote))
             {
                 conferencia = await _conferenciaRepository.BuscarPorLoteAsync(idLote);
+                if (conferencia is null)
+                {
+                    conferencia = await _conferenciaRepository.BuscarPorReservaAsync(idLote);
+                }
             }
 
             if (conferencia == null)

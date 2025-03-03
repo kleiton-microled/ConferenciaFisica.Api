@@ -1,9 +1,11 @@
-﻿using System.Data;
+﻿using ConferenciaFisica.Contracts.Commands;
+using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.Sql;
 using Dapper;
+using System.ComponentModel;
 
 namespace ConferenciaFisica.Infra.Repositories
 {
@@ -22,9 +24,17 @@ namespace ConferenciaFisica.Infra.Repositories
             {
                 using var connection = _connectionFactory.CreateConnection();
 
-                string query = SqlQueries.BuscarConferencia;
+                string query = SqlQueries.BuscarConferenciaPorIdContainer;
 
-                return await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { idConteiner });
+                var ret = await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { idConteiner });
+
+                if (ret is null)
+                {
+                    query = SqlQueries.BuscarConferenciaPorAgendamento;
+                    ret = await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { idConteiner });
+                }
+
+                return ret;
             }
             catch (Exception ex)
             {
@@ -52,6 +62,81 @@ namespace ConferenciaFisica.Infra.Repositories
             ";
 
             return await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { idLote });
+        }
+
+        public async Task<Conferencia> BuscarPorReservaAsync(string idLote)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.BuscarConferenciaPorReserva;
+
+            return await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { idLote });
+        }
+
+        public async Task<bool> IniciarConferencia(ConferenciaFisicaCommand command)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.InsertConferenciaFisica;
+
+            var ret =  await connection.ExecuteAsync(query, command);
+            if (ret > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public async Task<bool> AtualizarConferencia(ConferenciaFisicaCommand command)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.AtualizarConferencia;
+
+            var ret = await connection.ExecuteAsync(query, command);
+            if (ret > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> CadastroAdicional(CadastroAdicionalCommand command)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.CadastroAdicional;
+
+            var ret = await connection.ExecuteAsync(query, command);
+            if (ret > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<IEnumerable<CadastrosAdicionaisDTO>> CarregarCadastrosAdicionais(int idConferencia)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.CarregarCadastrosAdicionais;
+
+                var ret = await connection.QueryAsync<CadastrosAdicionaisDTO>(query, new { idConferencia });
+
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
     }
 }
