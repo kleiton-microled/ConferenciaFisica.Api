@@ -2,6 +2,7 @@
 using ConferenciaFisica.Application.Inputs;
 using ConferenciaFisica.Contracts.Commands;
 using ConferenciaFisica.Contracts.DTOs;
+using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Repositories;
 
 namespace ConferenciaFisica.Application.UseCases.Conferencia
@@ -42,11 +43,29 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
             return _serviceResult;
         }
 
-        public async Task<ServiceResult<IEnumerable<CadastrosAdicionaisDTO>>> CarregarCadastrosAdicionais(int idConferencia)
+        public async Task<ServiceResult<IEnumerable<CadastrosAdicionaisDTO>>> GetAllAsync(int idConferencia)
         {
             var _serviceResult = new ServiceResult<IEnumerable<CadastrosAdicionaisDTO>>();
 
             _serviceResult.Result = await _conferenciaRepository.CarregarCadastrosAdicionais(idConferencia);
+            return _serviceResult;
+        }
+
+        public async Task<ServiceResult<bool>> DeleteAsync(int id)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+
+            var result = await _conferenciaRepository.Delete(id);
+            if (result)
+            {
+                _serviceResult.Result = result;
+                _serviceResult.Mensagens.Add("Cadastro excluido com sucesso!");
+            }
+            else
+            {
+                _serviceResult.Mensagens.Add("Falha ao tentar excluir o registro!");
+            }
+            
             return _serviceResult;
         }
     }

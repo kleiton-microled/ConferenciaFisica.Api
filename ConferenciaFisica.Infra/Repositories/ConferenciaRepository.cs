@@ -41,7 +41,7 @@ namespace ConferenciaFisica.Infra.Repositories
 
                 throw;
             }
-            
+
         }
 
         public async Task<Conferencia> BuscarPorLoteAsync(string idLote)
@@ -77,7 +77,7 @@ namespace ConferenciaFisica.Infra.Repositories
             using var connection = _connectionFactory.CreateConnection();
             string query = SqlQueries.InsertConferenciaFisica;
 
-            var ret =  await connection.ExecuteAsync(query, command);
+            var ret = await connection.ExecuteAsync(query, command);
             if (ret > 0)
             {
                 return true;
@@ -87,6 +87,7 @@ namespace ConferenciaFisica.Infra.Repositories
                 return false;
             }
         }
+
         public async Task<bool> AtualizarConferencia(ConferenciaFisicaCommand command)
         {
             using var connection = _connectionFactory.CreateConnection();
@@ -138,5 +139,53 @@ namespace ConferenciaFisica.Infra.Repositories
                 throw;
             }
         }
+
+        public async Task<IEnumerable<TipoLacre>> CarregarTiposLacres()
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.CarregarTiposLacres;
+
+                var ret = await connection.QueryAsync<TipoLacre>(query);
+
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<bool> Delete(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.ExlcuirCadastroAdicional;
+
+                var ret = await connection.ExecuteAsync(query, new { id });
+                if (ret > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+       
     }
 }

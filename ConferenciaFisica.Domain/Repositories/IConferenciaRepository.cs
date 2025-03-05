@@ -12,6 +12,8 @@ namespace ConferenciaFisica.Domain.Repositories
         Task<bool> IniciarConferencia(ConferenciaFisicaCommand command);
         Task<bool> AtualizarConferencia(ConferenciaFisicaCommand command);
         Task<bool> CadastroAdicional(CadastroAdicionalCommand command);
+        Task<bool> Delete(int id);
         Task<IEnumerable<CadastrosAdicionaisDTO>> CarregarCadastrosAdicionais(int idReferencia);
+        Task<IEnumerable<TipoLacre>> CarregarTiposLacres();
     }
 }

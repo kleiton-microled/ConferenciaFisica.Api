@@ -1,4 +1,6 @@
-﻿namespace ConferenciaFisica.Application.Inputs
+﻿using System.Text.Json.Serialization;
+
+namespace ConferenciaFisica.Application.Inputs
 {
     public record CadastroAdicionalInput
     {

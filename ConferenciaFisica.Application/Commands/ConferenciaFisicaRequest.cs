@@ -9,6 +9,12 @@ namespace ConferenciaFisica.Application.Commands
         [JsonPropertyName("conteiner")]
         public string? Conteiner { get; set; }
 
+        [JsonPropertyName("tipoConferencia")]
+        public int Tipo { get; set; }
+
+        [JsonPropertyName("embalagem")]
+        public int Embalagem { get; set; }
+
         [JsonPropertyName("lote")]
         public string? Bl { get; set; }
 
@@ -63,7 +69,7 @@ namespace ConferenciaFisica.Application.Commands
         public int? QuantidadeOperadores { get; set; }
 
         [JsonPropertyName("movimentacao")]
-        public string? Movimentacao { get; set; }
+        public int? Movimentacao { get; set; }
 
         [JsonPropertyName("desunitizacao")]
         public int? Desuniticacao { get; set; }

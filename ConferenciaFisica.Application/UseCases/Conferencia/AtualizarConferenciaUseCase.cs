@@ -17,6 +17,7 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
             var _serviceResult = new ServiceResult<bool>();
 
             var command = ConferenciaFisicaCommand.New(request.Id,
+                                                       request.Tipo,
                                                        request.Conteiner, 
                                                        request.Bl, 
                                                        request.Inicio, 
@@ -28,7 +29,8 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
                                                        request.QtdeDivergente, 
                                                        request.DivergenciaQualificacao, 
                                                        request.ObservacaoDivergencia, 
-                                                       request.RetiradaAmostra, 
+                                                       request.RetiradaAmostra,
+                                                       request.Embalagem,
                                                        request.ConferenciaRemota, 
                                                        request.Operacao,
                                                        request.QtdeVolumesDivergentes, 

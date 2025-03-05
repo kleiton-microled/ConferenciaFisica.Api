@@ -2,13 +2,14 @@
 {
     public class ConferenciaFisicaCommand
     {
-        public ConferenciaFisicaCommand(int? id, string? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, 
+        public ConferenciaFisicaCommand(int? id, int? tipo, string? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, 
             string? nomeConferente, string? cpfCliente, string? nomeCliente, int? qtdeDivergente, string? divergenciaQualificacao, 
-            string? observacaoDivergencia, int? retiradaAmostra, bool? conferenciaRemota, string? operacao, 
+            string? observacaoDivergencia, int? retiradaAmostra, int? embalagem, bool? conferenciaRemota, string? operacao, 
             int? qtdeVolumesDivergentes, int? qtdeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 
-            string? movimentacao, int? desuniticacao, int? quantidadeDocumentos)
+            int? movimentacao, int? desuniticacao, int? quantidadeDocumentos)
         {
             Id = id;
+            Tipo = tipo;
             Cntr = cntr;
             Bl = bl;
             Inicio = inicio;
@@ -21,6 +22,7 @@
             DivergenciaQualificacao = divergenciaQualificacao;
             ObservacaoDivergencia = observacaoDivergencia;
             RetiradaAmostra = retiradaAmostra;
+            Embalagem = embalagem;
             ConferenciaRemota = conferenciaRemota;
             Operacao = operacao;
             QtdeVolumesDivergentes = qtdeVolumesDivergentes;
@@ -32,6 +34,7 @@
             QuantidadeDocumentos = quantidadeDocumentos;
         }
         public int? Id { get; set; }
+        public int? Tipo { get; set; }
         public string? Cntr { get; set; }
         public string? Bl { get; set; }
         public DateTime? Inicio { get; set; }
@@ -44,7 +47,7 @@
         public string? DivergenciaQualificacao { get; set; }
         public string? ObservacaoDivergencia { get; set; }
         public int? RetiradaAmostra { get; set; }
-        public int Embalagem { get; set; }
+        public int? Embalagem { get; set; }
         //LACRES
         public bool? ConferenciaRemota { get; set; }
         public string? Operacao { get; set; }
@@ -53,19 +56,19 @@
         public int? QuantidadeRepresentantes { get; set; }
         public int? QuantidadeAjudantes { get; set; }
         public int? QuantidadeOperadores { get; set; }
-        public string? Movimentacao { get; set; }
+        public int? Movimentacao { get; set; }
         public int? Desunitizacao { get; set; }
         public int? QuantidadeDocumentos { get; set; }
 
-        public static ConferenciaFisicaCommand New(int? id, string? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, string? nomeConferente, 
+        public static ConferenciaFisicaCommand New(int? id, int? tipo, string? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, string? nomeConferente, 
                                                    string? cpfCliente, string? nomeCliente, int? qtdeDivergente, string? divergenciaQualificacao, 
-                                                   string? observacaoDivergencia, int? retiradaAmostra, bool? conferenciaRemota, string    ? operacao, 
+                                                   string? observacaoDivergencia, int? retiradaAmostra, int? embalagem, bool? conferenciaRemota, string    ? operacao, 
                                                    int? qtdeVolumesDivergentes, int? qtdeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 
-                                                   string? movimentacao, int? desuniticacao, int? quantidadeDocumentos)
+                                                   int? movimentacao, int? desuniticacao, int? quantidadeDocumentos)
         {
-            return new ConferenciaFisicaCommand(id,cntr, bl, inicio, termino, cpfConferente, nomeConferente, 
+            return new ConferenciaFisicaCommand(id,tipo,cntr, bl, inicio, termino, cpfConferente, nomeConferente, 
                                                 cpfCliente, nomeCliente, qtdeDivergente, divergenciaQualificacao, 
-                                                observacaoDivergencia, retiradaAmostra, conferenciaRemota, operacao, 
+                                                observacaoDivergencia, retiradaAmostra, embalagem, conferenciaRemota, operacao, 
                                                 qtdeVolumesDivergentes, qtdeRepresentantes, quantidadeAjudantes, quantidadeOperadores,
                                                 movimentacao, desuniticacao,quantidadeDocumentos);
         }

@@ -7,6 +7,7 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
     public interface ICadastrosAdicionaisUseCase
     {
         Task<ServiceResult<bool>> ExecuteAsync(CadastroAdicionalInput request);
-        Task<ServiceResult<IEnumerable<CadastrosAdicionaisDTO>>> CarregarCadastrosAdicionais(int idConferencia);
+        Task<ServiceResult<IEnumerable<CadastrosAdicionaisDTO>>> GetAllAsync(int idConferencia);
+        Task<ServiceResult<bool>> DeleteAsync(int id);
     }
 }

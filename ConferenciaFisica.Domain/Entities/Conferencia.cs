@@ -3,6 +3,7 @@
     public class Conferencia
     {
         public long Id { get; set; }
+        public int Tipo { get; set; }
         public string NumeroBl { get; set; }
         public string Viagem { get; set; }
         public DateTime DataPrevista { get; set; }
@@ -26,6 +27,8 @@
         public int? QuantidadeAjudantes { get; set; }
         public int? QuantidadeOperadores { get; set; }
         public int? QuantidadeVolumesDivergentes { get; set; }
+        public int? Movimentacao { get; set; }
+        public int? Desunitizacao { get; set; }
     }
 
 }

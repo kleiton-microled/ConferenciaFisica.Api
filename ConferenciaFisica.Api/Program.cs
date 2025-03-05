@@ -2,8 +2,9 @@
 using ConferenciaFisica.Application.UseCases.Agendamento.Interfaces;
 using ConferenciaFisica.Application.UseCases.Conferencia;
 using ConferenciaFisica.Application.UseCases.Conferencia.Interfaces;
+using ConferenciaFisica.Application.UseCases.Lacres;
+using ConferenciaFisica.Application.UseCases.Lacres.Interfaces;
 using ConferenciaFisica.Domain.Repositories;
-using ConferenciaFisica.Infra;
 using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.HealthChecks;
 using ConferenciaFisica.Infra.Repositories;
@@ -46,6 +47,7 @@ builder.Services.AddScoped<ICarregarCntrAgendamentoUseCase, CarregarCntrAgendame
 builder.Services.AddScoped<IIniciarConferenciaUseCase, IniciarConferenciaUseCase>();
 builder.Services.AddScoped<IAtualizarConferenciaUseCase, AtualizarConferenciaUseCase>();
 builder.Services.AddScoped<ICadastrosAdicionaisUseCase, CadastrosAdicionaisUseCase>();
+builder.Services.AddScoped<ITiposLacresUseCase, TiposLacresUseCase>();
 
 
 

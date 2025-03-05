@@ -3,40 +3,42 @@
     public static class SqlQueries
     {
         public const string BuscarConferenciaPorIdContainer = @"SELECT DISTINCT 
-                                                        CONF.ID AS ID,
-                                                        CONF.BL as Lote,
-                                                        BL.VIAGEM ,
-                                                        CONF.CNTR,
-                                                        CONF.INICIO,
-                                                        CONF.TERMINO,
-                                                        CONF.NOME_CLIENTE as NomeCliente,
-                                                        CONF.CPF_CLIENTE as CpfCliente,
-                                                        CONF.QTDE_AVARIADA as QuantidadeAvariada,
-                                                        CONF.OBS_AVARIA as ObservacaoAvaria,
-                                                        CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
-                                                        CONF.DIVERGENCIA_QUALIFICACAO as DivergenciaQualificacao,
-                                                        CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
-                                                        CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
-                                                        --LACRES
-                                                        CONF.CONFREMOTA as ConferenciaRemota,
-                                                        CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
-                                                        CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
-                                                        CONF.QTD_AJUDANTES as QuantidadeAjudantes,
-                                                        CONF.QTD_OPERADORES as QuantidadeOperadores,
-                                                        CONF.MOVIMENTACAO as Movimentacao,
-                                                        CONF.DESUNITIZACAO as Desunitizacao,
-                                                        --Lacrefechamento
-                                                        CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
-                                                        CASE 
-                                                            WHEN ISNULL(CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
-                                                            WHEN ISNULL(CONF.CNTR, '') <> '' THEN 'CONTEINER'
-                                                            ELSE 'REDEX'
-                                                        END AS TipoCarga
-                                                    FROM dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
-                                                    LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.ID_CONTEINER
-                                                    WHERE BL.ID_CONTEINER = @idConteiner --'AMFU315608-0'
-                                                    ORDER BY CONF.ID DESC
-                                                   ";
+                                                                       CONF.ID AS ID,
+                                                                       CONF.TIPO_CONFERENCIA as Tipo,
+                                                                       CONF.EMBALAGEM,
+                                                                       CONF.BL as Lote,
+                                                                       BL.VIAGEM ,
+                                                                       CONF.CNTR,
+                                                                       CONF.INICIO,
+                                                                       CONF.TERMINO,
+                                                                       CONF.NOME_CLIENTE as NomeCliente,
+                                                                       CONF.CPF_CLIENTE as CpfCliente,
+                                                                       CONF.QTDE_AVARIADA as QuantidadeAvariada,
+                                                                       CONF.OBS_AVARIA as ObservacaoAvaria,
+                                                                       CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
+                                                                       CONF.DIVERGENCIA_QUALIFICACAO as DivergenciaQualificacao,
+                                                                       CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
+                                                                       CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
+                                                                       --LACRES
+                                                                       CONF.CONFREMOTA as ConferenciaRemota,
+                                                                       CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
+                                                                       CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
+                                                                       CONF.QTD_AJUDANTES as QuantidadeAjudantes,
+                                                                       CONF.QTD_OPERADORES as QuantidadeOperadores,
+                                                                       CONF.MOVIMENTACAO as Movimentacao,
+                                                                       CONF.DESUNITIZACAO as Desunitizacao,
+                                                                       --Lacrefechamento
+                                                                       CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
+                                                                       CASE 
+                                                                           WHEN ISNULL(CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
+                                                                           WHEN ISNULL(CONF.CNTR, '') <> '' THEN 'CONTEINER'
+                                                                           ELSE 'REDEX'
+                                                                       END AS TipoCarga
+                                                                   FROM dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
+                                                                   LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.ID_CONTEINER
+                                                                   WHERE BL.ID_CONTEINER = @idConteiner --'AMFU315608-0'
+                                                                   ORDER BY CONF.ID DESC
+                                                                  ";
         public const string BuscarConferenciaPorAgendamento = @"SELECT DISTINCT 
                                                                      '' AS NumeroBl,
                                                                      --C.AUTONUM AS CNTR,
@@ -186,13 +188,16 @@
 	                                                    MOVIMENTACAO = @movimentacao,
 	                                                    DESUNITIZACAO = @desunitizacao,
 	                                                    QTD_DOCUMENTOS = @quantidadeDocumentos,
-	                                                    QTD_VOLUMES_DIVERGENTES = @qtdeVolumesDivergentes
+	                                                    QTD_VOLUMES_DIVERGENTES = @qtdeVolumesDivergentes, 
+                                                        TIPO_CONFERENCIA = @tipo
 	                                                 WHERE ID  = @ID";
         public const string CadastroAdicional = @"INSERT INTO TB_EFETIVACAO_CONF_FISICA_ADC (ID_CONFERENCIA,NOME, CPF, QUALIFICACAO, TIPO) VALUES (@idConferencia,@nome, @cpf, @qualificacao, @tipo)";
         public const string CarregarCadastrosAdicionais = @"SELECT ID, 
                                                                    ID_CONFERENCIA as IdConferencia, NOME, CPF, QUALIFICACAO, TIPO
                                                             FROM TB_EFETIVACAO_CONF_FISICA_ADC 
                                                             WHERE ID_CONFERENCIA = @idConferencia";
+        public const string ExlcuirCadastroAdicional = @"DELETE FROM TB_EFETIVACAO_CONF_FISICA_ADC WHERE ID = @id";
+        public const string CarregarTiposLacres = @"SELECT * FROM TB_TIPO_LACRE";
     
     }
 }

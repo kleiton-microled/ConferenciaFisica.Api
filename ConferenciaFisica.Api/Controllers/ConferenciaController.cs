@@ -1,9 +1,9 @@
 ﻿using ConferenciaFisica.Application.Commands;
 using ConferenciaFisica.Application.Inputs;
-using ConferenciaFisica.Application.UseCases.Agendamento;
 using ConferenciaFisica.Application.UseCases.Agendamento.Interfaces;
 using ConferenciaFisica.Application.UseCases.Conferencia;
 using ConferenciaFisica.Application.UseCases.Conferencia.Interfaces;
+using ConferenciaFisica.Application.UseCases.Lacres.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenciaFisica.Api.Controllers
@@ -18,6 +18,7 @@ namespace ConferenciaFisica.Api.Controllers
         private readonly IIniciarConferenciaUseCase _iniciarConferenciaUseCase;
         private readonly IAtualizarConferenciaUseCase _atualizarConferenciaUseCase;
         private readonly ICadastrosAdicionaisUseCase _cadastrosAdicionaisUseCase;
+        private readonly ITiposLacresUseCase _tiposLacresUseCase;
 
 
 
@@ -26,7 +27,8 @@ namespace ConferenciaFisica.Api.Controllers
                                      ICarregarCntrAgendamentoUseCase carregarCntrAgendamentoUseCase,
                                      IIniciarConferenciaUseCase iniciarConferenciaUseCase,
                                      IAtualizarConferenciaUseCase atualizarConferenciaUseCase,
-                                     ICadastrosAdicionaisUseCase cadastrosAdicionaisUseCase)
+                                     ICadastrosAdicionaisUseCase cadastrosAdicionaisUseCase,
+                                     ITiposLacresUseCase tiposLacresUseCase)
         {
             _buscarConferenciaUseCase = buscarConferenciaUseCase;
             _carregarLotesAgendamentoUseCase = carregarLotesAgendamentoUseCase;
@@ -34,6 +36,7 @@ namespace ConferenciaFisica.Api.Controllers
             _iniciarConferenciaUseCase = iniciarConferenciaUseCase;
             _atualizarConferenciaUseCase = atualizarConferenciaUseCase;
             _cadastrosAdicionaisUseCase = cadastrosAdicionaisUseCase;
+            _tiposLacresUseCase = tiposLacresUseCase;
         }
 
         [HttpGet("buscar")]
@@ -109,13 +112,36 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpGet("carregar-cadastros-adicionais")]
         public async Task<IActionResult> CarregarCadastrosAdicionais([FromQuery] int idConferencia)
         {
-            var result = await _cadastrosAdicionaisUseCase.CarregarCadastrosAdicionais(idConferencia);
+            var result = await _cadastrosAdicionaisUseCase.GetAllAsync(idConferencia);
 
             if (!result.Status && !string.IsNullOrEmpty(result.Error))
                 return NotFound(result);
 
             return Ok(result);
         }
+
+        [HttpDelete("excluir-cadastro-adicional")]
+        public async Task<IActionResult> ExcluirCadastroAdicional([FromQuery] int id)
+        {
+            var result = await _cadastrosAdicionaisUseCase.DeleteAsync(id);
+
+            if (!result.Status && !string.IsNullOrEmpty(result.Error))
+                return NotFound(result);
+
+            return Ok(result);
+        }
+
+        [HttpGet("tipos-lacres")]
+        public async Task<IActionResult> TiposLAcres()
+        {
+            var result = await _tiposLacresUseCase.GetAllAsync();
+
+            if (!result.Status && !string.IsNullOrEmpty(result.Error))
+                return NotFound(result);
+
+            return Ok(result);
+        }
+
 
     }
 }
