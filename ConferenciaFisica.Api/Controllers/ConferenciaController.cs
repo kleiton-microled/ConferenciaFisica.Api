@@ -3,13 +3,14 @@ using ConferenciaFisica.Application.Inputs;
 using ConferenciaFisica.Application.UseCases.Agendamento.Interfaces;
 using ConferenciaFisica.Application.UseCases.Conferencia;
 using ConferenciaFisica.Application.UseCases.Conferencia.Interfaces;
+using ConferenciaFisica.Application.UseCases.Documentos.Interfaces;
 using ConferenciaFisica.Application.UseCases.Lacres.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenciaFisica.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/conferencia")]
     public class ConferenciaController : ControllerBase
     {
         private readonly IBuscarConferenciaUseCase _buscarConferenciaUseCase;
@@ -20,9 +21,7 @@ namespace ConferenciaFisica.Api.Controllers
         private readonly ICadastrosAdicionaisUseCase _cadastrosAdicionaisUseCase;
         private readonly ITiposLacresUseCase _tiposLacresUseCase;
         private readonly ILacresUseCase _lacresUseCase;
-
-
-
+        private readonly IDocumentoConferenciaUseCase _documentosUseCase;
         public ConferenciaController(IBuscarConferenciaUseCase buscarConferenciaUseCase,
                                      ICarregarLotesAgendamentoUseCase carregarLotesAgendamentoUseCase,
                                      ICarregarCntrAgendamentoUseCase carregarCntrAgendamentoUseCase,
@@ -30,7 +29,8 @@ namespace ConferenciaFisica.Api.Controllers
                                      IAtualizarConferenciaUseCase atualizarConferenciaUseCase,
                                      ICadastrosAdicionaisUseCase cadastrosAdicionaisUseCase,
                                      ITiposLacresUseCase tiposLacresUseCase,
-                                     ILacresUseCase lacresUseCase)
+                                     ILacresUseCase lacresUseCase,
+                                     IDocumentoConferenciaUseCase documentosUseCase)
         {
             _buscarConferenciaUseCase = buscarConferenciaUseCase;
             _carregarLotesAgendamentoUseCase = carregarLotesAgendamentoUseCase;
@@ -40,6 +40,7 @@ namespace ConferenciaFisica.Api.Controllers
             _cadastrosAdicionaisUseCase = cadastrosAdicionaisUseCase;
             _tiposLacresUseCase = tiposLacresUseCase;
             _lacresUseCase = lacresUseCase;
+            _documentosUseCase = documentosUseCase;
         }
 
         [HttpGet("buscar")]
@@ -192,6 +193,52 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(result);
         }
 
+        //Documentos Conferencia
+        [HttpGet("documentos-conferencia")]
+        public async Task<IActionResult> GetAllDocumentosConferencia([FromQuery] int idConferencia)
+        {
+            var result = await _documentosUseCase.GetAllAsync(idConferencia);
+
+            if (!result.Status && !string.IsNullOrEmpty(result.Error))
+                return NotFound(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("cadastro-documento-conferencia")]
+        public async Task<IActionResult> CadastrosDocumentoConferencia([FromBody] DocumentoConferenciaInput request)
+        {
+            var result = await _documentosUseCase.ExecuteAsync(request);
+
+            if (!result.Status)
+                return NotFound(result.Mensagens);
+
+            return Ok(result);
+
+        }
+
+        [HttpPost("atualizar-documento-conferencia")]
+        public async Task<IActionResult> AtualizarDocumentoConferencia([FromBody] DocumentoConferenciaInput request)
+        {
+            var result = await _documentosUseCase.UpdateAsync(request);
+
+            if (!result.Status)
+                return NotFound(result.Mensagens);
+
+            return Ok(result);
+
+        }
+
+        [HttpDelete("excluir-documento-conferencia")]
+        public async Task<IActionResult> ExcluirDocumentoConferencia([FromQuery] int id)
+        {
+            var result = await _documentosUseCase.DeleteAsync(id);
+
+            if (!result.Status && !string.IsNullOrEmpty(result.Error))
+                return NotFound(result);
+
+            return Ok(result);
+        }
 
     }
 }

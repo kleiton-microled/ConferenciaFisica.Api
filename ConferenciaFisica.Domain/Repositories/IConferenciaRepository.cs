@@ -20,5 +20,11 @@ namespace ConferenciaFisica.Domain.Repositories
         Task<bool> AtualizarLacreConferencia(LacreConferenciaCommand command);
         Task<bool> ExcluirLacreConferencia(int id);
 
+        //
+        Task<IEnumerable<DocumentosConferencia>> CarregarDocumentosConferencia(int idConferencia);
+        Task<bool> CadastroDocumentosConferencia(DocumentoConferenciaCommand command);
+        Task<bool> AtualizarDocumentosConferencia(DocumentoConferenciaCommand command);
+        Task<bool> ExcluirDocumentosConferencia(int id);
+
     }
 }

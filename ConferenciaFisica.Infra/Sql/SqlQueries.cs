@@ -216,5 +216,22 @@
                                                                                        LACRE_FECHAMENTO= @lacreFechamento
                                                           WHERE ID = @id";
         public const string ExcluirLacreConferencia = @"DELETE FROM TB_LACRES_CONFERENCIA WHERE ID = @id ";
+
+        public const string CarregarTiposDocumentos = @"SELECT * FROM TB_TIPO_DOCUMENTO_CONFERENCIA";
+        public const string CarregarDocumentosConferencia = @"SELECT tdc.Id, 
+                                                    	   tdc.ID_CONFERENCIA as IdConferencia,
+                                                    	   tdc.NUMERO,
+                                                    	   tdc.TIPO,
+                                                    	   ttdc.DESCRICAO as TipoDescricao
+                                                    	FROM TB_DOCUMENTOS_CONFERENCIA tdc 
+                                                    	INNER JOIN TB_TIPO_DOCUMENTO_CONFERENCIA ttdc ON tdc.TIPO = ttdc.ID
+                                                    	WHERE tdc.ID_CONFERENCIA = @idConferencia";
+        public const string AtualizarDocumentosConferencia = @"UPDATE TB_DOCUMENTOS_CONFERENCIA 
+                                                               		SET ID_CONFERENCIA = @idCOnferencia,
+                                                               		    NUMERO = @numero,
+                                                               		    TIPO = @tipo
+                                                               WHERE ID = @id";
+        public const string CadastrarDocumentosConferencia = @"INSERT INTO TB_DOCUMENTOS_CONFERENCIA (ID_CONFERENCIA, NUMERO, TIPO) VALUES(@idConferencia, @numero, @tipo)";
+        public const string ExcluirDocumentosConferencia = @"DELETE FROM TB_DOCUMENTOS_CONFERENCIA WHERE ID = @id";
     }
 }

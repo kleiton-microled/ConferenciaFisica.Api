@@ -263,5 +263,83 @@ namespace ConferenciaFisica.Infra.Repositories
                 throw;
             }
         }
+
+        public async Task<IEnumerable<DocumentosConferencia>> CarregarDocumentosConferencia(int idConferencia)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.CarregarDocumentosConferencia;
+
+                var ret = await connection.QueryAsync<DocumentosConferencia>(query, new { idConferencia });
+
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<bool> CadastroDocumentosConferencia(DocumentoConferenciaCommand command)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.CadastrarDocumentosConferencia;
+
+            var ret = await connection.ExecuteAsync(query, command);
+            if (ret > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> AtualizarDocumentosConferencia(DocumentoConferenciaCommand command)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.AtualizarDocumentosConferencia;
+
+            var ret = await connection.ExecuteAsync(query, command);
+            if (ret > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ExcluirDocumentosConferencia(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.ExcluirDocumentosConferencia;
+
+                var ret = await connection.ExecuteAsync(query, new { id });
+                if (ret > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
     }
 }
