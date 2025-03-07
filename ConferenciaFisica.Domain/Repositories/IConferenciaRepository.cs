@@ -15,5 +15,10 @@ namespace ConferenciaFisica.Domain.Repositories
         Task<bool> Delete(int id);
         Task<IEnumerable<CadastrosAdicionaisDTO>> CarregarCadastrosAdicionais(int idReferencia);
         Task<IEnumerable<TipoLacre>> CarregarTiposLacres();
+        Task<IEnumerable<Lacre>> CarregarLacresConferencia(int idConferencia);
+        Task<bool> CadastroLacreConferencia(LacreConferenciaCommand command);
+        Task<bool> AtualizarLacreConferencia(LacreConferenciaCommand command);
+        Task<bool> ExcluirLacreConferencia(int id);
+
     }
 }

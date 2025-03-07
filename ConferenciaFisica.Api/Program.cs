@@ -48,6 +48,7 @@ builder.Services.AddScoped<IIniciarConferenciaUseCase, IniciarConferenciaUseCase
 builder.Services.AddScoped<IAtualizarConferenciaUseCase, AtualizarConferenciaUseCase>();
 builder.Services.AddScoped<ICadastrosAdicionaisUseCase, CadastrosAdicionaisUseCase>();
 builder.Services.AddScoped<ITiposLacresUseCase, TiposLacresUseCase>();
+builder.Services.AddScoped<ILacresUseCase, LacresUseCase>();
 
 
 
@@ -59,11 +60,12 @@ builder.Services.AddHealthChecks()
 var app = builder.Build();
 
 // Configuração do pipeline
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseHttpsRedirection();
 

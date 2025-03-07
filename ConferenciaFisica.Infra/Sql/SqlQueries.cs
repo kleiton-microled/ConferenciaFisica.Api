@@ -198,6 +198,23 @@
                                                             WHERE ID_CONFERENCIA = @idConferencia";
         public const string ExlcuirCadastroAdicional = @"DELETE FROM TB_EFETIVACAO_CONF_FISICA_ADC WHERE ID = @id";
         public const string CarregarTiposLacres = @"SELECT * FROM TB_TIPO_LACRE";
-    
+        public const string CarregarLacresConferencia = @"SELECT tlc.ID, 
+                                                    	   tlc.ID_CONFERENCIA as IdConferencia, 
+                                                    	   tlc.NUMERO_LACRE as Numero, 
+                                                    	   tlc.ID_TIPO_LACRE as Tipo,
+                                                    	   ttl.CODIGO + ' - ' + ttl.DESCRICAO as DescricaoTipo,
+                                                    	   tlc.LACRE_FECHAMENTO as LacreFechamento 
+                                                    FROM TB_LACRES_CONFERENCIA tlc 
+                                                    INNER JOIN TB_TIPO_LACRE ttl ON ttl.ID = tlc.ID_TIPO_LACRE 
+                                                    WHERE ID_CONFERENCIA = @idConferencia";
+        public const string CadastrarLacreConferencia = @"INSERT INTO TB_LACRES_CONFERENCIA (ID_CONFERENCIA, NUMERO_LACRE, ID_TIPO_LACRE, LACRE_FECHAMENTO) 
+                                                                                     VALUES (@idCOnferencia, @numero, @tipo, @lacreFechamento)";
+        public const string AtualizarLacreConferencia = @"UPDATE TB_LACRES_CONFERENCIA SET 
+                                                                                       ID_CONFERENCIA = @idConferencia, 
+                                                                                       NUMERO_LACRE= @numero, 
+                                                                                       ID_TIPO_LACRE=@tipo,
+                                                                                       LACRE_FECHAMENTO= @lacreFechamento
+                                                          WHERE ID = @id";
+        public const string ExcluirLacreConferencia = @"DELETE FROM TB_LACRES_CONFERENCIA WHERE ID = @id ";
     }
 }

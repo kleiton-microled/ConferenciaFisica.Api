@@ -186,6 +186,82 @@ namespace ConferenciaFisica.Infra.Repositories
             }
         }
 
-       
+        public async Task<IEnumerable<Lacre>> CarregarLacresConferencia(int idConferencia)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.CarregarLacresConferencia;
+
+                var ret = await connection.QueryAsync<Lacre>(query, new {idConferencia});
+
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<bool> CadastroLacreConferencia(LacreConferenciaCommand command)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.CadastrarLacreConferencia;
+
+            var ret = await connection.ExecuteAsync(query, command);
+            if (ret > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> AtualizarLacreConferencia(LacreConferenciaCommand command)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.AtualizarLacreConferencia;
+
+            var ret = await connection.ExecuteAsync(query, command);
+            if (ret > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ExcluirLacreConferencia(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.ExcluirLacreConferencia;
+
+                var ret = await connection.ExecuteAsync(query, new { id });
+                if (ret > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
     }
 }

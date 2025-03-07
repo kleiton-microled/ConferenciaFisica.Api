@@ -19,6 +19,7 @@ namespace ConferenciaFisica.Api.Controllers
         private readonly IAtualizarConferenciaUseCase _atualizarConferenciaUseCase;
         private readonly ICadastrosAdicionaisUseCase _cadastrosAdicionaisUseCase;
         private readonly ITiposLacresUseCase _tiposLacresUseCase;
+        private readonly ILacresUseCase _lacresUseCase;
 
 
 
@@ -28,7 +29,8 @@ namespace ConferenciaFisica.Api.Controllers
                                      IIniciarConferenciaUseCase iniciarConferenciaUseCase,
                                      IAtualizarConferenciaUseCase atualizarConferenciaUseCase,
                                      ICadastrosAdicionaisUseCase cadastrosAdicionaisUseCase,
-                                     ITiposLacresUseCase tiposLacresUseCase)
+                                     ITiposLacresUseCase tiposLacresUseCase,
+                                     ILacresUseCase lacresUseCase)
         {
             _buscarConferenciaUseCase = buscarConferenciaUseCase;
             _carregarLotesAgendamentoUseCase = carregarLotesAgendamentoUseCase;
@@ -37,6 +39,7 @@ namespace ConferenciaFisica.Api.Controllers
             _atualizarConferenciaUseCase = atualizarConferenciaUseCase;
             _cadastrosAdicionaisUseCase = cadastrosAdicionaisUseCase;
             _tiposLacresUseCase = tiposLacresUseCase;
+            _lacresUseCase = lacresUseCase;
         }
 
         [HttpGet("buscar")]
@@ -96,7 +99,7 @@ namespace ConferenciaFisica.Api.Controllers
 
         }
 
-        
+
         [HttpPost("cadastro-adicional")]
         public async Task<IActionResult> CadastrosAdicionaisParaConferencia([FromBody] CadastroAdicionalInput request)
         {
@@ -135,6 +138,53 @@ namespace ConferenciaFisica.Api.Controllers
         public async Task<IActionResult> TiposLAcres()
         {
             var result = await _tiposLacresUseCase.GetAllAsync();
+
+            if (!result.Status && !string.IsNullOrEmpty(result.Error))
+                return NotFound(result);
+
+            return Ok(result);
+        }
+
+        //Lacres Conferencia
+        [HttpGet("lacres-conferencia")]
+        public async Task<IActionResult> GetAllLacresConferencia([FromQuery] int idConferencia)
+        {
+            var result = await _lacresUseCase.GetAllAsync(idConferencia);
+
+            if (!result.Status && !string.IsNullOrEmpty(result.Error))
+                return NotFound(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("cadastro-lacres-conferencia")]
+        public async Task<IActionResult> CadastrosLacresConferencia([FromBody] LacreConferenciaInput request)
+        {
+            var result = await _lacresUseCase.ExecuteAsync(request);
+
+            if (!result.Status)
+                return NotFound(result.Mensagens);
+
+            return Ok(result);
+
+        }
+
+        [HttpPost("atualizar-lacre-conferencia")]
+        public async Task<IActionResult> AtualizarLacreConferencia([FromBody] LacreConferenciaInput request)
+        {
+            var result = await _lacresUseCase.UpdateAsync(request);
+
+            if (!result.Status)
+                return NotFound(result.Mensagens);
+
+            return Ok(result);
+
+        }
+
+        [HttpDelete("excluir-lacre-conferencia")]
+        public async Task<IActionResult> ExcluirLacreConferencia([FromQuery] int id)
+        {
+            var result = await _lacresUseCase.DeleteAsync(id);
 
             if (!result.Status && !string.IsNullOrEmpty(result.Error))
                 return NotFound(result);
