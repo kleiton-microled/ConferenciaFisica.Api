@@ -233,5 +233,41 @@
                                                                WHERE ID = @id";
         public const string CadastrarDocumentosConferencia = @"INSERT INTO TB_DOCUMENTOS_CONFERENCIA (ID_CONFERENCIA, NUMERO, TIPO) VALUES(@idConferencia, @numero, @tipo)";
         public const string ExcluirDocumentosConferencia = @"DELETE FROM TB_DOCUMENTOS_CONFERENCIA WHERE ID = @id";
+
+        public const string CarregarTiposAvarias = @"SELECT Id, Codigo, Descricao FROM TB_TIPOS_AVARIAS";
+        public const string BuscarAvariasConferencia = @"SELECT tac.ID,
+		                                                   tac.ID_CONFERENCIA as IdConferencia, 
+		                                                   tac.QUANTIDADE_AVARIADA as QuantidadeAvariada, 
+		                                                   tac.PESO_AVARIADO as PesoAvariado, 
+		                                                   tac.ID_EMBALAGEM as IdEmbalagem,
+		                                                   tac.CONTEINER as Conteiner,
+		                                                   tac.OBSERVACAO as Observacao,
+		                                                   --Tipos de Avarias
+		                                                   tta.ID ,
+		                                                   tta.CODIGO as Codigo,
+		                                                   tta.DESCRICAO as Descricao
+		                                                FROM TB_AVARIAS_CONFERENCIA tac 
+		                                                INNER JOIN TB_AVARIA_CONFERENCIA_TIPO_AVARIA tacta on tac.ID = tacta.ID_AVARIA_CONFERENCIA 
+		                                                INNER JOIN TB_TIPOS_AVARIAS tta ON tacta.ID_TIPO_AVARIA = tta.ID 
+		                                                WHERE tac.ID_CONFERENCIA = @idConferencia";
+        public const string CadastrarAvariaConferencia = @"INSERT INTO TB_AVARIAS_CONFERENCIA 
+                                                          (ID_CONFERENCIA , QUANTIDADE_AVARIADA , PESO_AVARIADO , ID_EMBALAGEM , CONTEINER , OBSERVACAO) 
+                                                          VALUES 
+                                                          (@IdConferencia, @QuantidadeAvariada, @PesoAvariado, @IdEmbalagem, @Conteiner, @Observacao)";
+        public const string AtualizarAvariaConferencia = @"UPDATE TB_AVARIAS_CONFERENCIA
+	                                                        SET QUANTIDADE_AVARIADA = @quantidadeAvariada, 
+	                                                        	PESO_AVARIADO = @pesoAvariado, 
+	                                                        	ID_EMBALAGEM = @idEmbalagem,
+	                                                        	CONTEINER = @conteiner,
+	                                                        	OBSERVACAO = @observacao
+	                                                        WHERE ID = @id";
+        public const string CadastrarTiposAvariaConferencia = @"INSERT INTO TB_AVARIA_CONFERENCIA_TIPO_AVARIA (ID_AVARIA_CONFERENCIA, ID_TIPO_AVARIA)
+                                                                VALUES (@IdAvariaConferencia, @IdTipoAvaria)";
+        public const string ExcluirTiposAvariasConferencia = @"DELETE FROM TB_AVARIA_CONFERENCIA_TIPO_AVARIA WHERE ID_AVARIA_CONFERENCIA = @idAvariaConferencia";
+
+        public const string CarregarTiposEmbalages = @"SELECT dte.AUTONUM_EMB as Id, 
+                                                     	      dte.CODE as Codigo,
+                                                     	      dte.DESCR as Descricao
+                                                      FROM DTE_TB_EMBALAGENS dte";
     }
 }

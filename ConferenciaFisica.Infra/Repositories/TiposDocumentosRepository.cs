@@ -74,7 +74,6 @@ namespace ConferenciaFisica.Infra.Repositories
 
                 throw;
             }
-            throw new NotImplementedException();
         }
     }
 }

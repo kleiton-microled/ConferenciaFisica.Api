@@ -45,5 +45,54 @@ namespace ConferenciaFisica.Infra.Data
                 throw new ApplicationException("Ocorreu um erro inesperado ao conectar ao banco de dados.");
             }
         }
+
+        /// <summary>
+        /// Cria e abre uma conexão assíncrona com o banco de dados.
+        /// </summary>
+        public async Task<IDbConnection> CreateConnectionAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Tentando abrir conexão assíncrona com SQL Server...");
+                var connection = new SqlConnection(_connectionString);
+                await connection.OpenAsync(); // Abre a conexão de forma assíncrona
+
+                _logger.LogInformation("Conexão assíncrona estabelecida com sucesso.");
+                return connection;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Erro ao conectar ao banco de dados: {ex.Message}");
+                throw new ApplicationException("Erro ao conectar ao banco de dados.");
+            }
+        }
+
+        /// <summary>
+        /// Inicia uma transação de forma síncrona.
+        /// </summary>
+        public IDbTransaction BeginTransaction(IDbConnection connection)
+        {
+            if (connection.State != ConnectionState.Open)
+            {
+                throw new InvalidOperationException("A conexão deve estar aberta antes de iniciar uma transação.");
+            }
+
+            _logger.LogInformation("Iniciando transação...");
+            return connection.BeginTransaction();
+        }
+
+        /// <summary>
+        /// Inicia uma transação de forma assíncrona.
+        /// </summary>
+        public async Task<IDbTransaction> BeginTransactionAsync(IDbConnection connection)
+        {
+            if (connection.State != ConnectionState.Open)
+            {
+                throw new InvalidOperationException("A conexão deve estar aberta antes de iniciar uma transação.");
+            }
+
+            _logger.LogInformation("Iniciando transação assíncrona...");
+            return await Task.FromResult(connection.BeginTransaction());
+        }
     }
 }
