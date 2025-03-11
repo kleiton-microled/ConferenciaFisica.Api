@@ -4,6 +4,8 @@ using ConferenciaFisica.Application.UseCases.Avarias;
 using ConferenciaFisica.Application.UseCases.Avarias.Interface;
 using ConferenciaFisica.Application.UseCases.Conferencia;
 using ConferenciaFisica.Application.UseCases.Conferencia.Interfaces;
+using ConferenciaFisica.Application.UseCases.DescargaExportacao;
+using ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces;
 using ConferenciaFisica.Application.UseCases.Documentos;
 using ConferenciaFisica.Application.UseCases.Documentos.Interfaces;
 using ConferenciaFisica.Application.UseCases.Embalagens;
@@ -11,9 +13,11 @@ using ConferenciaFisica.Application.UseCases.Embalagens.Interfaces;
 using ConferenciaFisica.Application.UseCases.Lacres;
 using ConferenciaFisica.Application.UseCases.Lacres.Interfaces;
 using ConferenciaFisica.Domain.Repositories;
+using ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory;
 using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.HealthChecks;
 using ConferenciaFisica.Infra.Repositories;
+using ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json;
@@ -64,6 +68,10 @@ builder.Services.AddScoped<ITiposDocumentosUseCase, TiposDocumentosUseCase>();
 builder.Services.AddScoped<IEmbalagensUseCase, EmbalagensUseCase>();
 builder.Services.AddScoped<ITiposDocumentosRepository, TiposDocumentosRepository>();
 builder.Services.AddScoped<IEmbalagensRepository, EmbalagensRepository>();
+
+//Descarga Exportacao
+builder.Services.AddScoped<IDescargaExportacaoUseCase, DescargaExportacaoUseCase>();
+builder.Services.AddScoped<IDescargaExportacaoRepository, DescargaExportacaoRepository>();
 
 
 

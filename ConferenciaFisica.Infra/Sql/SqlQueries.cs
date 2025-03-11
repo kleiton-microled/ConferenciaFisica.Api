@@ -110,7 +110,7 @@
                                                             LEFT JOIN TB_EFETIVACAO_CONF_FISICA CONF ON CONF.AUTONUM_BOO = A.AUTONUM_BOO
                                                             LEFT JOIN SGIPA.dbo.TB_LACRES_CONFERENCIA tplc ON tplc.ID_CONFERENCIA = CONF.ID 
                                                             WHERE A.REFERENCE = @LotePesquisa --RESERVA '241ISZ1203091'";
-		public const string CarregarConteinerAgendamento = @"SELECT 
+        public const string CarregarConteinerAgendamento = @"SELECT 
 															     ID_CONTEINER AS Display, 
 															     ID_CONTEINER AS Autonum
 															 FROM TB_AGENDAMENTO_POSICAO A
@@ -119,7 +119,7 @@
 															 WHERE CONVERT(VARCHAR, DT_PREVISTA, 103) = CONVERT(VARCHAR, GETDATE(), 103)
 															 AND ID_STATUS_AGENDAMENTO = 0 
 															 AND CNTR IS NOT NULL";
-		public const string CarregarConteinerAgendamentoUnion = @"	UNION
+        public const string CarregarConteinerAgendamentoUnion = @"	UNION
 																  SELECT 
 																      ID_CONTEINER AS Display, 
 																      ID_CONTEINER AS Autonum
@@ -269,5 +269,50 @@
                                                      	      dte.CODE as Codigo,
                                                      	      dte.DESCR as Descricao
                                                       FROM DTE_TB_EMBALAGENS dte";
+
+        #region DESCARGA_EXPORTACAO
+        public const string CarregarRegistro = @"SELECT
+                                                    	--REGISTRO
+                                                    	tr.AUTONUM_REG as Id,
+                                                    	tr.placa as Placa,
+                                                    	e.reference as Reserva,
+                                                    	cexp.FANTASIA as Cliente,
+                                                    	--TALIE
+                                                        tt.AUTONUM_TALIE as Id,
+                                                    	tt.INICIO as Inicio,
+                                                    	tt.TERMINO as Termino,
+                                                    	tt.CONFERENTE as Conferente,
+                                                    	tt.EQUIPE as Equipe,
+                                                    	tt.FORMA_OPERACAO as Operacao,
+                                                    	tt.OBS as Observacao,
+                                                    	--TALIE ITEM
+                                                    	tti.AUTONUM_TI as Id,
+                                                        tti.NF as NotaFiscal ,
+	                                                    tce.DESCRICAO_EMB as Embalagem,
+	                                                    --tti.QTDE_DISPONIVEL as QtdNf,
+                                                        (SELECT ISNULL(SUM(QUANTIDADE),0) FROM REDEX..TB_REGISTRO_CS WHERE AUTONUM_REGCS = trc.AUTONUM_REGCS) As QtdNf,
+	                                                    tti.QTDE_DESCARGA as QtdDescarga
+                                                    FROM
+                                                    	REDEX.dbo.tb_gate_new a
+                                                    INNER JOIN REDEX.dbo.tb_registro tr ON
+                                                    	a.autonum = tr.autonum_gate
+                                                    INNER JOIN REDEX.dbo.tb_booking e ON
+                                                    	tr.autonum_boo = e.autonum_boo
+                                                    INNER JOIN REDEX.dbo.tb_cad_parceiros ccli ON
+                                                    	e.autonum_parceiro = ccli.autonum
+                                                    INNER JOIN REDEX.dbo.tb_cad_parceiros cexp ON
+                                                    	e.autonum_exportador = cexp.autonum
+                                                    LEFT JOIN REDEX.dbo.tb_talie tt ON
+                                                    	tr.autonum_reg = tt.autonum_reg
+                                                    LEFT JOIN REDEX.dbo.TB_TALIE_ITEM tti ON
+                                                    	tt.AUTONUM_TALIE = tti.AUTONUM_TALIE 
+                                                    LEFT JOIN REDEX.dbo.TB_REGISTRO_CS trc ON
+	                                                    trc.AUTONUM_REGCS = tti.AUTONUM_REGCS 
+                                                    LEFT JOIN REDEX.dbo.TB_CAD_EMBALAGENS tce ON
+	                                                    tti.AUTONUM_EMB = tce.AUTONUM_EMB 
+                                                    WHERE
+                                                    	tr.autonum_reg = @registro
+                                                    	AND tr.TIPO_REGISTRO = 'E'";
+        #endregion DESCARGA_EXPORTACAO
     }
 }
