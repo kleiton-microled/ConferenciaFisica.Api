@@ -1,4 +1,5 @@
-﻿using ConferenciaFisica.Application.UseCases.Agendamento;
+﻿using ConferenciaFisica.Application.Mapping;
+using ConferenciaFisica.Application.UseCases.Agendamento;
 using ConferenciaFisica.Application.UseCases.Agendamento.Interfaces;
 using ConferenciaFisica.Application.UseCases.Avarias;
 using ConferenciaFisica.Application.UseCases.Avarias.Interface;
@@ -73,6 +74,7 @@ builder.Services.AddScoped<IEmbalagensRepository, EmbalagensRepository>();
 builder.Services.AddScoped<IDescargaExportacaoUseCase, DescargaExportacaoUseCase>();
 builder.Services.AddScoped<IDescargaExportacaoRepository, DescargaExportacaoRepository>();
 
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 
 // Adicionando Health Check

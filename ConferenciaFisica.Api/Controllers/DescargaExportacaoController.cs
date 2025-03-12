@@ -15,10 +15,10 @@ namespace ConferenciaFisica.Api.Controllers
             _descargaExportacaoUseCase = descargaExportacaoUseCase;
         }
 
-        [HttpGet("buscar-registro")]
-        public async Task<IActionResult> Get(int registro)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
         {
-            var resultado = await _descargaExportacaoUseCase.BuscarPorRegistro(registro);
+            var resultado = await _descargaExportacaoUseCase.BuscarPorRegistro(id);
 
             if (!resultado.Status)
                 return BadRequest(resultado);

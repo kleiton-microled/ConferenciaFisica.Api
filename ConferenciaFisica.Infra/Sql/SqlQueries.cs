@@ -289,9 +289,9 @@
                                                     	tti.AUTONUM_TI as Id,
                                                         tti.NF as NotaFiscal ,
 	                                                    tce.DESCRICAO_EMB as Embalagem,
-	                                                    --tti.QTDE_DISPONIVEL as QtdNf,
+	                                                    --tti.QTDE_DISPONIVEL as QuantidadeNf,
                                                         (SELECT ISNULL(SUM(QUANTIDADE),0) FROM REDEX..TB_REGISTRO_CS WHERE AUTONUM_REGCS = trc.AUTONUM_REGCS) As QtdNf,
-	                                                    tti.QTDE_DESCARGA as QtdDescarga
+	                                                    tti.QTDE_DESCARGA as QuantidadeDescarga
                                                     FROM
                                                     	REDEX.dbo.tb_gate_new a
                                                     INNER JOIN REDEX.dbo.tb_registro tr ON
