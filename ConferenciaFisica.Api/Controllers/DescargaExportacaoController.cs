@@ -77,10 +77,10 @@ namespace ConferenciaFisica.Api.Controllers
 
         }
 
-        [HttpDelete("excluir-talie-item")]
-        public async Task<IActionResult> ExcluirTalieItem(int id)
+        [HttpDelete("excluir-talie-item/{registroId}")]
+        public async Task<IActionResult> ExcluirTalieItem(int registroId, [FromQuery] int talieId)
         {
-            var result = await _descargaExportacaoUseCase.ExcluirTalieItem(id);
+            var result = await _descargaExportacaoUseCase.ExcluirTalieItem(registroId, talieId);
 
             if (!result.Status && !string.IsNullOrEmpty(result.Error))
                 return NotFound(result);

@@ -15,6 +15,7 @@ namespace ConferenciaFisica.Application.Mapping
 
             CreateMap<Talie, TalieViewModel>();
             CreateMap<TalieItem, TalieItemViewModel>();
+            CreateMap<TalieItemViewModel, TalieItem>();
 
             CreateMap<TalieViewModel, TalieDTO>();
             CreateMap<TalieDTO, TalieViewModel>();
