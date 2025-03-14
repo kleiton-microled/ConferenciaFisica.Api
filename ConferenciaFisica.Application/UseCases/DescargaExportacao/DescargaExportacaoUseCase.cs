@@ -351,7 +351,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             }
             else
             {
-                _serviceResult.Mensagens.Add("Falha ao tentar associar o marcante!");
+                _serviceResult.Mensagens.Add("Marcante não pertence ao registro atual!");
             }
 
             return _serviceResult;
