@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ConferenciaFisica.Application.ViewModels;
 using ConferenciaFisica.Contracts.DTOs;
+using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Entities.DescargaExportacao;
 
 namespace ConferenciaFisica.Application.Mapping
@@ -9,7 +10,6 @@ namespace ConferenciaFisica.Application.Mapping
     {
         public MappingProfile()
         {
-            // Mapeamento de Entidade para ViewModel
             CreateMap<DescargaExportacao, DescargaExportacaoViewModel>()
                 .ForMember(dest => dest.Registro, opt => opt.MapFrom(src => src.Id));
 
@@ -24,12 +24,9 @@ namespace ConferenciaFisica.Application.Mapping
 
             CreateMap<DescargaExportacaoViewModel, DescargaExportacao>();
 
-            //// Se precisar de regras personalizadas
-            //CreateMap<TipoAvaria, TipoAvariaViewModel>()
-            //    .ForMember(dest => dest.Descricao, opt => opt.MapFrom(src => src.Nome));
+            CreateMap<ArmazensViewModel, Armazens>();
+            CreateMap<Armazens, ArmazensViewModel>();
 
-            //// Mapeamento de ViewModel para Entidade (se necessário)
-            //CreateMap<AvariaConferenciaViewModel, AvariaConferencia>();
         }
     }
 }

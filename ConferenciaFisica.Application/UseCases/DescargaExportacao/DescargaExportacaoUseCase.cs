@@ -253,5 +253,42 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
 
             return _serviceResult;
         }
+
+        public async Task<ServiceResult<bool>> GravarObservacao(string observacao, int talieId)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+
+            var result = await _repository.GravarObservacao(observacao, talieId);
+            if (result)
+            {
+                _serviceResult.Result = result;
+                _serviceResult.Mensagens.Add("Observação atualizada com sucesso!");
+            }
+            else
+            {
+                _serviceResult.Mensagens.Add("Falha ao tentar salvar o registro!");
+            }
+
+            return _serviceResult;
+        }
+
+        public async Task<ServiceResult<IEnumerable<ArmazensViewModel>>> CarregarArmazens(int patio)
+        {
+            IEnumerable<ArmazensViewModel> armazens = null;
+
+            var data = await _repository.CarregarArmazens(patio);
+
+            if (data == null)
+            {
+                return ServiceResult<IEnumerable<ArmazensViewModel>>.Failure("Registros não encontrado.");
+            }
+
+            return ServiceResult<IEnumerable<ArmazensViewModel>>.Success(_mapper.Map<IEnumerable<ArmazensViewModel>>(data), "Armazens localizados com sucesso.");
+        }
+
+        public Task<ServiceResult<bool>> GravarMarcante(MarcanteInput input)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

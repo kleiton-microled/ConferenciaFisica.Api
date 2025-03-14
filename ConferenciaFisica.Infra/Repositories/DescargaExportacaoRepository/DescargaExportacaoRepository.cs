@@ -385,5 +385,41 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 throw;
             }
         }
+
+        public async Task<bool> GravarObservacao(string observacao, int talieId)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.GravarObservacao;
+
+                var ret = await connection.ExecuteAsync(query, new { observacao, talieId });
+                if (ret > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Armazens>> CarregarArmazens(int patio)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.ListarArmazensPorPatio;
+
+            var ret = await connection.QueryAsync<Armazens>(query, new { patio });
+
+            return ret;
+        }
     }
 }
