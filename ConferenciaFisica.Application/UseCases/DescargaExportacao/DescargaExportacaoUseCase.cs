@@ -182,8 +182,9 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 {
                     Id = request.Id,
                     TalieId = itemOriginal.TalieId,
-                    Quantidade = request.QuantidadeDescarga,
+                    Quantidade = request.Quantidade ?? 0,
                     QtdDescarga = request.QuantidadeDescarga,
+                    QuantidadeDescarga = request.QuantidadeDescarga,
                     NotaFiscal = request.NotaFiscal,
                     CodigoEmbalagem = request.CodigoEmbalagem,
                     Peso = request.Peso,
@@ -219,7 +220,10 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             else
             {
                 // Atualiza diretamente o item quando não há divisão de quantidade
-                var updateResult = await _repository.UpdateTalieItem(_mapper.Map<TalieItem>(request));
+                var model = _mapper.Map<TalieItem>(request);
+                model.QtdDescarga = request.QuantidadeDescarga;
+                model.QuantidadeDescarga = request.QuantidadeDescarga;
+                var updateResult = await _repository.UpdateTalieItem(model);
 
                 if (!updateResult)
                 {
