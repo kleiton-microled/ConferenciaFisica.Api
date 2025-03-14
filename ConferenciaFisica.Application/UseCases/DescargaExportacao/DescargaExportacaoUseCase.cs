@@ -161,7 +161,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 return _serviceResult;
             }
 
-            if (request.QuantidadeDescarga < itemOriginal.Quantidade)
+            if (request.QuantidadeDescarga < itemOriginal.QtdDescarga)
             {
                 // Calcula a quantidade restante
                 var quantidadeRestante = itemOriginal.QtdDescarga - request.QuantidadeDescarga;
