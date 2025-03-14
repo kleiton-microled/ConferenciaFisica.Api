@@ -11,7 +11,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces
         Task<ServiceResult<bool>> CadastrarAvaria(AvariaInput input);
         Task<ServiceResult<TalieItemViewModel>> BuscarItemTalie(int id);
         Task<ServiceResult<bool>> SalvarTalieItem(TalieItemViewModel request, int registro);
-        Task<ServiceResult<bool>> ExcluirTalieItem(int id);
+        Task<ServiceResult<bool>> ExcluirTalieItem(int registroId, int talieId);
 
     }
 }

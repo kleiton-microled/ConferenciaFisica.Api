@@ -230,28 +230,62 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                     _serviceResult.Result = updateResult;
                     _serviceResult.Mensagens.Add("Alterações salvas com sucesso!");
                 }
-                
+
             }
 
             return _serviceResult;
         }
 
-        public async Task<ServiceResult<bool>> ExcluirTalieItem(int id)
+        public async Task<ServiceResult<bool>> ExcluirTalieItem(int registroId, int talieId)
         {
-            var _serviceResult = new ServiceResult<bool>();
+            var serviceResult = new ServiceResult<bool>();
+            var registro = await _repository.BuscarRegistroAsync(registroId);
 
-            var result = await _repository.ExcluirTalieItem(id);
+            if (registro is null)
+            {
+                serviceResult.Mensagens.Add("Registro nao encontrado");
+
+                return serviceResult;
+            }
+
+            var talieBase = registro.Talie?.TalieItem?.FirstOrDefault();
+            if (talieBase is null)
+            {
+                serviceResult.Mensagens.Add("Talie do registro nao encontrado");
+
+                return serviceResult;
+            }
+
+            if (registro.Talie?.TalieItem.Count <= 1 || talieBase.Id == talieId)
+            {
+                serviceResult.Mensagens.Add("Nao foi possivel exluir primeiro talie!");
+
+                return serviceResult;
+            }
+
+            var talieToRemove = registro.Talie.TalieItem.FirstOrDefault(x => x.Id == talieId);
+            if (talieToRemove is null)
+            {
+                serviceResult.Mensagens.Add("Talie nao encontrado!");
+                return serviceResult;
+            }
+
+            talieBase.QuantidadeDescarga = talieBase.QuantidadeDescarga + talieToRemove.QuantidadeDescarga;
+
+            await _repository.UpdateTalieItem(talieBase);
+
+            var result = await _repository.ExcluirTalieItem(talieId);
             if (result)
             {
-                _serviceResult.Result = result;
-                _serviceResult.Mensagens.Add("Item excluido com sucesso!");
+                serviceResult.Result = result;
+                serviceResult.Mensagens.Add("Item excluido com sucesso!");
             }
             else
             {
-                _serviceResult.Mensagens.Add("Falha ao tentar excluir o registro!");
+                serviceResult.Mensagens.Add("Falha ao tentar excluir o registro!");
             }
 
-            return _serviceResult;
+            return serviceResult;
         }
     }
 }
