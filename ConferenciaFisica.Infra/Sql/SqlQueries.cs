@@ -287,10 +287,31 @@
                                                     	tt.OBS as Observacao,
                                                     	--TALIE ITEM
                                                     	tti.AUTONUM_TI as Id,
-                                                        tti.NF as NotaFiscal ,
+                                                        tti.NF as NotaFiscal,
+                                                        tti.REMONTE,
+														tti.FUMIGACAO,
+														tti.IMO As IMO1,
+														tti.UNO As UNO1,
+														tti.IMO2,
+														tti.UNO2,
+														tti.IMO3,
+														tti.UNO3,
+														tti.IMO4,
+														tti.UNO4,
+														tti.YARD,
+														tti.FLAG_MADEIRA As Madeira,
+														tti.FLAG_FRAGIL As Fragil,
+														tti.AUTONUM_REGCS As RegistroCsId,
+														tti.NF As NotaFiscal,
+														tti.COMPRIMENTO,
+														tti.LARGURA,
+														tti.ALTURA,
+														tti.PESO,
 	                                                    tce.DESCRICAO_EMB as Embalagem,
+														tce.SIGLA AS EmbalagemSigla,
+														tce.AUTONUM_EMB As CodigoEmbalagem,
 	                                                    --tti.QTDE_DISPONIVEL as QuantidadeNf,
-                                                        (SELECT ISNULL(SUM(QUANTIDADE),0) FROM REDEX..TB_REGISTRO_CS WHERE AUTONUM_REGCS = trc.AUTONUM_REGCS) As QtdNf,
+                                                        (SELECT ISNULL(SUM(QUANTIDADE),0) FROM REDEX..TB_REGISTRO_CS WHERE AUTONUM_REGCS = trc.AUTONUM_REGCS) As QuantidadeNf,
 	                                                    tti.QTDE_DESCARGA as QuantidadeDescarga
                                                     FROM
                                                     	REDEX.dbo.tb_gate_new a
@@ -313,6 +334,164 @@
                                                     WHERE
                                                     	tr.autonum_reg = @registro
                                                     	AND tr.TIPO_REGISTRO = 'E'";
+        public const string AtualizarTalie = @" DECLARE @OutputTable TABLE (autonum_talie INT);
+                                    
+                                                UPDATE REDEX..tb_talie
+                                                SET 
+                                                    flag_descarga = 1,
+                                                    flag_estufagem = 1,
+                                                    flag_carregamento = 0,
+                                                    crossdocking = 0,
+                                                    conferente = @Conferente,
+                                                    equipe = @Equipe,
+                                                    forma_operacao = @Operacao
+                                                OUTPUT INSERTED.autonum_talie INTO @OutputTable
+                                                WHERE autonum_reg = @CodigoRegistro;
+                                    
+                                                SELECT autonum_talie FROM @OutputTable";
+        public const string CriarTalie = @"INSERT INTO REDEX..tb_talie 
+                                        (
+                                            placa, inicio, flag_descarga, 
+                                            flag_estufagem, flag_carregamento, crossdocking, 
+                                            conferente, equipe, autonum_reg
+                                        ) 
+                                        VALUES 
+                                        (
+                                            @Placa,
+                                            @Inicio, 
+                                            1,--FLAG DESCARGA 
+                                            0,--FLAG ESTUFAGEM
+                                            0,--FLAG CARREGAMENTO 
+                                            0,--CROSDOCKING 
+                                            @Conferente, --ID 
+                                            @Equipe, --ID
+                                            --autonum_boo
+                                            --forma_operacao
+                                            --autonum_gate
+                                            @CodigoRegistro --AutonumRegistro
+                                        );
+                                        
+                                        SELECT CAST(SCOPE_IDENTITY() as int)";
+        public const string ListaTalieItens = @"SELECT tti.AUTONUM_TI as Id,
+                                            	   tti.NF,
+                                            	   tti.QTDE_DESCARGA QtdDescarga,
+                                                   (SELECT ISNULL(SUM(QUANTIDADE),0) FROM REDEX..TB_REGISTRO_CS WHERE AUTONUM_REGCS = trc.AUTONUM_REGCS) As QtdNf,
+                                            	   tti.AUTONUM_EMB as CodigoEmbalagem,
+                                            	   tce.DESCRICAO_EMB as Embalagem,
+                                            	   tti.COMPRIMENTO ,
+                                            	   tti.LARGURA ,
+                                            	   tti.ALTURA ,
+                                            	   tti.PESO ,
+                                            	   tti.IMO ,
+                                            	   tti.IMO2 ,
+                                            	   tti.IMO3 ,
+                                            	   tti.IMO4 ,
+                                            	   tti.IMO5 ,
+                                            	   tti.UNO ,
+                                            	   tti.UNO2 ,
+                                            	   tti.UNO3 ,
+                                            	   tti.UNO4 ,
+                                            	   tti.UNO5 ,
+                                            	   tti.REMONTE ,
+                                            	   tti.FUMIGACAO ,
+                                            	   tti.FLAG_MADEIRA as FlagMadeira,
+                                            	   tti.FLAG_FRAGIL as FlagFragil
+                                            FROM REDEX.dbo.TB_TALIE_ITEM tti 
+                                            INNER JOIN REDEX.dbo.TB_CAD_EMBALAGENS tce ON tti.AUTONUM_EMB = tce.AUTONUM_EMB 
+                                            INNER JOIN REDEX.dbo.TB_REGISTRO_CS trc ON
+	                                                    trc.AUTONUM_REGCS = tti.AUTONUM_REGCS 
+                                            WHERE tti.AUTONUM_TALIE = @TalieId";
+
+        public const string Descarga = @"SELECT 
+                                            rcs.*, 
+                                            bcg.qtde AS qtde_manifestada, 
+                                            ISNULL(bcg.peso_bruto, 0) / NULLIF(bcg.qtde, 0) AS peso_manifestado,
+                                            bcg.imo, bcg.imo2, bcg.imo3, bcg.imo4, 
+                                            bcg.uno, bcg.uno2, bcg.uno3, bcg.uno4, 
+                                            bcg.autonum_pro, bcg.autonum_emb
+                                        FROM REDEX..tb_registro reg
+                                        INNER JOIN REDEX..tb_registro_cs rcs ON reg.autonum_reg = rcs.autonum_reg
+                                        INNER JOIN REDEX..tb_booking_carga bcg ON rcs.autonum_bcg = bcg.autonum_bcg
+                                        WHERE reg.autonum_reg = @CodigoRegistro";
+        public const string CadastrarAvariaCs = @"INSERT
+                                                	INTO
+                                                	REDEX.dbo.TB_AVARIAS_CS (
+                                                	[LOCAL],
+                                                	TIPO,
+                                                	OBS_TERMINAL,
+                                                    AUTONUM_AVCS,
+                                                	QTDE_AVARIADA,
+                                                	PESO_AVARIADO,
+                                                	AUTONUM_TALIE,
+                                                	DATA_AVARIA,
+                                                	FLAG_DIVERGENCIA)
+                                                VALUES (@local,
+                                                @tipo,
+                                                @observacao,
+                                                @autonumAvcs,
+                                                @quantidadeAvariada,
+                                                @pesoAvariado,
+                                                @talieId,
+                                                GETDATE(),
+                                                @flagDivergencia)";
+        public const string ExcluirAvarias = @"DELETE FROM REDEX.dbo.TB_AVARIAS_CS WHERE AUTONUM_TALIE = @talieId";
+
+        public const string AtualizarTalieItem = @"UPDATE REDEX.dbo.TB_TALIE_ITEM  SET QTDE_DESCARGA = @QtdDescarga, 
+                                                   										   AUTONUM_EMB = @IdEmbalagem, 
+                                                   										   COMPRIMENTO = @Comprimento, 
+                                                   										   ALTURA = @Altura, 
+                                                   										   LARGURA = @Largura, 
+                                                   										   PESO =@Peso,
+                                                   										   IMO = @Imo,
+                                                   										   IMO2 = @Imo2,
+                                                   										   IMO3 = @Imo3,
+                                                   										   IMO4 = @Imo4,
+                                                   										   IMO5 = @Imo5,
+                                                   										   UNO = @Uno,
+                                                   										   UNO2 = @Uno2,
+                                                   										   UNO3 = @Uno3,
+                                                   										   UNO4 = @Uno4,
+                                                   										   UNO5 = @Uno5
+                                                   WHERE AUTONUM_TI = @TalieItemId";
+        public const string BuscarTaliItemPorId = @"SELECT
+                        TI.AUTONUM_TI As Id,
+                        TI.AUTONUM_TALIE As TalieId,
+                        TI.AUTONUM_NF As NotaFiscalId,
+                        (SELECT ISNULL(SUM(QTDE_DESCARGA),0) FROM REDEX..TB_TALIE_ITEM WHERE AUTONUM_REGCS = TI.AUTONUM_REGCS AND AUTONUM_TI = @id) As QtdDescarga,
+                        (SELECT ISNULL(SUM(QUANTIDADE),0) FROM REDEX..TB_REGISTRO_CS WHERE AUTONUM_REGCS = TI.AUTONUM_REGCS) As Quantidade,
+                        TI.REMONTE,
+                        TI.FUMIGACAO,
+                        TI.IMO As IMO1,
+                        TI.UNO As UNO1,
+                        TI.IMO2,
+                        TI.UNO2,
+                        TI.IMO3,
+                        TI.UNO3,
+                        TI.IMO4,
+                        TI.UNO4,
+                        TI.YARD,
+                        TI.FLAG_MADEIRA As Madeira,
+                        TI.FLAG_FRAGIL As Fragil,
+                        TI.AUTONUM_REGCS As RegistroCsId,
+                        TI.NF As NotaFiscal,
+                        TI.COMPRIMENTO,
+                        TI.LARGURA,
+                        TI.ALTURA,
+                        TI.PESO,
+                        E.SIGLA,
+                        E.SIGLA AS EmbalagemSigla,
+                        E.AUTONUM_EMB As CodigoEmbalagem,
+                        E.DESCRICAO_EMB AS EMBALAGEM,
+                        TI.YARD
+                    FROM
+                        REDEX..TB_TALIE_ITEM TI
+                    LEFT JOIN
+                        REDEX..TB_NOTAS_FISCAIS NF ON TI.AUTONUM_NF = NF.AUTONUM_NF
+                    LEFT JOIN
+                        REDEX..TB_CAD_EMBALAGENS E ON TI.AUTONUM_EMB = E.AUTONUM_EMB
+                    WHERE
+                        TI.AUTONUM_TI = @Id";
+        public const string ExcluirTalieItem = @"DELETE FROM REDEX.dbo.TB_TALIE_ITEM WHERE AUTONUM_TI = @id";
         #endregion DESCARGA_EXPORTACAO
     }
 }

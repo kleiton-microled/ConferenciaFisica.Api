@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ConferenciaFisica.Contracts.Commands
+﻿namespace ConferenciaFisica.Contracts.Commands
 {
     public class CadastroAvariaConferenciaCommand
     {

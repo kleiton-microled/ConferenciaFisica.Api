@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ConferenciaFisica.Application.ViewModels;
+using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Domain.Entities.DescargaExportacao;
 
 namespace ConferenciaFisica.Application.Mapping
@@ -14,6 +15,14 @@ namespace ConferenciaFisica.Application.Mapping
 
             CreateMap<Talie, TalieViewModel>();
             CreateMap<TalieItem, TalieItemViewModel>();
+
+            CreateMap<TalieViewModel, TalieDTO>();
+            CreateMap<TalieDTO, TalieViewModel>();
+
+            CreateMap<TalieItemViewModel, TalieItemDTO>();
+            CreateMap<TalieItemDTO, TalieItemViewModel>();
+
+            CreateMap<DescargaExportacaoViewModel, DescargaExportacao>();
 
             //// Se precisar de regras personalizadas
             //CreateMap<TipoAvaria, TipoAvariaViewModel>()
