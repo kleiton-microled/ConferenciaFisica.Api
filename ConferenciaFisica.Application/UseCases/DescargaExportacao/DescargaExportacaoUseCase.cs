@@ -164,10 +164,10 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             if (request.QuantidadeDescarga < itemOriginal.Quantidade)
             {
                 // Calcula a quantidade restante
-                var quantidadeRestante = itemOriginal.Quantidade - request.QuantidadeDescarga;
+                var quantidadeRestante = itemOriginal.QtdDescarga - request.QuantidadeDescarga;
 
                 // Atualiza o item original com a nova quantidade
-                itemOriginal.QtdDescarga = request.QuantidadeDescarga;
+                itemOriginal.QtdDescarga = quantidadeRestante;
 
                 var updateOriginal = await _repository.UpdateTalieItem(itemOriginal);
 
@@ -182,8 +182,8 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 {
                     Id = request.Id,
                     TalieId = itemOriginal.TalieId,
-                    Quantidade = quantidadeRestante,
-                    QtdDescarga = quantidadeRestante,
+                    Quantidade = request.QuantidadeDescarga,
+                    QtdDescarga = request.QuantidadeDescarga,
                     NotaFiscal = request.NotaFiscal,
                     CodigoEmbalagem = request.CodigoEmbalagem,
                     Peso = request.Peso,
