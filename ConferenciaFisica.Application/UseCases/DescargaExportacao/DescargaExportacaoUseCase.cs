@@ -217,6 +217,10 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 }
 
             }
+            else if (request.QuantidadeDescarga > itemOriginal.QtdDescarga || request.QuantidadeDescarga > itemOriginal.Quantidade)
+            {
+                _serviceResult.Mensagens.Add("Quantidade nao deve ser maior que tamanho total NF.");
+            }
             else
             {
                 // Atualiza diretamente o item quando não há divisão de quantidade
