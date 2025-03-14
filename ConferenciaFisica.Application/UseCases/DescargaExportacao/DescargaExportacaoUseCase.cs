@@ -275,6 +275,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             }
 
             talieBase.QuantidadeDescarga = talieBase.QuantidadeDescarga + talieToRemove.QuantidadeDescarga;
+            talieBase.QtdDescarga = talieBase.QuantidadeDescarga;
 
             await _repository.UpdateTalieItem(talieBase);
 
