@@ -429,8 +429,14 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 using var connection = _connectionFactory.CreateConnection();
 
                 string query = SqlQueries.GravarMarcante;
+                DynamicParameters param = new DynamicParameters();
+                param.Add("armazem", command.Armazem);
+                //param.Add("placa", command.Placa);
+                param.Add("talieId", command.TalieId);
+                param.Add("taliItemId", command.TalieItemId);
+                param.Add("idRegistro", command.Registro);
 
-                var ret = await connection.ExecuteAsync(query, new { command });
+                var ret = await connection.ExecuteAsync(query, param);
                 if (ret > 0)
                 {
                     return true;

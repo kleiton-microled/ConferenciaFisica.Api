@@ -502,7 +502,7 @@
         public const string GravarMarcante = @"UPDATE REDEX.dbo.TB_MARCANTES_RDX 
 	                                           SET DT_ASSOCIACAO = GETDATE(), 
 	                                           	ARMAZEM = @armazem, 
-	                                           	PLACA_C = @placa,
+	                                           	--PLACA_C = @placa,
 	                                           	AUTONUM_TALIE = @talieId,
 	                                           	AUTONUM_TI = @taliItemId
 	                                           WHERE AUTONUM_REG = @idRegistro";
