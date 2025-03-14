@@ -65,6 +65,18 @@ namespace ConferenciaFisica.Api.Controllers
 
         }
 
+        [HttpPost("gravar-observacao")]
+        public async Task<IActionResult> GravarObservacao(string observacao, int talieId)
+        {
+            var result = await _descargaExportacaoUseCase.GravarObservacao(observacao, talieId);
+
+            if (!result.Status)
+                return NotFound(result.Mensagens);
+
+            return Ok(result);
+
+        }
+
         [HttpDelete("excluir-talie-item/{registroId}")]
         public async Task<IActionResult> ExcluirTalieItem(int registroId, [FromQuery] int talieId)
         {
@@ -76,7 +88,29 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("carregar-armazens")]
+        public async Task<IActionResult> CarregarArmazens([FromQuery] int patio)
+        {
+            var resultado = await _descargaExportacaoUseCase.CarregarArmazens(patio);
 
+            if (!resultado.Status)
+                return BadRequest(resultado);
+
+            return Ok(resultado);
+        }
+
+
+        [HttpPost("gravar-marcante")]
+        public async Task<IActionResult> GravarMarcante([FromBody] MarcanteInput input)
+        {
+            var result = await _descargaExportacaoUseCase.GravarMarcante(input);
+
+            if (!result.Status)
+                return NotFound(result.Mensagens);
+
+            return Ok(result);
+
+        }
     }
 
 }

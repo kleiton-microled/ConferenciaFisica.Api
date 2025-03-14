@@ -1,4 +1,5 @@
 ﻿using ConferenciaFisica.Contracts.Commands;
+using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Entities.DescargaExportacao;
 
 namespace ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory
@@ -15,6 +16,8 @@ namespace ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory
         Task<bool> UpdateTalieItem(TalieItem item);
         Task<bool> CadastrarTalieItem(TalieItem item, int registro);
         Task<bool> ExcluirTalieItem(int id);
+        Task<bool> GravarObservacao(string observacao, int talieId);
+        Task<IEnumerable<Armazens>> CarregarArmazens(int patio);
 
     }
 }
