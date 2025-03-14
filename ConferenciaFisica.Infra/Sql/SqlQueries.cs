@@ -498,6 +498,14 @@
 		                                                  tai.DESCR as Descricao
 		                                               FROM TB_ARMAZENS_IPA tai 
 		                                               WHERE tai.DT_SAIDA is NULL AND tai.FLAG_HISTORICO =0 and tai.PATIO = @patio";
+
+        public const string GravarMarcante = @"UPDATE REDEX.dbo.TB_MARCANTES_RDX 
+	                                           SET DT_ASSOCIACAO = @dataAssociacao, 
+	                                           	ARMAZEM = @armazem, 
+	                                           	PLACA_C = @placa,
+	                                           	AUTONUM_TALIE = @talieId,
+	                                           	AUTONUM_TI = @taliItemId
+	                                           WHERE AUTONUM_REG = @idRegistro";
         #endregion DESCARGA_EXPORTACAO
     }
 }

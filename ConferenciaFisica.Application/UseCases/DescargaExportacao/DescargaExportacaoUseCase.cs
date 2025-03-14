@@ -161,7 +161,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 return _serviceResult;
             }
 
-            if (request.QuantidadeDescarga < itemOriginal.Quantidade)
+            if (request.QuantidadeDescarga < itemOriginal.QtdDescarga)
             {
                 // Calcula a quantidade restante
                 var quantidadeRestante = itemOriginal.QtdDescarga - request.QuantidadeDescarga;
@@ -230,7 +230,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                     _serviceResult.Result = updateResult;
                     _serviceResult.Mensagens.Add("Alterações salvas com sucesso!");
                 }
-                
+
             }
 
             return _serviceResult;
@@ -286,9 +286,32 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             return ServiceResult<IEnumerable<ArmazensViewModel>>.Success(_mapper.Map<IEnumerable<ArmazensViewModel>>(data), "Armazens localizados com sucesso.");
         }
 
-        public Task<ServiceResult<bool>> GravarMarcante(MarcanteInput input)
+        public async Task<ServiceResult<bool>> GravarMarcante(MarcanteInput input)
         {
-            throw new NotImplementedException();
+            var _serviceResult = new ServiceResult<bool>();
+
+            var command = new MarcanteCommand()
+            {
+                Registro = input.Registro,
+                TalieId = input.TalieId,
+                TalieItemId = input.TalieItemId,
+                Marcante = input.Marcante,
+                Quantidade = input.Quantidade,
+                Armazen = input.Armazen,
+                Local = input.Local
+            };
+            var result = await _repository.GravarMarcante(command);
+            if (result)
+            {
+                _serviceResult.Result = result;
+                _serviceResult.Mensagens.Add("Marcante associado com sucesso!");
+            }
+            else
+            {
+                _serviceResult.Mensagens.Add("Falha ao tentar associar o marcante!");
+            }
+
+            return _serviceResult;
         }
     }
 }

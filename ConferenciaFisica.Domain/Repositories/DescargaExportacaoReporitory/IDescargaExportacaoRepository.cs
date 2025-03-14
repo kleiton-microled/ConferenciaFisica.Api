@@ -18,6 +18,7 @@ namespace ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory
         Task<bool> ExcluirTalieItem(int id);
         Task<bool> GravarObservacao(string observacao, int talieId);
         Task<IEnumerable<Armazens>> CarregarArmazens(int patio);
+        Task<bool> GravarMarcante(MarcanteCommand input);
 
     }
 }

@@ -421,5 +421,31 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
             return ret;
         }
+
+        public async Task<bool> GravarMarcante(MarcanteCommand command)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.GravarMarcante;
+
+                var ret = await connection.ExecuteAsync(query, new { command });
+                if (ret > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
     }
 }
