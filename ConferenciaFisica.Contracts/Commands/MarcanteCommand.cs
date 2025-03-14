@@ -7,7 +7,7 @@
         public int TalieItemId { get; set; }
         public int Marcante { get; set; }
         public int Quantidade { get; set; }
-        public int Armazen { get; set; }
+        public int Armazem { get; set; }
         public string Local { get; set; }
 
         //public static MarcanteCommand Create(int talieId, int talieItemId, int marcante, int quantidade, int armazen, string local)
