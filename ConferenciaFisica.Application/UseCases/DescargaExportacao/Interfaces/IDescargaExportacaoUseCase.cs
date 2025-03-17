@@ -13,8 +13,12 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces
         Task<ServiceResult<bool>> SalvarTalieItem(TalieItemViewModel request, int registro);
         Task<ServiceResult<bool>> GravarObservacao(string observacao, int talieId);
         Task<ServiceResult<IEnumerable<ArmazensViewModel>>> CarregarArmazens(int patio);
+        Task<ServiceResult<IEnumerable<MarcantesViewModel>>> CarregarMarcantes(int talieItem);
         Task<ServiceResult<bool>> GravarMarcante(MarcanteInput input);
         Task<ServiceResult<bool>> ExcluirTalieItem(int registroId, int talieId);
+        Task<ServiceResult<bool>> ExcluirMarcanteTalieItem(int id);
+        Task<ServiceResult<bool>> FinalizarProcesso(int id);
+
 
     }
 }

@@ -111,6 +111,38 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(result);
 
         }
+
+        [HttpGet("carregar-marcantes-talie-item")]
+        public async Task<IActionResult> CarregarMarcantesTalieItem([FromQuery] int talieItemId)
+        {
+            var resultado = await _descargaExportacaoUseCase.CarregarMarcantes(talieItemId);
+
+            if (!resultado.Status)
+                return BadRequest(resultado);
+
+            return Ok(resultado);
+        }
+
+        [HttpDelete("excluir-marcante-talie-item")]
+        public async Task<IActionResult> ExcluirTalieItem([FromQuery] int id)
+        {
+            var result = await _descargaExportacaoUseCase.ExcluirMarcanteTalieItem(id);
+
+            if (!result.Status && !string.IsNullOrEmpty(result.Error))
+                return NotFound(result);
+
+            return Ok(result);
+        }
+
+        [HttpGet("finalizar-processo")]
+        public async Task<IActionResult> FinalizarProcesso([FromQuery] int id)
+        {
+            var result = await _descargaExportacaoUseCase.FinalizarProcesso(id);
+            if (!result.Status && !string.IsNullOrEmpty(result.Error))
+                return NotFound(result);
+
+            return Ok(result);
+        }
     }
 
 }

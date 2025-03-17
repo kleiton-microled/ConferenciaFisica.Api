@@ -92,7 +92,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 }
 
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 

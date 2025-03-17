@@ -506,6 +506,23 @@
 	                                           	AUTONUM_TALIE = @talieId,
 	                                           	AUTONUM_TI = @taliItemId
 	                                           WHERE AUTONUM_REG = @idRegistro";
+        public const string CarregarMarcantesTalieItem = @"SELECT tmr.AUTONUM as Id,
+	                                                          tmr.DT_IMPRESSAO as DataImpressao,
+	                                                          tmr.DT_ASSOCIACAO as DataAssociacao,
+	                                                          tmr.VOLUMES as Quantidade ,
+	                                                          tmr.AUTONUM_TALIE as TalieId,
+	                                                          tmr.AUTONUM_TI as TalieItemId,
+	                                                          tmr.STR_CODE128 as Numero,
+	                                                          tmr.AUTONUM_CS_YARD as Local
+	                                                       FROM REDEX.dbo.TB_MARCANTES_RDX tmr 
+	                                                       WHERE tmr.AUTONUM_TI = @talieItemId";
+        public const string ExcluirMarcanteTalieItem = @"UPDATE REDEX.dbo.TB_MARCANTES_RDX 
+	                                                    SET DT_ASSOCIACAO = null, 
+	                                                    	ARMAZEM = 0, 
+	                                                    	--PLACA_C = @placa,
+	                                                    	AUTONUM_TALIE = 0,
+	                                                    	AUTONUM_TI = 0
+	                                                    WHERE AUTONUM = @id";
         #endregion DESCARGA_EXPORTACAO
     }
 }

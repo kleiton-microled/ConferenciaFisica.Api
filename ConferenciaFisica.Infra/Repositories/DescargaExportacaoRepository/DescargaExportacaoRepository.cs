@@ -6,6 +6,7 @@ using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.Sql;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using System.IO;
 using static Dapper.SqlMapper;
 
 namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
@@ -433,8 +434,9 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 param.Add("armazem", command.Armazem);
                 //param.Add("placa", command.Placa);
                 param.Add("talieId", command.TalieId);
-                param.Add("taliItemId", command.TalieItemId);
+                param.Add("talieItemId", command.TalieItemId);
                 param.Add("idRegistro", command.Registro);
+                param.Add("id", command.Marcante);
 
                 var ret = await connection.ExecuteAsync(query, param);
                 if (ret > 0)
@@ -452,6 +454,47 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<Marcante>> CarregarMarcantesTalieItem(int talieItemId)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.CarregarMarcantesTalieItem;
+
+            var ret = await connection.QueryAsync<Marcante>(query, new { talieItemId });
+
+            return ret;
+        }
+
+        public async Task<bool> ExcluirMarcanteTalieItem(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.ExcluirMarcanteTalieItem;
+
+                var ret = await connection.ExecuteAsync(query, new { id });
+                if (ret > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public Task<bool> FinalizarProcesso(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

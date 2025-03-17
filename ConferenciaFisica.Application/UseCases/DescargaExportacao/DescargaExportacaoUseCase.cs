@@ -10,6 +10,7 @@ using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory;
 using Microsoft.Win32;
 using System.ComponentModel;
+using System.IO;
 
 namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
 {
@@ -352,6 +353,53 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             else
             {
                 _serviceResult.Mensagens.Add("Marcante não pertence ao registro atual!");
+            }
+
+            return _serviceResult;
+        }
+
+        public async Task<ServiceResult<IEnumerable<MarcantesViewModel>>> CarregarMarcantes(int talieItem)
+        {
+            var data = await _repository.CarregarMarcantesTalieItem(talieItem);
+
+            if (data == null)
+            {
+                return ServiceResult<IEnumerable<MarcantesViewModel>>.Failure("Registros não encontrado.");
+            }
+
+            return ServiceResult<IEnumerable<MarcantesViewModel>>.Success(_mapper.Map<IEnumerable<MarcantesViewModel>>(data), "Marcantes localizados com sucesso.");
+        }
+
+        public async Task<ServiceResult<bool>> ExcluirMarcanteTalieItem(int talieId)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+
+            var result = await _repository.ExcluirMarcanteTalieItem(talieId);
+            if (result)
+            {
+                _serviceResult.Result = result;
+                _serviceResult.Mensagens.Add("Marcante excluido com sucesso!");
+            }
+            else
+            {
+                _serviceResult.Mensagens.Add("Falha ao tentar exlcuir o marcante!");
+            }
+
+            return _serviceResult;
+        }
+
+        public async Task<ServiceResult<bool>> FinalizarProcesso(int id)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+            var result = await _repository.FinalizarProcesso(id);
+            if (result)
+            {
+                _serviceResult.Result = result;
+                _serviceResult.Mensagens.Add("Processo finalizado com sucesso!");
+            }
+            else
+            {
+                _serviceResult.Mensagens.Add("Falha ao tentar finalizar o processo!");
             }
 
             return _serviceResult;
