@@ -22,6 +22,11 @@ namespace ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory
         Task<bool> GravarMarcante(MarcanteCommand input);
         Task<bool> ExcluirMarcanteTalieItem(int id);
         Task<bool> FinalizarProcesso(int id);
+        Task<bool> ValidarQuantidadeDescargaAsync(int talieId);
+        Task<bool> VerificarEmissaoEtiquetasAsync(int talieId);
+        Task<bool> ValidarCargaTransferidaAsync(int talieId);
+        Task<bool> FecharTalieAsync(int talieId);
+        Task FinalizarReservaAsync(int booId);
 
     }
 }

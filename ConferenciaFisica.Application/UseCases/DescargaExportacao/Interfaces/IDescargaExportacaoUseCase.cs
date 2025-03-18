@@ -17,7 +17,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces
         Task<ServiceResult<bool>> GravarMarcante(MarcanteInput input);
         Task<ServiceResult<bool>> ExcluirTalieItem(int registroId, int talieId);
         Task<ServiceResult<bool>> ExcluirMarcanteTalieItem(int id);
-        Task<ServiceResult<bool>> FinalizarProcesso(int id);
+        Task<ServiceResult<bool>> FinalizarProcesso(int id, bool crossdock);
 
 
     }
