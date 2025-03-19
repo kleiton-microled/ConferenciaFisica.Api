@@ -509,6 +509,13 @@
 
 
         public const string ListarTiposProcesso = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_PROCESSO;";
+        public const string ListarProcessosPorTalie = @"SELECT 
+                                                            ID_TIPO_PROCESSO as IdTipoProcesso, 
+                                                            ID_TALIE AS IdTalie,
+                                                            IMAGEM_PATH AS ImagemPath ,
+                                                            OBSERVACAO AS Observacao ,
+                                                            DESCRICAO AS Descricao
+                                                        FROM REDEX.dbo.TB_FOTO_PROCESSO where ID_TALIE = @talieId";
 
         public const string InsertTipoProcesso = @"INSERT INTO
                                                         	REDEX.dbo.TB_TIPOS_PROCESSO (Codigo, Descricao)

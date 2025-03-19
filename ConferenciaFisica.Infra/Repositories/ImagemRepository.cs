@@ -1,9 +1,11 @@
-﻿using ConferenciaFisica.Contracts.Commands;
+﻿using System.Transactions;
+using ConferenciaFisica.Contracts.Commands;
 using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.Sql;
 using Dapper;
+using Microsoft.Win32;
 
 namespace ConferenciaFisica.Infra.Repositories
 {
@@ -78,6 +80,23 @@ namespace ConferenciaFisica.Infra.Repositories
 
                 var sql = SqlQueries.ListarTiposProcesso;
                 return await connection.QueryAsync<TipoProcesso>(sql);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Processo>> ListProcessoByTalieId(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var sql = SqlQueries.ListarProcessosPorTalie;
+
+                return await connection.QueryAsync<Processo>(sql, new { talieId = id });
+
             }
             catch (Exception)
             {

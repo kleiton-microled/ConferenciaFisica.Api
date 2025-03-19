@@ -9,5 +9,6 @@ namespace ConferenciaFisica.Domain.Repositories
         Task<bool> CreateTipoProcesso(TipoProcesso input);
         Task<bool> CreateProcesso(ProcessoCommand input);
         Task<bool> DeleteTipoProcesso(int id);
+        Task<IEnumerable<Processo>> ListProcessoByTalieId(int id);
     }
 }

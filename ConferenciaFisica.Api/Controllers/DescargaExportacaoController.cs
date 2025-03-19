@@ -127,10 +127,10 @@ namespace ConferenciaFisica.Api.Controllers
 
         }
 
-        [HttpGet("processo")]
-        public async Task<IActionResult> ListarProcessos(IImagensUseCaseUseCase carregarTiposImagemUseCase)
+        [HttpGet("processo/{talieId}")]
+        public async Task<IActionResult> ListarProcessos(int talieId)
         {
-            var result = await carregarTiposImagemUseCase.ListTipoProcesso();
+            var result = await _imagensUseCaseUseCase.GetImagemByTalieId(talieId);
 
             if (!result.Status)
                 return NotFound(result.Mensagens);

@@ -13,7 +13,7 @@ namespace ConferenciaFisica.Application.UseCases.Imagens.Interfaces
 
         Task<ServiceResult<bool>> InsertProcesso(ProcessoViewModel input);
 
-        Task<ServiceResult<IEnumerable<TipoProcesso>>> GetImagemByRegistroId(int registroId);
+        Task<ServiceResult<IEnumerable<Processo>>> GetImagemByTalieId(int registroId);
         Task<ServiceResult<IEnumerable<TipoProcesso>>> UpdateImagemByRegistroId(int registroId);
     }
 } 

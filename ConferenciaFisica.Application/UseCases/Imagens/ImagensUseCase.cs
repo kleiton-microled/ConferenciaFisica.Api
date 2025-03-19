@@ -59,9 +59,23 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             return result;
         }
 
-        public Task<ServiceResult<IEnumerable<TipoProcesso>>> GetImagemByRegistroId(int registroId)
+
+        public async Task<ServiceResult<IEnumerable<Processo>>> GetImagemByTalieId(int talieId)
         {
-            throw new NotImplementedException();
+            var result = new ServiceResult<IEnumerable<Processo>> ();
+
+            try
+            {
+                var tipoProcesso = await _imagemRepository.ListProcessoByTalieId(talieId);
+
+                return ServiceResult<IEnumerable<Processo>>.Success(tipoProcesso);
+            }
+            catch (Exception exception)
+            {
+                result.Error = exception.Message;
+            }
+
+            return result;
         }
 
         public async Task<ServiceResult<bool>> InsertProcesso(ProcessoViewModel input)
