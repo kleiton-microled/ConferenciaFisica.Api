@@ -506,6 +506,29 @@
 	                                           	AUTONUM_TALIE = @talieId,
 	                                           	AUTONUM_TI = @taliItemId
 	                                           WHERE AUTONUM_REG = @idRegistro";
+
+
+        public const string ListarTiposProcesso = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_PROCESSO;";
+
+        public const string InsertTipoProcesso = @"INSERT INTO
+                                                        	REDEX.dbo.TB_TIPOS_PROCESSO (Codigo, Descricao)
+                                                        VALUES (
+                                                        	@Codigo,
+                                                            @Descricao
+                                                        )";
+
+        public const string DeleteTipoProcesso = @"DELETE FROM REDEX.dbo.TB_TIPOS_PROCESSO WHERE ID = @id";
+
+        public const string InsertProcesso = @"INSERT INTO
+                                                        	REDEX.dbo.TB_FOTO_PROCESSO (ID_TIPO_PROCESSO,ID_TALIE, IMAGEM_PATH, DESCRICAO, OBSERVACAO)
+                                                        VALUES (
+                                                        	@IdTipoProcesso,
+                                                        	@IdTalie,
+                                                        	@ImagemPath,
+                                                        	@Descricao,
+                                                        	@Observacao
+                                                        )";
+
         #endregion DESCARGA_EXPORTACAO
     }
 }

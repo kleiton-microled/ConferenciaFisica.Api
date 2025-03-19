@@ -11,6 +11,8 @@ using ConferenciaFisica.Application.UseCases.Documentos;
 using ConferenciaFisica.Application.UseCases.Documentos.Interfaces;
 using ConferenciaFisica.Application.UseCases.Embalagens;
 using ConferenciaFisica.Application.UseCases.Embalagens.Interfaces;
+using ConferenciaFisica.Application.UseCases.Imagens;
+using ConferenciaFisica.Application.UseCases.Imagens.Interfaces;
 using ConferenciaFisica.Application.UseCases.Lacres;
 using ConferenciaFisica.Application.UseCases.Lacres.Interfaces;
 using ConferenciaFisica.Domain.Repositories;
@@ -73,6 +75,8 @@ builder.Services.AddScoped<IEmbalagensRepository, EmbalagensRepository>();
 //Descarga Exportacao
 builder.Services.AddScoped<IDescargaExportacaoUseCase, DescargaExportacaoUseCase>();
 builder.Services.AddScoped<IDescargaExportacaoRepository, DescargaExportacaoRepository>();
+builder.Services.AddScoped<IImagensUseCaseUseCase, ImagensUseCase>();
+builder.Services.AddScoped<IImagemRepository, ImagemRepository>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
