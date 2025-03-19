@@ -84,10 +84,11 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             //return result;
             try
             {
+                var pathArquivo = await SalvarArquivo(input);
                 var command = new ProcessoCommand()
                 {
                     IdTipoProcesso = input.Type,
-                    ImagemPath = "",
+                    ImagemPath = pathArquivo,
                     Descricao = input.Descricao,
                     Observacao = input.Observacao,
                     IdTalie = input.TalieId
@@ -102,6 +103,25 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             }
 
             return result;
+        }
+
+        public async Task<string> SalvarArquivo(ProcessoViewModel processoViewModel)
+        {
+            string pastaFotos = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "fotos-processos", processoViewModel.TalieId.ToString());
+
+            if (!Directory.Exists(pastaFotos))
+            {
+                Directory.CreateDirectory(pastaFotos);
+            }
+
+            string nomeArquivo = $"talie_{processoViewModel.TalieId}_{processoViewModel.Type}.png";
+            string caminhoCompleto = Path.Combine(pastaFotos, nomeArquivo);
+
+            byte[] bytesArquivo = Convert.FromBase64String(processoViewModel.ImagemBase64.Split(',').LastOrDefault());
+
+            await File.WriteAllBytesAsync(caminhoCompleto, bytesArquivo);
+
+            return nomeArquivo;
         }
 
         public async Task<ServiceResult<IEnumerable<TipoProcesso>>> ListTipoProcesso()

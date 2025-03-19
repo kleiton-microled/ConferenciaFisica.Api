@@ -99,6 +99,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
+app.UseStaticFiles();
 
 
 app.UseRouting();
@@ -118,6 +119,13 @@ app.UseEndpoints(endpoints =>
             await context.Response.WriteAsync(result);
         }
     });
+});
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
 });
 
 app.Run();
