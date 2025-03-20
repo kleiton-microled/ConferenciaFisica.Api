@@ -401,7 +401,8 @@
                                             	   tti.REMONTE ,
                                             	   tti.FUMIGACAO ,
                                             	   tti.FLAG_MADEIRA as FlagMadeira,
-                                            	   tti.FLAG_FRAGIL as FlagFragil
+                                            	   tti.FLAG_FRAGIL as FlagFragil,
+                                                   tti.OBS as Observacao
                                             FROM REDEX.dbo.TB_TALIE_ITEM tti 
                                             INNER JOIN REDEX.dbo.TB_CAD_EMBALAGENS tce ON tti.AUTONUM_EMB = tce.AUTONUM_EMB 
                                             INNER JOIN REDEX.dbo.TB_REGISTRO_CS trc ON
@@ -457,7 +458,12 @@
                                                    										   UNO2 = @Uno2,
                                                    										   UNO3 = @Uno3,
                                                    										   UNO4 = @Uno4,
-                                                   										   UNO5 = @Uno5
+                                                   										   UNO5 = @Uno5,
+                                                                                           OBS = @Observacao,
+                                                                                           FLAG_MADEIRA = @Madeira,
+                                                                                           FLAG_FRAGIL = @Fragil,
+                                                                                           REMONTE = @Remonte
+                                                                                           
                                                    WHERE AUTONUM_TI = @TalieItemId";
         public const string BuscarTaliItemPorId = @"SELECT
                         TI.AUTONUM_TI As Id,
@@ -510,7 +516,7 @@
 	                                           	ARMAZEM = @armazem, 
 	                                           	--PLACA_C = @placa,
 	                                           	AUTONUM_TALIE = @talieId,
-	                                           	AUTONUM_TI = @taliItemId
+	                                           	AUTONUM_TI = @talieItemId
 	                                           WHERE AUTONUM_REG = @idRegistro";
         public const string CarregarMarcantesTalieItem = @"SELECT tmr.AUTONUM as Id,
 	                                                          tmr.DT_IMPRESSAO as DataImpressao,

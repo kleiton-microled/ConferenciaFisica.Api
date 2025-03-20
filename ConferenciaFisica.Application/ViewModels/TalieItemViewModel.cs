@@ -9,7 +9,7 @@ namespace ConferenciaFisica.Application.ViewModels
         public string? Embalagem { get; set; }
         public int? QuantidadeNf { get; set; }
         public int QuantidadeDescarga { get; set; }
-        public string? Remonte { get; set; }
+        public bool Remonte { get; set; } = false;
         public string? Fumigacao { get; set; }
         public int? RegistroCsId { get; set; }
         public string? Descricao { get; set; }
@@ -19,9 +19,9 @@ namespace ConferenciaFisica.Application.ViewModels
         public decimal? Largura { get; set; }
         public decimal? Altura { get; set; }
         public decimal? Peso { get; set; }
-        public bool? Fragil { get; set; }
-        public bool? Madeira { get; set; }
-        public bool? Avariado { get; set; }
+        public bool Fragil { get; set; } = false;
+        public bool Madeira { get; set; } = false;
+        public bool? Avariado { get; set; } = false;
         public string? Yard { get; set; }
         public int? NotaFiscalId { get; set; }
         [JsonPropertyName("imo")]
@@ -39,6 +39,7 @@ namespace ConferenciaFisica.Application.ViewModels
         public int? CodigoEmbalagem { get; set; }
         public int QtdDescarga { get; set; }
         public string? Resumo { get; set; }
+        public string? Observacao { get; set; }
 
     }
 }
