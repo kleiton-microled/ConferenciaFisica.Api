@@ -7,11 +7,11 @@ using ConferenciaFisica.Domain.Repositories;
 
 namespace ConferenciaFisica.Application.UseCases.Imagens
 {
-    public class ImagensUseCase : IImagensUseCaseUseCase
+    public class ProcessoUseCase : IProcessoUseCase
     {
         private IImagemRepository _imagemRepository;
 
-        public ImagensUseCase(IImagemRepository imagemRepository)
+        public ProcessoUseCase(IImagemRepository imagemRepository)
         {
             _imagemRepository = imagemRepository;
         }
@@ -60,15 +60,25 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
         }
 
 
-        public async Task<ServiceResult<IEnumerable<Processo>>> GetImagemByTalieId(int talieId)
+        public async Task<ServiceResult<IEnumerable<ProcessoViewModel>>> GetImagemByTalieId(int talieId)
         {
-            var result = new ServiceResult<IEnumerable<Processo>> ();
+            var result = new ServiceResult<IEnumerable<ProcessoViewModel>> ();
 
             try
             {
                 var tipoProcesso = await _imagemRepository.ListProcessoByTalieId(talieId);
 
-                return ServiceResult<IEnumerable<Processo>>.Success(tipoProcesso);
+                return ServiceResult<IEnumerable<ProcessoViewModel>>.Success(tipoProcesso.Select(x => new ProcessoViewModel()
+                {
+                    TalieId = x.IdTalie,
+                    Descricao = x.Descricao,
+                    Observacao = x.Observacao,
+                    Type = x.IdTipoProcesso,
+                    TypeDescription = x.DescricaoTipoProcesso,
+                    ImagemPath = x.ImagemPath,
+                    Id = x.Id
+
+                }));
             }
             catch (Exception exception)
             {
@@ -81,7 +91,6 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
         public async Task<ServiceResult<bool>> InsertProcesso(ProcessoViewModel input)
         {
             var result = new ServiceResult<bool>();
-            //return result;
             try
             {
                 var pathArquivo = await SalvarArquivo(input);
@@ -114,14 +123,14 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
                 Directory.CreateDirectory(pastaFotos);
             }
 
-            string nomeArquivo = $"talie_{processoViewModel.TalieId}_{processoViewModel.Type}.png";
+            string nomeArquivo = $"talie_{processoViewModel.TalieId}_{processoViewModel.Type}_{Guid.NewGuid().ToString()}.png";
             string caminhoCompleto = Path.Combine(pastaFotos, nomeArquivo);
 
             byte[] bytesArquivo = Convert.FromBase64String(processoViewModel.ImagemBase64.Split(',').LastOrDefault());
 
             await File.WriteAllBytesAsync(caminhoCompleto, bytesArquivo);
 
-            return nomeArquivo;
+            return $"fotos-processos/{processoViewModel.TalieId.ToString()}/{nomeArquivo}";
         }
 
         public async Task<ServiceResult<IEnumerable<TipoProcesso>>> ListTipoProcesso()
@@ -145,6 +154,49 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
         public Task<ServiceResult<IEnumerable<TipoProcesso>>> UpdateImagemByRegistroId(int registroId)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<ServiceResult<bool>> UpdateProcesso(UpdateProcessoViewModel input)
+        {
+            var result = new ServiceResult<bool>();
+
+            try
+            {
+                var command = new ProcessoCommand()
+                {
+                    Id = input.Id,
+                    Descricao = input.Descricao,
+                    Observacao = input.Observacao,
+                };
+
+                var resultUpdate = await _imagemRepository.UpdateProcesso(command);
+
+                return resultUpdate? ServiceResult<bool>.Success(resultUpdate) : ServiceResult<bool>.Failure("Falha ao atualizars");
+            }
+            catch (Exception exception)
+            {
+                result.Error = exception.Message;
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResult<bool>> DeleteProcesso(int id)
+        {
+            var result = new ServiceResult<bool>();
+
+            try
+            {
+                var resultDelete = await _imagemRepository.DeleteProcesso(id);
+
+                return resultDelete ? ServiceResult<bool>.Success(resultDelete) : ServiceResult<bool>.Failure("Falha ao excluir processo");
+            }
+            catch (Exception exception)
+            {
+                result.Error = exception.Message;
+            }
+
+            return result;
         }
     }
 }

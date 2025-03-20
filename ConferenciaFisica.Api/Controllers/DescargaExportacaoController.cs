@@ -15,9 +15,9 @@ namespace ConferenciaFisica.Api.Controllers
     public class DescargaExportacaoController : ControllerBase
     {
         private readonly IDescargaExportacaoUseCase _descargaExportacaoUseCase;
-        private readonly IImagensUseCaseUseCase _imagensUseCaseUseCase;
+        private readonly IProcessoUseCase _imagensUseCaseUseCase;
 
-        public DescargaExportacaoController(IDescargaExportacaoUseCase descargaExportacaoUseCase, IImagensUseCaseUseCase imagensUseCaseUseCase)
+        public DescargaExportacaoController(IDescargaExportacaoUseCase descargaExportacaoUseCase, IProcessoUseCase imagensUseCaseUseCase)
         {
             _descargaExportacaoUseCase = descargaExportacaoUseCase;
             _imagensUseCaseUseCase = imagensUseCaseUseCase;
@@ -115,17 +115,30 @@ namespace ConferenciaFisica.Api.Controllers
 
         }
 
-        [HttpDelete("processo")]
-        public async Task<IActionResult> DeletarProcesso(IImagensUseCaseUseCase carregarTiposImagemUseCase)
+        [HttpDelete("processo/{id}")]
+        public async Task<IActionResult> DeletarProcesso(int id)
         {
-            var result = await carregarTiposImagemUseCase.ListTipoProcesso();
+            var result = await _imagensUseCaseUseCase.DeleteProcesso(id);
 
             if (!result.Status)
-                return NotFound(result.Mensagens);
+                return BadRequest(result.Mensagens);
 
             return Ok(result);
 
         }
+
+        [HttpPut("processo")]
+        public async Task<IActionResult> AtualizarProcesso([FromBody] UpdateProcessoViewModel input)
+        {
+            var result = await _imagensUseCaseUseCase.UpdateProcesso(input);
+
+            if (!result.Status)
+                return BadRequest(result);
+
+            return Ok(result);
+
+        }
+
 
         [HttpGet("processo/{talieId}")]
         public async Task<IActionResult> ListarProcessos(int talieId)

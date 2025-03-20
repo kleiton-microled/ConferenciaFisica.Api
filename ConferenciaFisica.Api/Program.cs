@@ -75,7 +75,7 @@ builder.Services.AddScoped<IEmbalagensRepository, EmbalagensRepository>();
 //Descarga Exportacao
 builder.Services.AddScoped<IDescargaExportacaoUseCase, DescargaExportacaoUseCase>();
 builder.Services.AddScoped<IDescargaExportacaoRepository, DescargaExportacaoRepository>();
-builder.Services.AddScoped<IImagensUseCaseUseCase, ImagensUseCase>();
+builder.Services.AddScoped<IProcessoUseCase, ProcessoUseCase>();
 builder.Services.AddScoped<IImagemRepository, ImagemRepository>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));

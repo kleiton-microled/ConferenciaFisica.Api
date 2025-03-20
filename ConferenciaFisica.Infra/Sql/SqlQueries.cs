@@ -510,12 +510,19 @@
 
         public const string ListarTiposProcesso = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_PROCESSO;";
         public const string ListarProcessosPorTalie = @"SELECT 
-                                                            ID_TIPO_PROCESSO as IdTipoProcesso, 
-                                                            ID_TALIE AS IdTalie,
-                                                            IMAGEM_PATH AS ImagemPath ,
-                                                            OBSERVACAO AS Observacao ,
-                                                            DESCRICAO AS Descricao
-                                                        FROM REDEX.dbo.TB_FOTO_PROCESSO where ID_TALIE = @talieId";
+                                                            FP.ID AS Id, 
+                                                            FP.ID_TIPO_PROCESSO AS IdTipoProcesso, 
+                                                            FP.ID_TALIE AS IdTalie,
+                                                            FP.IMAGEM_PATH AS ImagemPath,
+                                                            FP.OBSERVACAO AS Observacao,
+                                                            FP.DESCRICAO AS Descricao,
+                                                            TP.Descricao AS DescricaoTipoProcesso
+                                                        FROM 
+                                                            REDEX.dbo.TB_FOTO_PROCESSO FP
+                                                        JOIN 
+                                                            REDEX.dbo.TB_TIPOS_PROCESSO TP ON FP.ID_TIPO_PROCESSO = TP.ID
+                                                        WHERE 
+                                                            FP.ID_TALIE = @talieId;";
 
         public const string InsertTipoProcesso = @"INSERT INTO
                                                         	REDEX.dbo.TB_TIPOS_PROCESSO (Codigo, Descricao)
@@ -525,6 +532,8 @@
                                                         )";
 
         public const string DeleteTipoProcesso = @"DELETE FROM REDEX.dbo.TB_TIPOS_PROCESSO WHERE ID = @id";
+
+        public const string DeleteProcesso = @"DELETE FROM REDEX.dbo.TB_FOTO_PROCESSO WHERE ID = @id";
 
         public const string InsertProcesso = @"INSERT INTO
                                                         	REDEX.dbo.TB_FOTO_PROCESSO (ID_TIPO_PROCESSO,ID_TALIE, IMAGEM_PATH, DESCRICAO, OBSERVACAO)
@@ -536,6 +545,9 @@
                                                         	@Observacao
                                                         )";
 
+        public const string UpdatesProcessoDescricaoAndObservacao = @"UPDATE REDEX.dbo.TB_FOTO_PROCESSO 
+                                                                        SET DESCRICAO = @Descricao, OBSERVACAO = @Observacao
+                                                                      WHERE ID = @Id;";
         #endregion DESCARGA_EXPORTACAO
     }
 }

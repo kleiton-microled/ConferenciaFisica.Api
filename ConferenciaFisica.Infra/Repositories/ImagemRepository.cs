@@ -54,6 +54,24 @@ namespace ConferenciaFisica.Infra.Repositories
             }
         }
 
+        public async Task<bool> DeleteProcesso(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var query = SqlQueries.DeleteProcesso;
+
+                var result = await connection.ExecuteAsync(query, new { id = id });
+
+                return result > 0;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+        }
+
         public async Task<bool> DeleteTipoProcesso(int id)
         {
             try
@@ -97,6 +115,24 @@ namespace ConferenciaFisica.Infra.Repositories
 
                 return await connection.QueryAsync<Processo>(sql, new { talieId = id });
 
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateProcesso(ProcessoCommand input)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var sql = SqlQueries.UpdatesProcessoDescricaoAndObservacao;
+
+                var result = await connection.ExecuteAsync(sql, input);
+
+                return result > 0;
             }
             catch (Exception)
             {
