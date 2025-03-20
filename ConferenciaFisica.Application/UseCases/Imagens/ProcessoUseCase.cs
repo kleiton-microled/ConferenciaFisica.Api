@@ -151,10 +151,6 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             return result;
         }
 
-        public Task<ServiceResult<IEnumerable<TipoProcesso>>> UpdateImagemByRegistroId(int registroId)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task<ServiceResult<bool>> UpdateProcesso(UpdateProcessoViewModel input)
         {

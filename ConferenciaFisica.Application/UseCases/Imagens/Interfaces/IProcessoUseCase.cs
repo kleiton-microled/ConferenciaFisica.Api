@@ -16,6 +16,5 @@ namespace ConferenciaFisica.Application.UseCases.Imagens.Interfaces
         Task<ServiceResult<bool>> DeleteProcesso(int id);
 
         Task<ServiceResult<IEnumerable<ProcessoViewModel>>> GetImagemByTalieId(int registroId);
-        Task<ServiceResult<IEnumerable<TipoProcesso>>> UpdateImagemByRegistroId(int registroId);
     }
 } 
