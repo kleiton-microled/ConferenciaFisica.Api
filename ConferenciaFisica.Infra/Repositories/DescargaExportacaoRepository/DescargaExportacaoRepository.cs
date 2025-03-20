@@ -1,4 +1,5 @@
 ﻿using ConferenciaFisica.Contracts.Commands;
+using ConferenciaFisica.Contracts.DTOs.FinalizarProcesso;
 using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Entities.DescargaExportacao;
 using ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory;
@@ -6,6 +7,8 @@ using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.Sql;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using System.IO;
+using System.Text.RegularExpressions;
 using static Dapper.SqlMapper;
 
 namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
@@ -81,7 +84,8 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                     Conferente = command.Talie.Conferente,
                     Equipe = command.Talie.Equipe,
                     Operacao = command.Talie.Operacao,
-                    CodigoRegistro = command.Registro
+                    CodigoRegistro = command.Registro,
+                    Termino = command.Talie.Termino
                 });
 
 
@@ -429,8 +433,15 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 using var connection = _connectionFactory.CreateConnection();
 
                 string query = SqlQueries.GravarMarcante;
+                DynamicParameters param = new DynamicParameters();
+                param.Add("armazem", command.Armazem);
+                //param.Add("placa", command.Placa);
+                param.Add("talieId", command.TalieId);
+                param.Add("talieItemId", command.TalieItemId);
+                param.Add("idRegistro", command.Registro);
+                param.Add("id", command.Marcante);
 
-                var ret = await connection.ExecuteAsync(query, new { command });
+                var ret = await connection.ExecuteAsync(query, param);
                 if (ret > 0)
                 {
                     return true;
@@ -447,5 +458,383 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<Marcante>> CarregarMarcantesTalieItem(int talieItemId)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.CarregarMarcantesTalieItem;
+
+            var ret = await connection.QueryAsync<Marcante>(query, new { talieItemId });
+
+            return ret;
+        }
+
+        public async Task<bool> ExcluirMarcanteTalieItem(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.ExcluirMarcanteTalieItem;
+
+                var ret = await connection.ExecuteAsync(query, new { id });
+                if (ret > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<bool> FinalizarProcesso(int id)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
+            using var transaction = await connection.BeginTransactionAsync();
+
+
+            try
+            {
+                var data = await ObterFinalizarDescargaAsync(id);
+
+                foreach (var registro in data.Item)
+                {
+                    // 🔹 Gerando novo ID para TB_PATIO_CS
+                    int novoId = await ObterProximoIdPatioCsAsync();
+
+                    // 🔹 Inserindo na tabela TB_PATIO_CS
+                    string sqlInsertPatio = SqlQueries.InsertIntoTbPatioCs;
+
+                    #region PARAMETERS
+                    DynamicParameters parameters = new DynamicParameters();
+                    parameters.Add("id", novoId);
+                    parameters.Add("AutonumBcg", 1);//todo
+                    parameters.Add("QuantidadeEntrada", registro.Quantidade);
+                    parameters.Add("AutonumEmb", registro.Embalagem);
+                    parameters.Add("AutonumPro", registro.Produto);
+                    parameters.Add("Marca", registro.Marca);
+                    parameters.Add("VolumeDeclarado", 0);
+                    parameters.Add("Comprimento", registro.Comprimento);
+                    parameters.Add("Largura", registro.Largura);
+                    parameters.Add("Altura", registro.Altura);
+                    parameters.Add("Bruto", 0); //todo
+                    parameters.Add("QtdeUnit", registro.Quantidade);
+                    parameters.Add("DataRegistro", data.DataTermino);
+                    parameters.Add("AutonumRegcs", registro.RegistroCargaSolta);
+                    parameters.Add("AutonumNf", registro.NotaFiscal);
+                    parameters.Add("AutonumTi", registro.Id);
+                    parameters.Add("QtdeEstufagem", registro.QuantidadeEstufagem);
+                    parameters.Add("Yard", registro.Yard);
+                    parameters.Add("Armazem", registro.Armazem);
+                    parameters.Add("AutonumPatios", 2);
+                    parameters.Add("Patio", 2);
+                    parameters.Add("Imo", registro.IMO);
+                    parameters.Add("Imo2", registro.IMO2);
+                    parameters.Add("Imo3", registro.IMO3);
+                    parameters.Add("Imo4", registro.IMO4);
+                    parameters.Add("Uno", registro.UNO);
+                    parameters.Add("Uno2", registro.UNO2);
+                    parameters.Add("Uno3", registro.UNO3);
+                    parameters.Add("Uno4", registro.UNO4);
+                    parameters.Add("CodProduto", registro.CodigoProduto);
+                    parameters.Add("CodEan", registro.CodigoEan);
+                    parameters.Add("Termino", DateTime.Now);
+                    #endregion PARAMETERS
+
+                    await connection.ExecuteAsync(sqlInsertPatio, parameters, transaction);
+
+                    // 🔹 Atualizando IMO na TB_BOOKING_CARGA se houver
+                    if (!string.IsNullOrEmpty(registro.IMO))
+                    {
+                        await AtualizarIMOAsync(registro.IdBookingCarga, registro.IMO);
+                    }
+
+                    // 🔹 Inserindo na tabela TB_CARGA_SOLTA_YARD
+                    await InserirCargaSoltaYardAsync(registro.RegistroCargaSolta, registro.Armazem, registro.Yard);
+
+                    // 🔹 Gerando novo ID para TB_AMR_GATE
+                    long novoIdAmr = await ObterProximoIdAmrAsync();
+
+                    // 🔹 Inserindo na tabela TB_AMR_GATE
+                    string sqlInsertAmrGate = @"
+                                                INSERT INTO REDEX.dbo.TB_AMR_GATE (
+                                                    autonum, gate, cntr_rdx, cs_rdx, peso_entrada, peso_saida, data, id_booking, id_oc, funcao_gate, flag_historico
+                                                ) VALUES (
+                                                    @IdAmr, @Gate, 0, @Id, @PesoEntrada, 0, @DataRegistro, @AutonumBoo, 0, 203, 0
+                                                )";
+
+                    DynamicParameters param = new DynamicParameters();
+                    param.Add("IdAmr", novoIdAmr);
+                    param.Add("Gate", data.Gate);
+                    param.Add("Id", novoId);
+                    param.Add("PesoEntrada", registro.Peso);
+                    param.Add("DataRegistro", DateTime.Now); //todo
+                    param.Add("AutonumBoo", registro.IdBookingCarga); //todo
+
+                    await connection.ExecuteAsync(sqlInsertAmrGate, param, transaction);
+
+                    // 🔹 Atualizando TB_PATIO_CS
+                    string sqlUpdatePatio = "UPDATE REDEX.dbo.TB_PATIO_CS SET pcs_pai = @Id WHERE autonum_pcs = @Id";
+                    await connection.ExecuteAsync(sqlUpdatePatio, new { Id = novoId }, transaction);
+                }
+
+                await transaction.CommitAsync();
+                return true; // ✅ Sucesso
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception($"Erro ao processar fechamento do Talie: {ex.Message}", ex);
+            }
+        }
+
+        public async Task<bool> ValidarQuantidadeDescargaAsync(int talieId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            // 🔹 Soma da quantidade descarregada (qtde_descarga)
+            string sqlQuantidadeDescarregada = @"SELECT SUM(qtde_descarga) 
+                                                    FROM REDEX.dbo.TB_TALIE_ITEM 
+                                                WHERE autonum_talie = @TalieId";
+
+            int quantidadeDescarregada = await connection.ExecuteScalarAsync<int>(sqlQuantidadeDescarregada, new { TalieId = talieId });
+
+            // 🔹 Soma da quantidade registrada (quantidade) na tabela de registro
+            string sqlQuantidadeRegistrada = @"SELECT SUM(r.quantidade) 
+                                                FROM REDEX.dbo.tb_talie t
+                                                INNER JOIN REDEX.dbo.TB_REGISTRO_CS r ON t.autonum_reg = r.autonum_reg
+                                               WHERE t.autonum_talie = @TalieId";
+
+            int quantidadeRegistrada = await connection.ExecuteScalarAsync<int>(sqlQuantidadeRegistrada, new { TalieId = talieId });
+
+            // 🔹 Validação: Quantidade Registrada == Quantidade Descarregada
+            if (quantidadeDescarregada != quantidadeRegistrada)
+            {
+                return false;
+            }
+
+            return true; // ✅ Tudo certo, não há divergências
+        }
+
+        public async Task<int> ObterProximoIdPatioCsAsync()
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            string sql = @"
+                INSERT INTO REDEX.dbo.SEQ_TB_PATIO_CS (DATA)
+                OUTPUT inserted.AUTONUM
+                VALUES (GETDATE())";
+
+            return await connection.ExecuteScalarAsync<int>(sql);
+        }
+
+        public async Task<int> ObterProximoIdAmrAsync()
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            string sql = @"
+                INSERT INTO REDEX.dbo.seq_tb_amr_gate (DATA)
+                OUTPUT inserted.AUTONUM
+                VALUES (GETDATE())";
+
+            return await connection.ExecuteScalarAsync<int>(sql);
+        }
+
+
+        public async Task<bool> VerificarEmissaoEtiquetasAsync(int talieId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            // 🔹 Verifica se há etiquetas geradas para o registro
+            string sqlEtiquetasGeradas = @"SELECT COUNT(*) 
+                                            FROM REDEX.dbo.TB_TALIE t
+                                            INNER JOIN REDEX.dbo.TB_TALIE_ITEM ti ON t.autonum_talie = ti.autonum_talie
+                                            INNER JOIN REDEX.dbo.ETIQUETAS e ON ti.autonum_regcs = e.autonum_rcs
+                                            WHERE t.autonum_talie = @TalieId";
+
+            int etiquetasGeradas = await connection.ExecuteScalarAsync<int>(sqlEtiquetasGeradas, new { TalieId = talieId });
+
+            if (etiquetasGeradas != 0)
+            {
+                throw new Exception("Não consta geração de etiquetas deste registro. Deseja continuar assim mesmo?");
+            }
+
+            // 🔹 Verifica se há etiquetas pendentes de emissão
+            string sqlEtiquetasPendentes = @"SELECT COUNT(*) 
+                                                FROM REDEX.dbo.TB_TALIE t
+                                                INNER JOIN REDEX.dbo.TB_TALIE_ITEM ti ON t.autonum_talie = ti.autonum_talie
+                                                INNER JOIN REDEX.dbo.ETIQUETAS e ON ti.autonum_regcs = e.autonum_rcs
+                                                WHERE t.autonum_talie = @TalieId 
+                                             AND e.emissao IS NULL";
+
+            int etiquetasPendentes = await connection.ExecuteScalarAsync<int>(sqlEtiquetasPendentes, new { TalieId = talieId });
+
+            if (etiquetasPendentes > 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task<FinalizarDescargaDTO> ObterFinalizarDescargaAsync(int talieId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            string sql = SqlQueries.BuscarRegistroDescarga;
+
+            var resultado = new Dictionary<int, FinalizarDescargaDTO>();
+
+            var data = await connection.QueryAsync<FinalizarDescargaDTO, ItemDTO, FinalizarDescargaDTO>(
+                sql,
+                (descarga, item) =>
+                {
+                    if (!resultado.TryGetValue(descarga.Id, out var descargaExistente))
+                    {
+                        descargaExistente = descarga;
+                        descargaExistente.Item = new List<ItemDTO>();
+                        resultado.Add(descarga.Id, descargaExistente);
+                    }
+
+                    if (item != null)
+                    {
+                        descargaExistente.Item.Add(item);
+                    }
+
+                    return descargaExistente;
+                },
+                new { TalieId = talieId },
+                splitOn: "Id"
+            );
+
+            return resultado.Values.FirstOrDefault();
+        }
+
+        private async Task AtualizarIMOAsync(int autonumBcg, string imo)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            string sql = @"UPDATE REDEX.dbo.tb_booking_carga
+                            SET imo = @IMO
+                          WHERE autonum_bcg = @AutonumBcg AND @IMO IS NOT NULL AND @IMO <> ''";
+
+            await connection.ExecuteAsync(sql, new { AutonumBcg = autonumBcg, IMO = imo });
+        }
+
+        public async Task InserirCargaSoltaYardAsync(int autonumCS, int armazem, string yard)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            string sql = @"INSERT INTO SGIPA.DBO.TB_CARGA_SOLTA_YARD 
+                               (Autonum_CS, Armazem, Yard, Origem, DATA, AUDIT_94, FL_FRENTE, FL_FUNDO, FL_LE, FL_LD)
+                           VALUES 
+                               (@AutonumCS, @Armazem, @Yard, 'R', GETDATE(), 0, 0, 0, 0, 0)";
+
+            await connection.ExecuteAsync(sql, new
+            {
+                AutonumCS = autonumCS,
+                Armazem = armazem,
+                Yard = yard
+            });
+        }
+
+        public async Task<bool> ValidarCargaTransferidaAsync(int talieId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            string sql = @"SELECT COUNT(1)
+                            FROM REDEX.dbo.TB_PATIO_CS pcs
+                            INNER JOIN REDEX.dbo.TB_TALIE_ITEM ti ON pcs.talie_descarga = ti.autonum_ti
+                            WHERE ti.autonum_talie = @TalieId";
+
+            int count = await connection.ExecuteScalarAsync<int>(sql, new { TalieId = talieId });
+
+            if (count == 0)
+            {
+                throw new Exception("Falha no processo de fechamento. Carga não foi transferida para o estoque. Contate o TI assim que possível.");
+            }
+
+            return true;
+        }
+
+        public async Task<bool> FecharTalieAsync(int talieId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            string sql = @"
+                          UPDATE REDEX.dbo.TB_TALIE 
+                          SET FLAG_FECHADO = 1, 
+                              DT_FECHAMENTO = GETDATE(),
+                              TERMINO = GETDATE()
+                          WHERE AUTONUM_TALIE = @TalieId";
+
+            int rowsAffected = await connection.ExecuteAsync(sql, new { TalieId = talieId });
+
+            return rowsAffected > 0; 
+        }
+
+        public async Task FinalizarReservaAsync(int booId)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
+            using var transaction = await connection.BeginTransactionAsync();
+
+            try
+            {
+                // 🔹 Obtém QR (quantidade de carga da reserva)
+                string sqlQR = @"
+                                SELECT COALESCE(SUM(bcg.qtde), 0)
+                                FROM REDEX.dbo.TB_BOOKING boo
+                                INNER JOIN REDEX.dbo.TB_BOOKING_CARGA bcg ON boo.AUTONUM_BOO = bcg.AUTONUM_BOO
+                                WHERE boo.AUTONUM_BOO = @Boo
+                                AND bcg.FLAG_CS = 1";
+
+                int qr = await connection.ExecuteScalarAsync<int>(sqlQR, new { Boo = booId }, transaction);
+
+                // 🔹 Obtém QE (quantidade de entrada)
+                string sqlQE = @"
+                                SELECT COALESCE(SUM(pcs.QTDE_ENTRADA), 0)
+                                FROM REDEX.dbo.TB_BOOKING boo
+                                INNER JOIN REDEX.dbo.TB_BOOKING_CARGA bcg ON boo.AUTONUM_BOO = bcg.AUTONUM_BOO
+                                INNER JOIN REDEX.dbo.TB_PATIO_CS pcs ON bcg.AUTONUM_BCG = pcs.AUTONUM_BCG
+                                WHERE boo.AUTONUM_BOO = @Boo";
+
+                int qe = await connection.ExecuteScalarAsync<int>(sqlQE, new { Boo = booId }, transaction);
+
+                // 🔹 Se QE ≥ QR e QE > 0, finaliza a reserva
+                if (qe >= qr && qe != 0)
+                {
+                    string sqlFinalizar = @"
+                                           UPDATE REDEX.dbo.TB_BOOKING
+                                           SET FLAG_FINALIZADO = 1
+                                           WHERE AUTONUM_BOO = @Boo";
+
+                    await connection.ExecuteAsync(sqlFinalizar, new { Boo = booId }, transaction);
+                }
+
+                // 🔹 Atualiza o status da reserva para 2
+                string sqlStatusReserva = @"
+                                           UPDATE REDEX.dbo.TB_BOOKING
+                                           SET STATUS_RESERVA = 2
+                                           WHERE AUTONUM_BOO = @Boo";
+
+                await connection.ExecuteAsync(sqlStatusReserva, new { Boo = booId }, transaction);
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception($"Erro ao finalizar reserva: {ex.Message}", ex);
+            }
+        }
+
     }
 }

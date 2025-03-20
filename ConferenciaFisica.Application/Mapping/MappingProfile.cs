@@ -28,6 +28,9 @@ namespace ConferenciaFisica.Application.Mapping
             CreateMap<ArmazensViewModel, Armazens>();
             CreateMap<Armazens, ArmazensViewModel>();
 
+            CreateMap<MarcantesViewModel, Marcante>();
+            CreateMap<Marcante, MarcantesViewModel>();
+
         }
     }
 }

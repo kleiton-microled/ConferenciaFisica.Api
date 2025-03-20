@@ -10,6 +10,7 @@ using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory;
 using Microsoft.Win32;
 using System.ComponentModel;
+using System.IO;
 
 namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
 {
@@ -78,6 +79,8 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             var _serviceResult = new ServiceResult<bool>();
 
             var talie = _mapper.Map<TalieDTO>(request.Talie);
+            talie.Operacao = "1";
+            talie.Equipe = 1;
 
             var command = DescargaExportacaoCommand.CreateNew(request.Registro, talie, request.Placa, request.Reserva, request.Cliente);
 
@@ -351,10 +354,97 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             }
             else
             {
-                _serviceResult.Mensagens.Add("Falha ao tentar associar o marcante!");
+                _serviceResult.Mensagens.Add("Marcante não pertence ao registro atual!");
             }
 
             return _serviceResult;
+        }
+
+        public async Task<ServiceResult<IEnumerable<MarcantesViewModel>>> CarregarMarcantes(int talieItem)
+        {
+            var data = await _repository.CarregarMarcantesTalieItem(talieItem);
+
+            if (data == null)
+            {
+                return ServiceResult<IEnumerable<MarcantesViewModel>>.Failure("Registros não encontrado.");
+            }
+
+            return ServiceResult<IEnumerable<MarcantesViewModel>>.Success(_mapper.Map<IEnumerable<MarcantesViewModel>>(data), "Marcantes localizados com sucesso.");
+        }
+
+        public async Task<ServiceResult<bool>> ExcluirMarcanteTalieItem(int talieId)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+
+            var result = await _repository.ExcluirMarcanteTalieItem(talieId);
+            if (result)
+            {
+                _serviceResult.Result = result;
+                _serviceResult.Mensagens.Add("Marcante excluido com sucesso!");
+            }
+            else
+            {
+                _serviceResult.Mensagens.Add("Falha ao tentar exlcuir o marcante!");
+            }
+
+            return _serviceResult;
+        }
+
+        public async Task<ServiceResult<bool>> FinalizarProcesso(int talie, bool crossdock)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+
+            //Validar quantidade registrada X quantidade descarregada
+            if (!crossdock)
+            {
+                if (!await ValidarQuantidadeDescarga(talie))
+                {
+                    _serviceResult.Result = false;
+                    _serviceResult.Mensagens.Add("Divergência entre quantidade registrada e descarregada.");
+                }
+
+
+                //if (!await VerificarEmissaoEtiquetasAsync(talie))
+                //{
+                //    _serviceResult.Result = false;
+                //    _serviceResult.Mensagens.Add("Consta pendência de emissão de etiquetas deste registro. Deseja continuar assim mesmo?");
+                //}
+            }
+
+            var result = await _repository.FinalizarProcesso(talie);
+
+            if (result)
+            {
+                var isValid = await _repository.ValidarCargaTransferidaAsync(talie);
+                if (isValid)
+                {
+                    var fecharTalie = await _repository.FecharTalieAsync(talie);
+                    if (fecharTalie)
+                    {
+                        await _repository.FinalizarReservaAsync(talie);
+
+                        _serviceResult.Result = result;
+                        _serviceResult.Mensagens.Add("Processo finalizado com sucesso!");
+                    }
+                }
+                else
+                {
+                    _serviceResult.Mensagens.Add("Falha ao tentar finalizar o processo!");
+                }
+            }
+
+
+            return _serviceResult;
+        }
+
+        private async Task<bool> ValidarQuantidadeDescarga(int id)
+        {
+            return await _repository.ValidarQuantidadeDescargaAsync(id);
+        }
+
+        private async Task<bool> VerificarEmissaoEtiquetasAsync(int id)
+        {
+            return await _repository.VerificarEmissaoEtiquetasAsync(id);
         }
     }
 }

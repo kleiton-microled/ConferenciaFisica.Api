@@ -344,16 +344,22 @@
                                                     crossdocking = 0,
                                                     conferente = @Conferente,
                                                     equipe = @Equipe,
-                                                    forma_operacao = @Operacao
+                                                    forma_operacao = @Operacao,
+                                                    termino =@termino
                                                 OUTPUT INSERTED.autonum_talie INTO @OutputTable
                                                 WHERE autonum_reg = @CodigoRegistro;
                                     
                                                 SELECT autonum_talie FROM @OutputTable";
-        public const string CriarTalie = @"INSERT INTO REDEX..tb_talie 
-                                        (
-                                            placa, inicio, flag_descarga, 
-                                            flag_estufagem, flag_carregamento, crossdocking, 
-                                            conferente, equipe, autonum_reg
+        public const string CriarTalie = @"INSERT INTO REDEX..TB_TALIE 
+                                        (placa, 
+                                        inicio, 
+                                        flag_descarga, 
+                                        flag_estufagem, 
+                                        flag_carregamento, 
+                                        crossdocking, 
+                                        conferente, 
+                                        equipe, 
+                                        autonum_reg
                                         ) 
                                         VALUES 
                                         (
@@ -502,10 +508,11 @@
         public const string GravarMarcante = @"UPDATE REDEX.dbo.TB_MARCANTES_RDX 
 	                                           SET DT_ASSOCIACAO = GETDATE(), 
 	                                           	ARMAZEM = @armazem, 
-	                                           	PLACA_C = @placa,
+	                                           	--PLACA_C = @placa,
 	                                           	AUTONUM_TALIE = @talieId,
 	                                           	AUTONUM_TI = @taliItemId
 	                                           WHERE AUTONUM_REG = @idRegistro";
+<<<<<<< HEAD
 
 
         public const string ListarTiposProcesso = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_PROCESSO;";
@@ -548,6 +555,106 @@
         public const string UpdatesProcessoDescricaoAndObservacao = @"UPDATE REDEX.dbo.TB_FOTO_PROCESSO 
                                                                         SET DESCRICAO = @Descricao, OBSERVACAO = @Observacao
                                                                       WHERE ID = @Id;";
+=======
+        public const string CarregarMarcantesTalieItem = @"SELECT tmr.AUTONUM as Id,
+	                                                          tmr.DT_IMPRESSAO as DataImpressao,
+	                                                          tmr.DT_ASSOCIACAO as DataAssociacao,
+	                                                          tmr.VOLUMES as Quantidade ,
+	                                                          tmr.AUTONUM_TALIE as TalieId,
+	                                                          tmr.AUTONUM_TI as TalieItemId,
+	                                                          tmr.STR_CODE128 as Numero,
+	                                                          tmr.AUTONUM_CS_YARD as Local
+	                                                       FROM REDEX.dbo.TB_MARCANTES_RDX tmr 
+	                                                       WHERE tmr.AUTONUM_TI = @talieItemId";
+        public const string ExcluirMarcanteTalieItem = @"UPDATE REDEX.dbo.TB_MARCANTES_RDX 
+	                                                    SET DT_ASSOCIACAO = null, 
+	                                                    	ARMAZEM = 0, 
+	                                                    	--PLACA_C = @placa,
+	                                                    	AUTONUM_TALIE = 0,
+	                                                    	AUTONUM_TI = 0
+	                                                    WHERE AUTONUM = @id";
+
+        public const string BuscarRegistroDescarga = @"SELECT
+                                                        	--TALIE
+                                                        	a.autonum_talie as Id,
+                                                        	a.termino as DataTermino,
+                                                        	a.autonum_boo as Booking,
+                                                        	a.autonum_gate as Gate,
+                                                        	a.forma_operacao as Operacao,
+                                                        	--TALIE ITEM
+                                                        	b.autonum_ti as Id,
+                                                        	b.qtde_descarga AS quantidade,
+                                                        	b.autonum_emb as Embalagem,
+                                                        	b.autonum_pro as Produto,
+                                                        	b.marca as Marca,
+                                                        	b.qtde_estufagem as QuantidadeEstufagem,
+                                                        	b.comprimento as Comprimento,
+                                                        	b.largura as Largura,
+                                                        	b.altura as Altura,
+                                                        	b.peso as Peso,
+                                                        	b.yard as Yard,
+                                                        	b.armazem as Armazem,
+                                                        	--'' CodProduto AS codproduto,
+                                                        	b.imo as IMO,
+                                                        	b.imo2 as IMO2,
+                                                        	b.imo3 as IMO3,
+                                                        	b.imo4 as IMO4,
+                                                        	b.uno as UNO,
+                                                        	b.uno2 as UNO2,
+                                                        	b.uno3 as UNO3,
+                                                        	b.uno4 as UNO4,
+                                                        	b.autonum_regcs as RegistroCargaSolta,
+                                                        	b.cod_ean as CodigoEan,
+                                                        	boo.fcl_lcl as FclLcl,
+                                                        	c.autonum_nf as NotaFiscal,
+                                                        	d.autonum_emb AS EmbalagemReserva,
+                                                        	d.autonum_bcg as IdBookingCarga
+                                                        FROM
+                                                        	REDEX.dbo.tb_talie a
+                                                        INNER JOIN REDEX.dbo.tb_talie_item b ON
+                                                        	a.autonum_talie = b.autonum_talie
+                                                        LEFT JOIN REDEX.dbo.tb_notas_fiscais c ON
+                                                        	b.autonum_nf = c.autonum_nf
+                                                        INNER JOIN REDEX.dbo.tb_registro_cs e ON
+                                                        	e.autonum_regcs = b.autonum_regcs
+                                                        INNER JOIN REDEX.dbo.tb_booking_carga d ON
+                                                        	d.autonum_bcg = e.autonum_bcg
+                                                        INNER JOIN REDEX.dbo.tb_booking boo ON
+                                                        	d.autonum_boo = boo.autonum_boo
+                                                        WHERE
+                                                        	a.autonum_talie = @talieId";
+        public const string InsertIntoTbPatioCs = @"INSERT INTO REDEX.dbo.TB_PATIO_CS (
+                                                        autonum_pcs, --id da tabela
+                                                        AUTONUM_BCG, 
+                                                        QTDE_ENTRADA, 
+                                                        AUTONUM_EMB, 
+                                                        autonum_pro, 
+                                                        MARCA, 
+                                                        VOLUME_DECLARADO, 
+                                                        COMPRIMENTO, 
+                                                        LARGURA, 
+                                                        ALTURA, 
+                                                        BRUTO, 
+                                                        qtde_unit, 
+                                                        DT_PRIM_ENTRADA, 
+                                                        FLAG_HISTORICO,
+                                                        AUTONUM_REGCS, 
+                                                        AUTONUM_NF, 
+                                                        talie_descarga, 
+                                                        QTDE_ESTUFAGEM, 
+                                                        YARD, 
+                                                        ARMAZEM, 
+                                                        AUTONUM_PATIOS, 
+                                                        PATIO, 
+                                                        imo, uno, imo2, uno2, imo3, uno3, imo4, uno4, codproduto, cod_ean
+                                                    ) VALUES (
+                                                        @Id, @AutonumBcg, @QuantidadeEntrada, @AutonumEmb, @AutonumPro, @Marca, 
+                                                        @VolumeDeclarado, @Comprimento, @Largura, @Altura, @Bruto, @QtdeUnit,
+                                                        @DataRegistro, 0, @AutonumRegcs, @AutonumNf, @AutonumTi, @QtdeEstufagem,
+                                                        @Yard, @Armazem, @AutonumPatios, @Patio, @Imo, @Uno, @Imo2, @Uno2, @Imo3, 
+                                                        @Uno3, @Imo4, @Uno4, @CodProduto, @CodEan
+                                                    )";
+>>>>>>> 88faa42540e08acc0b185c5cd5707f05a4ec129b
         #endregion DESCARGA_EXPORTACAO
     }
 }
