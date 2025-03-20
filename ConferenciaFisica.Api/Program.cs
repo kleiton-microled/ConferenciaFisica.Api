@@ -11,6 +11,8 @@ using ConferenciaFisica.Application.UseCases.Documentos;
 using ConferenciaFisica.Application.UseCases.Documentos.Interfaces;
 using ConferenciaFisica.Application.UseCases.Embalagens;
 using ConferenciaFisica.Application.UseCases.Embalagens.Interfaces;
+using ConferenciaFisica.Application.UseCases.Imagens;
+using ConferenciaFisica.Application.UseCases.Imagens.Interfaces;
 using ConferenciaFisica.Application.UseCases.Lacres;
 using ConferenciaFisica.Application.UseCases.Lacres.Interfaces;
 using ConferenciaFisica.Domain.Repositories;
@@ -73,6 +75,8 @@ builder.Services.AddScoped<IEmbalagensRepository, EmbalagensRepository>();
 //Descarga Exportacao
 builder.Services.AddScoped<IDescargaExportacaoUseCase, DescargaExportacaoUseCase>();
 builder.Services.AddScoped<IDescargaExportacaoRepository, DescargaExportacaoRepository>();
+builder.Services.AddScoped<IProcessoUseCase, ProcessoUseCase>();
+builder.Services.AddScoped<IImagemRepository, ImagemRepository>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -95,6 +99,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 //app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
+app.UseStaticFiles();
 
 
 app.UseRouting();
@@ -114,6 +119,13 @@ app.UseEndpoints(endpoints =>
             await context.Response.WriteAsync(result);
         }
     });
+});
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
 });
 
 app.Run();

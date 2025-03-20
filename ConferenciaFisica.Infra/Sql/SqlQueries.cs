@@ -518,6 +518,49 @@
 	                                           	AUTONUM_TALIE = @talieId,
 	                                           	AUTONUM_TI = @talieItemId
 	                                           WHERE AUTONUM_REG = @idRegistro";
+
+
+        public const string ListarTiposProcesso = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_PROCESSO;";
+        public const string ListarProcessosPorTalie = @"SELECT 
+                                                            FP.ID AS Id, 
+                                                            FP.ID_TIPO_PROCESSO AS IdTipoProcesso, 
+                                                            FP.ID_TALIE AS IdTalie,
+                                                            FP.IMAGEM_PATH AS ImagemPath,
+                                                            FP.OBSERVACAO AS Observacao,
+                                                            FP.DESCRICAO AS Descricao,
+                                                            TP.Descricao AS DescricaoTipoProcesso
+                                                        FROM 
+                                                            REDEX.dbo.TB_FOTO_PROCESSO FP
+                                                        JOIN 
+                                                            REDEX.dbo.TB_TIPOS_PROCESSO TP ON FP.ID_TIPO_PROCESSO = TP.ID
+                                                        WHERE 
+                                                            FP.ID_TALIE = @talieId;";
+
+        public const string InsertTipoProcesso = @"INSERT INTO
+                                                        	REDEX.dbo.TB_TIPOS_PROCESSO (Codigo, Descricao)
+                                                        VALUES (
+                                                        	@Codigo,
+                                                            @Descricao
+                                                        )";
+
+        public const string DeleteTipoProcesso = @"DELETE FROM REDEX.dbo.TB_TIPOS_PROCESSO WHERE ID = @id";
+
+        public const string DeleteProcesso = @"DELETE FROM REDEX.dbo.TB_FOTO_PROCESSO WHERE ID = @id";
+
+        public const string InsertProcesso = @"INSERT INTO
+                                                        	REDEX.dbo.TB_FOTO_PROCESSO (ID_TIPO_PROCESSO,ID_TALIE, IMAGEM_PATH, DESCRICAO, OBSERVACAO)
+                                                        VALUES (
+                                                        	@IdTipoProcesso,
+                                                        	@IdTalie,
+                                                        	@ImagemPath,
+                                                        	@Descricao,
+                                                        	@Observacao
+                                                        )";
+
+        public const string UpdatesProcessoDescricaoAndObservacao = @"UPDATE REDEX.dbo.TB_FOTO_PROCESSO 
+                                                                        SET DESCRICAO = @Descricao, OBSERVACAO = @Observacao
+                                                                      WHERE ID = @Id;";
+
         public const string CarregarMarcantesTalieItem = @"SELECT tmr.AUTONUM as Id,
 	                                                          tmr.DT_IMPRESSAO as DataImpressao,
 	                                                          tmr.DT_ASSOCIACAO as DataAssociacao,
@@ -616,6 +659,7 @@
                                                         @Yard, @Armazem, @AutonumPatios, @Patio, @Imo, @Uno, @Imo2, @Uno2, @Imo3, 
                                                         @Uno3, @Imo4, @Uno4, @CodProduto, @CodEan
                                                     )";
+
         #endregion DESCARGA_EXPORTACAO
     }
 }
