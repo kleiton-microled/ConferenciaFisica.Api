@@ -1,11 +1,7 @@
-﻿using ConferenciaFisica.Application.Commands;
-using ConferenciaFisica.Application.Inputs;
+﻿using ConferenciaFisica.Application.Inputs;
 using ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces;
-using ConferenciaFisica.Application.UseCases.Documentos.Interfaces;
-using ConferenciaFisica.Application.UseCases.Imagens;
 using ConferenciaFisica.Application.UseCases.Imagens.Interfaces;
 using ConferenciaFisica.Application.ViewModels;
-using ConferenciaFisica.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenciaFisica.Api.Controllers
@@ -15,12 +11,12 @@ namespace ConferenciaFisica.Api.Controllers
     public class DescargaExportacaoController : ControllerBase
     {
         private readonly IDescargaExportacaoUseCase _descargaExportacaoUseCase;
-        private readonly IProcessoUseCase _imagensUseCaseUseCase;
+        private readonly IProcessoUseCase _processoUseCase;
 
         public DescargaExportacaoController(IDescargaExportacaoUseCase descargaExportacaoUseCase, IProcessoUseCase imagensUseCaseUseCase)
         {
             _descargaExportacaoUseCase = descargaExportacaoUseCase;
-            _imagensUseCaseUseCase = imagensUseCaseUseCase;
+            _processoUseCase = imagensUseCaseUseCase;
         }
 
         [HttpGet("{id}")]
@@ -73,7 +69,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpPost("tipos-processos")]
         public async Task<IActionResult> CreateTipoProcesso([FromBody]TipoProcessoViewModel input)
         {
-            var result = await _imagensUseCaseUseCase.CreateTipoProcesso(input);
+            var result = await _processoUseCase.CreateTipoProcesso(input);
 
             if (!result.Status)
                 return BadRequest(result.Mensagens);
@@ -84,7 +80,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpDelete("tipos-processos")]
         public async Task<IActionResult> DeleteTipoProcesso(int id)
         {
-            var result = await _imagensUseCaseUseCase.DeleteTipoProcesso(id);
+            var result = await _processoUseCase.DeleteTipoProcesso(id);
 
             if (!result.Status)
                 return BadRequest(result.Mensagens);
@@ -95,7 +91,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpGet("tipos-processos")]
         public async Task<IActionResult> GetImageTypes()
         {
-            var result = await _imagensUseCaseUseCase.ListTipoProcesso();
+            var result = await _processoUseCase.ListTipoProcesso();
 
             if (!result.Status)
                 return NotFound(result.Mensagens);
@@ -106,7 +102,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpPost("processo")]
         public async Task<IActionResult> AnexarProcesso([FromBody] ProcessoViewModel input)
         {
-            var result = await _imagensUseCaseUseCase.InsertProcesso(input);
+            var result = await _processoUseCase.InsertProcesso(input);
 
             if (!result.Status)
                 return NotFound(result.Mensagens);
@@ -118,7 +114,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpDelete("processo/{id}")]
         public async Task<IActionResult> DeletarProcesso(int id)
         {
-            var result = await _imagensUseCaseUseCase.DeleteProcesso(id);
+            var result = await _processoUseCase.DeleteProcesso(id);
 
             if (!result.Status)
                 return BadRequest(result.Mensagens);
@@ -130,7 +126,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpPut("processo")]
         public async Task<IActionResult> AtualizarProcesso([FromBody] UpdateProcessoViewModel input)
         {
-            var result = await _imagensUseCaseUseCase.UpdateProcesso(input);
+            var result = await _processoUseCase.UpdateProcesso(input);
 
             if (!result.Status)
                 return BadRequest(result);
@@ -143,7 +139,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpGet("processo/{talieId}")]
         public async Task<IActionResult> ListarProcessos(int talieId)
         {
-            var result = await _imagensUseCaseUseCase.GetImagemByTalieId(talieId);
+            var result = await _processoUseCase.GetImagemByTalieId(talieId);
 
             if (!result.Status)
                 return NotFound(result.Mensagens);

@@ -512,7 +512,6 @@
 	                                           	AUTONUM_TALIE = @talieId,
 	                                           	AUTONUM_TI = @taliItemId
 	                                           WHERE AUTONUM_REG = @idRegistro";
-<<<<<<< HEAD
 
 
         public const string ListarTiposProcesso = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_PROCESSO;";
@@ -555,7 +554,7 @@
         public const string UpdatesProcessoDescricaoAndObservacao = @"UPDATE REDEX.dbo.TB_FOTO_PROCESSO 
                                                                         SET DESCRICAO = @Descricao, OBSERVACAO = @Observacao
                                                                       WHERE ID = @Id;";
-=======
+
         public const string CarregarMarcantesTalieItem = @"SELECT tmr.AUTONUM as Id,
 	                                                          tmr.DT_IMPRESSAO as DataImpressao,
 	                                                          tmr.DT_ASSOCIACAO as DataAssociacao,
@@ -654,7 +653,7 @@
                                                         @Yard, @Armazem, @AutonumPatios, @Patio, @Imo, @Uno, @Imo2, @Uno2, @Imo3, 
                                                         @Uno3, @Imo4, @Uno4, @CodProduto, @CodEan
                                                     )";
->>>>>>> 88faa42540e08acc0b185c5cd5707f05a4ec129b
+
         #endregion DESCARGA_EXPORTACAO
     }
 }
