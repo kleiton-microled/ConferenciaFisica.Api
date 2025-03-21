@@ -46,22 +46,21 @@ namespace ConferenciaFisica.Infra.Repositories
 
         public async Task<Conferencia> BuscarPorLoteAsync(string idLote)
         {
-            using var connection = _connectionFactory.CreateConnection();
-            const string query = @"
-                SELECT AUTONUM AS Id, BL AS NumeroBl, CNTR AS NumeroCntr, 
-                       INICIO, TERMINO, NOME_CLIENTE, CPF_CLIENTE, QTDE_AVARIADA, OBS_AVARIA,
-                       DIVERGENCIA_QTDE AS DivergenciaQuantidade, DIVERGENCIA_QUALIFICACAO, OBS_DIVERGENCIA, 
-                       RETIRADA_AMOSTRA, 
-                       CASE 
-                         WHEN NVL(BL, 0) <> 0 THEN 'CARGA SOLTA'
-                         WHEN NVL(CNTR, 0) <> 0 THEN 'CONTEINER'
-                         ELSE 'REDEX'
-                       END AS TipoCarga
-                FROM SGIPA.TB_EFETIVACAO_CONF_FISICA
-                WHERE BL = :idLote
-            ";
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                const string query = SqlQueries.BUscarConferenciaPorLote;
 
-            return await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { idLote });
+                var ret = await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { idLote });
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
         }
 
         public async Task<Conferencia> BuscarPorReservaAsync(string idLote)
@@ -69,7 +68,7 @@ namespace ConferenciaFisica.Infra.Repositories
             using var connection = _connectionFactory.CreateConnection();
             string query = SqlQueries.BuscarConferenciaPorReserva;
 
-            return await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { idLote });
+            return await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { LotePesquisa = idLote });
         }
 
         public async Task<bool> IniciarConferencia(ConferenciaFisicaCommand command)
@@ -194,7 +193,7 @@ namespace ConferenciaFisica.Infra.Repositories
 
                 string query = SqlQueries.CarregarLacresConferencia;
 
-                var ret = await connection.QueryAsync<Lacre>(query, new {idConferencia});
+                var ret = await connection.QueryAsync<Lacre>(query, new { idConferencia });
 
 
                 return ret;
@@ -334,6 +333,57 @@ namespace ConferenciaFisica.Infra.Repositories
                     return false;
                 }
 
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<bool> FinalizarConferencia(int idConferencia)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.FinalizarConferencia;
+
+                var ret = await connection.ExecuteAsync(query, new { idConferencia });
+                if (ret > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<Conferencia> BuscarPorPorId(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlQueries.BuscarConferenciaPorId;
+
+                var ret = await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { id });
+
+                if (ret is null)
+                {
+                    query = SqlQueries.BuscarConferenciaPorId;
+                    ret = await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { id });
+                }
+
+                return ret;
             }
             catch (Exception ex)
             {

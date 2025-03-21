@@ -79,9 +79,12 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             var _serviceResult = new ServiceResult<bool>();
 
             var talie = _mapper.Map<TalieDTO>(request.Talie);
-            talie.Operacao = "1";
-            talie.Equipe = 1;
-
+            if(talie is not null)
+            {
+                talie.Operacao = "1";
+                talie.Equipe = 1;
+            }
+            
             var command = DescargaExportacaoCommand.CreateNew(request.Registro, talie, request.Placa, request.Reserva, request.Cliente);
 
             var talieId = await _repository.AtualizarOuCriarTalie(command);
@@ -202,7 +205,9 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                     UNO3 = request.UNO3,
                     UNO4 = request.UNO4,
                     Remonte = request.Remonte,
-                    Fumigacao = request.Fumigacao
+                    Fumigacao = request.Fumigacao,
+                    Madeira = request.Madeira,
+                    Fragil = request.Fragil
                 };
 
                 var inserirNovo = await _repository.CadastrarTalieItem(novoItem, registro);

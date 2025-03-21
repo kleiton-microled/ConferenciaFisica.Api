@@ -19,9 +19,9 @@ namespace ConferenciaFisica.Application.UseCases.Agendamento
             var lotes = await _agendamentoRepository.CarregarLotesAgendamentoAsync(filtro);
 
             if (!lotes.Any())
-                return new ServiceResult<IEnumerable<LoteAgendamentoDto>> { Status = false, Mensagens = new List<string> { "Lote não encontrado." } };
+                return ServiceResult<IEnumerable<LoteAgendamentoDto>>.Success(lotes, "Nenhum Lote não encontrado.");
 
-            return new ServiceResult<IEnumerable<LoteAgendamentoDto>> { Result = lotes };
+            return ServiceResult<IEnumerable<LoteAgendamentoDto>>.Success(lotes, "Busca realizada com sucesso");
         }
     }
 }

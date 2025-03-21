@@ -54,12 +54,23 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(resultado);
         }
 
+        [HttpGet("buscar-por-id")]
+        public async Task<IActionResult> BuscarConferenciaPorId([FromQuery] int id)
+        {
+            var resultado = await _buscarConferenciaUseCase.BuscarPorId(id);
+
+            if (!resultado.Status)
+                return BadRequest(resultado);
+
+            return Ok(resultado);
+        }
+
         [HttpGet("lotes")]
         public async Task<IActionResult> CarregarLotesAgendamento([FromQuery] string filtro = "")
         {
             var result = await _carregarLotesAgendamentoUseCase.ExecuteAsync(filtro);
 
-            if (!result.Status)
+            if (!result.Status && !string.IsNullOrEmpty(result.Error))
                 return NotFound(result.Mensagens);
 
             return Ok(result);
@@ -233,6 +244,17 @@ namespace ConferenciaFisica.Api.Controllers
         public async Task<IActionResult> ExcluirDocumentoConferencia([FromQuery] int id)
         {
             var result = await _documentosUseCase.DeleteAsync(id);
+
+            if (!result.Status && !string.IsNullOrEmpty(result.Error))
+                return NotFound(result);
+
+            return Ok(result);
+        }
+
+        [HttpGet("finalizar-conferencia")]
+        public async Task<IActionResult> FinalizarConferencia([FromQuery] int idConferencia)
+        {
+            var result = await _atualizarConferenciaUseCase.FinalizarConferencia(idConferencia);
 
             if (!result.Status && !string.IsNullOrEmpty(result.Error))
                 return NotFound(result);

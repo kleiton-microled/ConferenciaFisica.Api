@@ -3,7 +3,7 @@
     public class ConferenciaFisicaCommand
     {
         public ConferenciaFisicaCommand(int? id, int? tipo, string? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, 
-            string? nomeConferente, string? cpfCliente, string? nomeCliente, int? qtdeDivergente, string? divergenciaQualificacao, 
+            string? nomeConferente, string? cpfCliente, string? nomeCliente, int? qtdeDivergente, bool divergenciaQualificacao, 
             string? observacaoDivergencia, int? retiradaAmostra, int? embalagem, bool? conferenciaRemota, string? operacao, 
             int? qtdeVolumesDivergentes, int? qtdeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 
             int? movimentacao, int? desuniticacao, int? quantidadeDocumentos)
@@ -44,7 +44,7 @@
         public string? CpfCliente { get; set; }
         public string? NomeCliente { get; set; }
         public int? QuantidadeDivergente { get; set; }
-        public string? DivergenciaQualificacao { get; set; }
+        public bool DivergenciaQualificacao { get; set; }
         public string? ObservacaoDivergencia { get; set; }
         public int? RetiradaAmostra { get; set; }
         public int? Embalagem { get; set; }
@@ -61,7 +61,7 @@
         public int? QuantidadeDocumentos { get; set; }
 
         public static ConferenciaFisicaCommand New(int? id, int? tipo, string? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, string? nomeConferente, 
-                                                   string? cpfCliente, string? nomeCliente, int? qtdeDivergente, string? divergenciaQualificacao, 
+                                                   string? cpfCliente, string? nomeCliente, int? qtdeDivergente, bool divergenciaQualificacao, 
                                                    string? observacaoDivergencia, int? retiradaAmostra, int? embalagem, bool? conferenciaRemota, string    ? operacao, 
                                                    int? qtdeVolumesDivergentes, int? qtdeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 
                                                    int? movimentacao, int? desuniticacao, int? quantidadeDocumentos)

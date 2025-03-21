@@ -278,6 +278,10 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             parameters.Add("@Uno3", item.UNO3);
             parameters.Add("@Uno4", item.UNO4);
             parameters.Add("@Uno5", item.UNO5);
+            parameters.Add("@Observacao", item.Observacao);
+            parameters.Add("@Fragil", item.Fragil);
+            parameters.Add("@Madeira", item.Madeira);
+            parameters.Add("@Remonte", item.Remonte);
 
             var ret = await connection.ExecuteAsync(query, parameters);
             if (ret > 0)
