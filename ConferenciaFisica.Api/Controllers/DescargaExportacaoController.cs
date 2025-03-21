@@ -11,9 +11,9 @@ namespace ConferenciaFisica.Api.Controllers
     public class DescargaExportacaoController : ControllerBase
     {
         private readonly IDescargaExportacaoUseCase _descargaExportacaoUseCase;
-        private readonly IProcessoUseCase _processoUseCase;
+        private readonly ITipoFotoUseCase _processoUseCase;
 
-        public DescargaExportacaoController(IDescargaExportacaoUseCase descargaExportacaoUseCase, IProcessoUseCase imagensUseCaseUseCase)
+        public DescargaExportacaoController(IDescargaExportacaoUseCase descargaExportacaoUseCase, ITipoFotoUseCase imagensUseCaseUseCase)
         {
             _descargaExportacaoUseCase = descargaExportacaoUseCase;
             _processoUseCase = imagensUseCaseUseCase;
@@ -67,9 +67,9 @@ namespace ConferenciaFisica.Api.Controllers
         }
 
         [HttpPost("tipos-processos")]
-        public async Task<IActionResult> CreateTipoProcesso([FromBody]TipoProcessoViewModel input)
+        public async Task<IActionResult> CreateTipoProcesso([FromBody]TipoFotoViewModel input)
         {
-            var result = await _processoUseCase.CreateTipoProcesso(input);
+            var result = await _processoUseCase.CreateTipoFoto(input);
 
             if (!result.Status)
                 return BadRequest(result.Mensagens);
@@ -80,7 +80,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpDelete("tipos-processos")]
         public async Task<IActionResult> DeleteTipoProcesso(int id)
         {
-            var result = await _processoUseCase.DeleteTipoProcesso(id);
+            var result = await _processoUseCase.DeleteTipoFoto(id);
 
             if (!result.Status)
                 return BadRequest(result.Mensagens);
@@ -91,7 +91,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpGet("tipos-processos")]
         public async Task<IActionResult> GetImageTypes()
         {
-            var result = await _processoUseCase.ListTipoProcesso();
+            var result = await _processoUseCase.GetAllTipoFoto();
 
             if (!result.Status)
                 return NotFound(result.Mensagens);
@@ -124,9 +124,9 @@ namespace ConferenciaFisica.Api.Controllers
         }
 
         [HttpPut("processo")]
-        public async Task<IActionResult> AtualizarProcesso([FromBody] UpdateProcessoViewModel input)
+        public async Task<IActionResult> AtualizarProcesso([FromBody] UpdateTipoFotoViewModel input)
         {
-            var result = await _processoUseCase.UpdateProcesso(input);
+            var result = await _processoUseCase.UpdateTipoFoto(input);
 
             if (!result.Status)
                 return BadRequest(result);

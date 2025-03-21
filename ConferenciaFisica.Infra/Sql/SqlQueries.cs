@@ -514,7 +514,42 @@
 	                                           WHERE AUTONUM_REG = @idRegistro";
 
 
-        public const string ListarTiposProcesso = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_PROCESSO;";
+        public const string ListarTiposFoto = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_FOTO;";
+
+        public const string ListarTiposProcesso = @"SELECT ID as Id, Descricao FROM REDEX.dbo.TB_TIPOS_PROCESSO;";
+
+        public const string ListarTiposProcessoFoto = @"SELECT * FROM REDEX.dbo.TB_PROCESSO_FOTO;";
+
+        public const string GetTiposProcessoById = @"SELECT ID as Id, Descricao FROM REDEX.dbo.TB_TIPOS_PROCESSO  WHERE ID = @Id; ";
+
+        public const string GetTiposProcessoFotoById = @"SELECT ID as Id, * FROM REDEX.dbo.TB_PROCESSO_FOTO  WHERE ID = @Id; ";
+
+        public const string GetTiposProcessoFotoByProcessoId = @"SELECT 
+                                                                    PF.ID AS Id,
+                                                                    TF.ID AS TipoFotoID,          
+                                                                    TF.Descricao,
+                                                                    PF.TipoProcessoID,
+                                                                    PF.Ativo
+                                                                FROM 
+                                                                    REDEX.dbo.TB_PROCESSO_FOTO PF
+                                                                INNER JOIN 
+                                                                    REDEX.dbo.TB_TIPOS_FOTO TF ON PF.TipoFotoID = TF.ID
+                                                                INNER JOIN 
+                                                                    REDEX.dbo.TB_TIPOS_PROCESSO TP ON PF.TipoProcessoID = TP.ID 
+                                                                WHERE 
+                                                                    TP.Descricao = @ProcessDescription
+                                                                    AND PF.Ativo = 1; ";
+
+        public const string UpdateTiposProcesso = @"UPDATE REDEX.dbo.TB_TIPOS_PROCESSO 
+                                                                        SET Descricao = @Descricao
+                                                                      WHERE ID = @Id;";
+
+        public const string UpdateTiposProcessoFoto = @"UPDATE REDEX.dbo.TB_PROCESSO_FOTO 
+                                                                        SET Ativo = @Ativo,
+                                                                             TipoProcessoID = @TipoProcessoID,
+                                                                             TipoFotoID = @TipoFotoID
+                                                                      WHERE ID = @Id;";
+
         public const string ListarProcessosPorTalie = @"SELECT 
                                                             FP.ID AS Id, 
                                                             FP.ID_TIPO_PROCESSO AS IdTipoProcesso, 
@@ -526,26 +561,52 @@
                                                         FROM 
                                                             REDEX.dbo.TB_FOTO_PROCESSO FP
                                                         JOIN 
-                                                            REDEX.dbo.TB_TIPOS_PROCESSO TP ON FP.ID_TIPO_PROCESSO = TP.ID
+                                                            REDEX.dbo.TB_TIPOS_FOTO TP ON FP.ID_TIPO_FOTO = TP.ID
                                                         WHERE 
                                                             FP.ID_TALIE = @talieId;";
 
         public const string InsertTipoProcesso = @"INSERT INTO
-                                                        	REDEX.dbo.TB_TIPOS_PROCESSO (Codigo, Descricao)
+                                                        	REDEX.dbo.TB_TIPOS_FOTO (Codigo, Descricao)
                                                         VALUES (
                                                         	@Codigo,
                                                             @Descricao
                                                         )";
 
+        public const string InsertTiposProcesso = @"INSERT INTO
+                                                        	REDEX.dbo.TB_TIPOS_PROCESSO (Descricao)
+                                                        VALUES (
+                                                            @Descricao
+                                                        )";
+
+        public const string InsertTiposProcessoFoto = @"INSERT INTO
+                                                        	REDEX.dbo.TB_PROCESSO_FOTO (TipoProcessoID, TipoFotoID, Ativo)
+                                                        VALUES (
+                                                            @TipoProcessoID,
+                                                            @TipoFotoID,
+                                                            @Ativo
+                                                        )";
+
+        public const string DeleteTipoFoto = @"DELETE FROM REDEX.dbo.TB_TIPOS_FOTO WHERE ID = @id";
         public const string DeleteTipoProcesso = @"DELETE FROM REDEX.dbo.TB_TIPOS_PROCESSO WHERE ID = @id";
+        public const string DeleteTipoProcessoFoto = @"DELETE FROM REDEX.dbo.TB_PROCESSO_FOTO WHERE ID = @id";
 
         public const string DeleteProcesso = @"DELETE FROM REDEX.dbo.TB_FOTO_PROCESSO WHERE ID = @id";
 
         public const string InsertProcesso = @"INSERT INTO
-                                                        	REDEX.dbo.TB_FOTO_PROCESSO (ID_TIPO_PROCESSO,ID_TALIE, IMAGEM_PATH, DESCRICAO, OBSERVACAO)
+                                                        	REDEX.dbo.TB_FOTO_PROCESSO (
+                                                                ID_TIPO_FOTO,        
+                                                                ID_TIPO_PROCESSO,    
+                                                                ID_TALIE,            
+                                                                ID_CONTAINER,        
+                                                                IMAGEM_PATH,         
+                                                                DESCRICAO,           
+                                                                OBSERVACAO           
+                                                            )
                                                         VALUES (
-                                                        	@IdTipoProcesso,
+                                                        	@IdTipoFoto,
+                                                        	@IdProcesso,
                                                         	@IdTalie,
+                                                        	@IdContainer,
                                                         	@ImagemPath,
                                                         	@Descricao,
                                                         	@Observacao
@@ -553,6 +614,10 @@
 
         public const string UpdatesProcessoDescricaoAndObservacao = @"UPDATE REDEX.dbo.TB_FOTO_PROCESSO 
                                                                         SET DESCRICAO = @Descricao, OBSERVACAO = @Observacao
+                                                                      WHERE ID = @Id;";
+
+        public const string UpdatesTipoFoto = @"UPDATE REDEX.dbo.TB_TIPOS_FOTO 
+                                                                        SET Codigo = @Codigo, Descricao = @Descricao
                                                                       WHERE ID = @Id;";
 
         public const string CarregarMarcantesTalieItem = @"SELECT tmr.AUTONUM as Id,

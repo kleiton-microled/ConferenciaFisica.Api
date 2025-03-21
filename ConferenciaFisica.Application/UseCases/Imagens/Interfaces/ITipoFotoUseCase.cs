@@ -5,14 +5,16 @@ using ConferenciaFisica.Domain.Entities;
 namespace ConferenciaFisica.Application.UseCases.Imagens.Interfaces
 {
     
-    public interface IProcessoUseCase
+    public interface ITipoFotoUseCase
     {
-        Task<ServiceResult<IEnumerable<TipoProcesso>>> ListTipoProcesso();
-        Task<ServiceResult<bool>> CreateTipoProcesso(TipoProcessoViewModel input);
-        Task<ServiceResult<bool>> DeleteTipoProcesso(int id);
+        Task<ServiceResult<IEnumerable<TipoFotoModel>>> GetAllTipoFoto();
+        Task<ServiceResult<bool>> CreateTipoFoto(TipoFotoViewModel input);
+        Task<ServiceResult<bool>> UpdateTiposFoto(UpdateTiposFotoViewModel input);
+        Task<ServiceResult<bool>> UpdateTipoFoto(UpdateTipoFotoViewModel input);
+        Task<ServiceResult<bool>> DeleteTipoFoto(int id);
 
         Task<ServiceResult<bool>> InsertProcesso(ProcessoViewModel input);
-        Task<ServiceResult<bool>> UpdateProcesso(UpdateProcessoViewModel input);
+        
         Task<ServiceResult<bool>> DeleteProcesso(int id);
 
         Task<ServiceResult<IEnumerable<ProcessoViewModel>>> GetImagemByTalieId(int registroId);

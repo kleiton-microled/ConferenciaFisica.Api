@@ -1,6 +1,6 @@
-﻿namespace ConferenciaFisica.Domain.Entities
+﻿namespace ConferenciaFisica.Contracts.DTOs
 {
-    public class TipoProcesso
+    public class EnumValueDTO
     {
         public int Id { get; set; }
         public int Codigo { get; set; }

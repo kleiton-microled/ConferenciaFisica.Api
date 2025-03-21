@@ -36,7 +36,7 @@ namespace ConferenciaFisica.Infra.Repositories
             }
         }
 
-        public async Task<bool> CreateTipoProcesso(TipoProcesso input)
+        public async Task<bool> CreateTipoFoto(TipoFotoModel input)
         {
             try
             {
@@ -72,13 +72,13 @@ namespace ConferenciaFisica.Infra.Repositories
             }
         }
 
-        public async Task<bool> DeleteTipoProcesso(int id)
+        public async Task<bool> DeleteTipoFoto(int id)
         {
             try
             {
                 using var connection = _connectionFactory.CreateConnection();
 
-                var query = SqlQueries.DeleteTipoProcesso;
+                var query = SqlQueries.DeleteTipoFoto;
 
                 var result = await connection.ExecuteAsync(query, new { id = id });
 
@@ -90,14 +90,14 @@ namespace ConferenciaFisica.Infra.Repositories
             }
         }
 
-        public async Task<IEnumerable<TipoProcesso>> GetImagesTypes()
+        public async Task<IEnumerable<TipoFotoModel>> GetImagesTypes()
         {
             try
             {
                 using var connection = _connectionFactory.CreateConnection();
 
-                var sql = SqlQueries.ListarTiposProcesso;
-                return await connection.QueryAsync<TipoProcesso>(sql);
+                var sql = SqlQueries.ListarTiposFoto;
+                return await connection.QueryAsync<TipoFotoModel>(sql);
             }
             catch (Exception)
             {
@@ -129,6 +129,24 @@ namespace ConferenciaFisica.Infra.Repositories
                 using var connection = _connectionFactory.CreateConnection();
 
                 var sql = SqlQueries.UpdatesProcessoDescricaoAndObservacao;
+
+                var result = await connection.ExecuteAsync(sql, input);
+
+                return result > 0;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateTipoFoto(TipoFotoModel input)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var sql = SqlQueries.UpdatesTipoFoto;
 
                 var result = await connection.ExecuteAsync(sql, input);
 

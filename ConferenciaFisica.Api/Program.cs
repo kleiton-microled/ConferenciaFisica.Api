@@ -15,6 +15,8 @@ using ConferenciaFisica.Application.UseCases.Imagens;
 using ConferenciaFisica.Application.UseCases.Imagens.Interfaces;
 using ConferenciaFisica.Application.UseCases.Lacres;
 using ConferenciaFisica.Application.UseCases.Lacres.Interfaces;
+using ConferenciaFisica.Application.UseCases.Utils;
+using ConferenciaFisica.Application.UseCases.Utils.Interfaces;
 using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory;
 using ConferenciaFisica.Infra.Data;
@@ -75,8 +77,12 @@ builder.Services.AddScoped<IEmbalagensRepository, EmbalagensRepository>();
 //Descarga Exportacao
 builder.Services.AddScoped<IDescargaExportacaoUseCase, DescargaExportacaoUseCase>();
 builder.Services.AddScoped<IDescargaExportacaoRepository, DescargaExportacaoRepository>();
-builder.Services.AddScoped<IProcessoUseCase, ProcessoUseCase>();
+builder.Services.AddScoped<ITipoFotoUseCase, ProcessoUseCase>();
 builder.Services.AddScoped<IImagemRepository, ImagemRepository>();
+builder.Services.AddScoped<ITiposProcessoRepository, TipoProcessoRepository>();
+builder.Services.AddScoped<ITiposProcessosUseCase, TiposProcessosUseCase>();
+builder.Services.AddScoped<ITipoProcessoFotoUtilUseCase, TipoProcessoFotoUtilUseCase>();
+builder.Services.AddScoped<ITiposProcessoFotoRepository, TiposProcessoFotoRepository>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 

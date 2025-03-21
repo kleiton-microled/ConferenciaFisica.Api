@@ -31,6 +31,11 @@ namespace ConferenciaFisica.Application.Mapping
             CreateMap<MarcantesViewModel, Marcante>();
             CreateMap<Marcante, MarcantesViewModel>();
 
+            CreateMap<TipoProcessoModel, TipoProcessoViewModel>();
+            CreateMap<TipoProcessoViewModel, TipoProcessoModel>();
+
+            CreateMap<TipoProcessoFotoViewModel, TipoProcessoFotoModel>();
+            CreateMap<TipoProcessoFotoModel, TipoProcessoFotoViewModel>();
         }
     }
 }

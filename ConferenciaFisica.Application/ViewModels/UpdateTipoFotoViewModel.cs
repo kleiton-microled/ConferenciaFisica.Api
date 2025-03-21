@@ -1,6 +1,6 @@
 ﻿namespace ConferenciaFisica.Application.ViewModels
 {
-    public class UpdateProcessoViewModel
+    public class UpdateTipoFotoViewModel
     {
         public int? Id { get; set; }
         public string? Descricao { get; set; }

@@ -7,7 +7,7 @@ using ConferenciaFisica.Domain.Repositories;
 
 namespace ConferenciaFisica.Application.UseCases.Imagens
 {
-    public class ProcessoUseCase : IProcessoUseCase
+    public class ProcessoUseCase : ITipoFotoUseCase
     {
         private IImagemRepository _imagemRepository;
 
@@ -16,19 +16,19 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             _imagemRepository = imagemRepository;
         }
 
-        public async Task<ServiceResult<bool>> CreateTipoProcesso(TipoProcessoViewModel input)
+        public async Task<ServiceResult<bool>> CreateTipoFoto(TipoFotoViewModel input)
         {
             var result = new ServiceResult<bool>();
 
             try
             {
-                var modelCreate = new TipoProcesso()
+                var modelCreate = new TipoFotoModel()
                 {
                     Codigo = input.Codigo,
                     Descricao = input.Descricao
                 };
 
-                var tipoProcesso = await _imagemRepository.CreateTipoProcesso(modelCreate);
+                var tipoProcesso = await _imagemRepository.CreateTipoFoto(modelCreate);
 
                 return ServiceResult<bool>.Success(tipoProcesso);
             }
@@ -41,13 +41,13 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
 
         }
 
-        public async Task<ServiceResult<bool>> DeleteTipoProcesso(int id)
+        public async Task<ServiceResult<bool>> DeleteTipoFoto(int id)
         {
             var result = new ServiceResult<bool>();
 
             try
             {
-                var tipoProcesso = await _imagemRepository.DeleteTipoProcesso(id);
+                var tipoProcesso = await _imagemRepository.DeleteTipoFoto(id);
 
                 return ServiceResult<bool>.Success(tipoProcesso);
             }
@@ -96,7 +96,9 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
                 var pathArquivo = await SalvarArquivo(input);
                 var command = new ProcessoCommand()
                 {
-                    IdTipoProcesso = input.Type,
+                    IdTipoFoto = input.IdTipoFoto,
+                    IdProcesso = input.IdTipoProcesso,
+                    IdContainer = input.ContainerId,
                     ImagemPath = pathArquivo,
                     Descricao = input.Descricao,
                     Observacao = input.Observacao,
@@ -133,15 +135,15 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             return $"fotos-processos/{processoViewModel.TalieId.ToString()}/{nomeArquivo}";
         }
 
-        public async Task<ServiceResult<IEnumerable<TipoProcesso>>> ListTipoProcesso()
+        public async Task<ServiceResult<IEnumerable<TipoFotoModel>>> GetAllTipoFoto()
         {
-            var result = new ServiceResult<IEnumerable<TipoProcesso>>();
+            var result = new ServiceResult<IEnumerable<TipoFotoModel>>();
 
             try
             {
                 var tiposImagens = await _imagemRepository.GetImagesTypes();
 
-                return ServiceResult<IEnumerable<TipoProcesso>>.Success(tiposImagens);
+                return ServiceResult<IEnumerable<TipoFotoModel>>.Success(tiposImagens);
             }
             catch (Exception exception)
             {
@@ -151,8 +153,7 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             return result;
         }
 
-
-        public async Task<ServiceResult<bool>> UpdateProcesso(UpdateProcessoViewModel input)
+        public async Task<ServiceResult<bool>> UpdateTipoFoto(UpdateTipoFotoViewModel input)
         {
             var result = new ServiceResult<bool>();
 
@@ -167,7 +168,7 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
 
                 var resultUpdate = await _imagemRepository.UpdateProcesso(command);
 
-                return resultUpdate? ServiceResult<bool>.Success(resultUpdate) : ServiceResult<bool>.Failure("Falha ao atualizars");
+                return resultUpdate ? ServiceResult<bool>.Success(resultUpdate) : ServiceResult<bool>.Failure("Falha ao atualizars");
             }
             catch (Exception exception)
             {
@@ -176,6 +177,31 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
 
             return result;
         }
+
+        //public async Task<ServiceResult<bool>> UpdateTipoFoto(UpdateTipoFotoViewModel input)
+        //{
+        //    var result = new ServiceResult<bool>();
+
+        //    try
+        //    {
+        //        var command = new ProcessoCommand()
+        //        {
+        //            Id = input.Id,
+        //            Descricao = input.Descricao,
+        //            Observacao = input.Observacao,
+        //        };
+
+        //        var resultUpdate = await _imagemRepository.UpdateProcesso(command);
+
+        //        return resultUpdate? ServiceResult<bool>.Success(resultUpdate) : ServiceResult<bool>.Failure("Falha ao atualizars");
+        //    }
+        //    catch (Exception exception)
+        //    {
+        //        result.Error = exception.Message;
+        //    }
+
+        //    return result;
+        //}
 
         public async Task<ServiceResult<bool>> DeleteProcesso(int id)
         {
@@ -193,6 +219,27 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             }
 
             return result;
+        }
+
+        public async Task<ServiceResult<bool>> UpdateTiposFoto(UpdateTiposFotoViewModel input)
+        {
+            try
+            {
+                var command = new TipoFotoModel
+                {
+                    Id = input.Id,
+                    Descricao = input.Descricao,
+                    Codigo = input.Codigo,
+                };
+
+                var resultUpdate = await _imagemRepository.UpdateTipoFoto(command);
+
+                return resultUpdate ? ServiceResult<bool>.Success(resultUpdate) : ServiceResult<bool>.Failure("Falha ao atualizars");
+            }
+            catch (Exception exception)
+            {
+                return ServiceResult<bool>.Failure($"Falha ao atualizars, {exception.Message}");
+            }
         }
     }
 }
