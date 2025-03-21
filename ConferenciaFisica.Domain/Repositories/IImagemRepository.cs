@@ -15,5 +15,6 @@ namespace ConferenciaFisica.Domain.Repositories
         Task<bool> DeleteProcesso(int id);
         
         Task<IEnumerable<Processo>> ListProcessoByTalieId(int id);
+        Task<IEnumerable<Processo>> ListProcessoByContainer(string container);
     }
 }

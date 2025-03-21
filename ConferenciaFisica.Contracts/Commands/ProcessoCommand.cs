@@ -13,6 +13,6 @@
 
         public string? Observacao { get; set; }
         public int? IdTalie { get; set; }
-        public int? IdContainer { get; set; }
+        public string? IdContainer { get; set; }
     }
 }

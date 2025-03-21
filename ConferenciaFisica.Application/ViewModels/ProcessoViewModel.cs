@@ -6,7 +6,7 @@
         public int IdTipoFoto { get; set; }
         public int IdTipoProcesso { get; set; }
         public int? TalieId { get; set; }
-        public int? ContainerId { get; set; }
+        public string? ContainerId { get; set; }
         public string? ImagemPath { get; set; }
         public string Descricao { get; set; }
         public string Observacao { get; set; }

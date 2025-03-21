@@ -148,6 +148,18 @@ namespace ConferenciaFisica.Api.Controllers
 
         }
 
+        [HttpGet("processo-container/{container}")]
+        public async Task<IActionResult> ListarProcessosByContainer(string container)
+        {
+            var result = await _processoUseCase.GetImagemByContainer(container);
+
+            if (!result.Status)
+                return NotFound(result.Mensagens);
+
+            return Ok(result);
+
+        }
+
         [HttpPost("gravar-observacao")]
         public async Task<IActionResult> GravarObservacao(string observacao, int talieId)
         {

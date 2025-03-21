@@ -3,6 +3,7 @@ using ConferenciaFisica.Application.UseCases.Imagens.Interfaces;
 using ConferenciaFisica.Application.ViewModels;
 using ConferenciaFisica.Contracts.Commands;
 using ConferenciaFisica.Domain.Entities;
+using ConferenciaFisica.Domain.Entities.DescargaExportacao;
 using ConferenciaFisica.Domain.Repositories;
 
 namespace ConferenciaFisica.Application.UseCases.Imagens
@@ -178,31 +179,6 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             return result;
         }
 
-        //public async Task<ServiceResult<bool>> UpdateTipoFoto(UpdateTipoFotoViewModel input)
-        //{
-        //    var result = new ServiceResult<bool>();
-
-        //    try
-        //    {
-        //        var command = new ProcessoCommand()
-        //        {
-        //            Id = input.Id,
-        //            Descricao = input.Descricao,
-        //            Observacao = input.Observacao,
-        //        };
-
-        //        var resultUpdate = await _imagemRepository.UpdateProcesso(command);
-
-        //        return resultUpdate? ServiceResult<bool>.Success(resultUpdate) : ServiceResult<bool>.Failure("Falha ao atualizars");
-        //    }
-        //    catch (Exception exception)
-        //    {
-        //        result.Error = exception.Message;
-        //    }
-
-        //    return result;
-        //}
-
         public async Task<ServiceResult<bool>> DeleteProcesso(int id)
         {
             var result = new ServiceResult<bool>();
@@ -240,6 +216,35 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             {
                 return ServiceResult<bool>.Failure($"Falha ao atualizars, {exception.Message}");
             }
+        }
+
+        public async Task<ServiceResult<IEnumerable<ProcessoViewModel>>> GetImagemByContainer(string container)
+        {
+            var result = new ServiceResult<IEnumerable<ProcessoViewModel>>();
+
+            try
+            {
+                var tipoProcesso = await _imagemRepository.ListProcessoByContainer(container);
+
+                return ServiceResult<IEnumerable<ProcessoViewModel>>.Success(tipoProcesso.Select(x => new ProcessoViewModel()
+                {
+                    TalieId = x.IdTalie,
+                    Descricao = x.Descricao,
+                    Observacao = x.Observacao,
+                    Type = x.IdTipoProcesso,
+                    TypeDescription = x.DescricaoTipoProcesso,
+                    ImagemPath = x.ImagemPath,
+                    Id = x.Id,
+                    ContainerId = x.IdContainer
+
+                }));
+            }
+            catch (Exception exception)
+            {
+                result.Error = exception.Message;
+            }
+
+            return result;
         }
     }
 }

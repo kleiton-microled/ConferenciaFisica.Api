@@ -105,6 +105,23 @@ namespace ConferenciaFisica.Infra.Repositories
             }
         }
 
+        public async Task<IEnumerable<Processo>> ListProcessoByContainer(string container)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var sql = SqlQueries.ListarProcessosPorContainer;
+
+                return await connection.QueryAsync<Processo>(sql, new { container = container });
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<Processo>> ListProcessoByTalieId(int id)
         {
             try

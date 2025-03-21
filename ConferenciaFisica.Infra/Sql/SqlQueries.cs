@@ -643,6 +643,22 @@
                                                         WHERE 
                                                             FP.ID_TALIE = @talieId;";
 
+        public const string ListarProcessosPorContainer = @"SELECT 
+                                                            FP.ID AS Id, 
+                                                            FP.ID_TIPO_PROCESSO AS IdTipoProcesso, 
+                                                            FP.ID_TALIE AS IdTalie,
+                                                            FP.IMAGEM_PATH AS ImagemPath,
+                                                            FP.OBSERVACAO AS Observacao,
+                                                            FP.DESCRICAO AS Descricao,
+                                                            FP.ID_CONTAINER AS IdContainer,
+                                                            TP.Descricao AS DescricaoTipoProcesso
+                                                        FROM 
+                                                            REDEX.dbo.TB_FOTO_PROCESSO FP
+                                                        JOIN 
+                                                            REDEX.dbo.TB_TIPOS_FOTO TP ON FP.ID_TIPO_FOTO = TP.ID
+                                                        WHERE 
+                                                            FP.ID_CONTAINER = @container;";
+
         public const string InsertTipoProcesso = @"INSERT INTO
                                                         	REDEX.dbo.TB_TIPOS_FOTO (Codigo, Descricao)
                                                         VALUES (
