@@ -55,5 +55,24 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
 
             return _serviceResult;
         }
+
+        public async Task<ServiceResult<bool>> FinalizarConferencia(int idConferencia)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+
+            var ret = await _conferenciaRepository.FinalizarConferencia(idConferencia);
+
+            if (ret)
+            {
+                _serviceResult.Result = true;
+                _serviceResult.Mensagens.Add("Conferência finalizada com sucesso!");
+            }
+            else
+            {
+                _serviceResult.Result = false;
+            }
+
+            return _serviceResult;
+        }
     }
 }

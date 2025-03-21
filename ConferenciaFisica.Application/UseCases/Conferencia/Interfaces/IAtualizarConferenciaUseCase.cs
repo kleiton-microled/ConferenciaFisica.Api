@@ -6,5 +6,6 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
     public interface IAtualizarConferenciaUseCase
     {
         Task<ServiceResult<bool>> ExecuteAsync(ConferenciaFisicaRequest request);
+        Task<ServiceResult<bool>> FinalizarConferencia(int idConferencia);
     }
 }

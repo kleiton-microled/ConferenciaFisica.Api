@@ -6,7 +6,7 @@ namespace ConferenciaFisica.Application.Commands
     {
         public int Id { get; set; }
 
-        [JsonPropertyName("conteiner")]
+        [JsonPropertyName("cntr")]
         public string? Conteiner { get; set; }
 
         [JsonPropertyName("tipoConferencia")]
@@ -18,7 +18,7 @@ namespace ConferenciaFisica.Application.Commands
         [JsonPropertyName("lote")]
         public string? Bl { get; set; }
 
-        [JsonPropertyName("inicioConferencia")]
+        [JsonPropertyName("inicio")]
         public DateTime Inicio { get; set; }
 
         [JsonPropertyName("fimConferencia")]
@@ -40,7 +40,7 @@ namespace ConferenciaFisica.Application.Commands
         public int? QtdeDivergente { get; set; }
 
         [JsonPropertyName("divergenciaQualificacao")]
-        public string? DivergenciaQualificacao { get; set; }
+        public bool DivergenciaQualificacao { get; set; }
 
         [JsonPropertyName("observacaoDivergencia")]
         public string? ObservacaoDivergencia { get; set; }

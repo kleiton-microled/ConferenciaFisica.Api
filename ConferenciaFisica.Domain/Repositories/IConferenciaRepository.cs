@@ -8,6 +8,7 @@ namespace ConferenciaFisica.Domain.Repositories
     {
         Task<Conferencia> BuscarPorConteinerAsync(string idConteiner);
         Task<Conferencia> BuscarPorLoteAsync(string idLote);
+        Task<Conferencia> BuscarPorPorId(int id);
         Task<Conferencia> BuscarPorReservaAsync(string idLote);
         Task<bool> IniciarConferencia(ConferenciaFisicaCommand command);
         Task<bool> AtualizarConferencia(ConferenciaFisicaCommand command);
@@ -19,12 +20,12 @@ namespace ConferenciaFisica.Domain.Repositories
         Task<bool> CadastroLacreConferencia(LacreConferenciaCommand command);
         Task<bool> AtualizarLacreConferencia(LacreConferenciaCommand command);
         Task<bool> ExcluirLacreConferencia(int id);
-
         //
         Task<IEnumerable<DocumentosConferencia>> CarregarDocumentosConferencia(int idConferencia);
         Task<bool> CadastroDocumentosConferencia(DocumentoConferenciaCommand command);
         Task<bool> AtualizarDocumentosConferencia(DocumentoConferenciaCommand command);
         Task<bool> ExcluirDocumentosConferencia(int id);
+        Task<bool> FinalizarConferencia(int idConferencia);
 
     }
 }

@@ -3,42 +3,113 @@
     public static class SqlQueries
     {
         public const string BuscarConferenciaPorIdContainer = @"SELECT DISTINCT 
-                                                                       CONF.ID AS ID,
-                                                                       CONF.TIPO_CONFERENCIA as Tipo,
-                                                                       CONF.EMBALAGEM,
-                                                                       CONF.BL as Lote,
-                                                                       BL.VIAGEM ,
-                                                                       CONF.CNTR,
-                                                                       CONF.INICIO,
-                                                                       CONF.TERMINO,
-                                                                       CONF.NOME_CLIENTE as NomeCliente,
-                                                                       CONF.CPF_CLIENTE as CpfCliente,
-                                                                       CONF.QTDE_AVARIADA as QuantidadeAvariada,
-                                                                       CONF.OBS_AVARIA as ObservacaoAvaria,
-                                                                       CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
-                                                                       CONF.DIVERGENCIA_QUALIFICACAO as DivergenciaQualificacao,
-                                                                       CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
-                                                                       CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
-                                                                       --LACRES
-                                                                       CONF.CONFREMOTA as ConferenciaRemota,
-                                                                       CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
-                                                                       CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
-                                                                       CONF.QTD_AJUDANTES as QuantidadeAjudantes,
-                                                                       CONF.QTD_OPERADORES as QuantidadeOperadores,
-                                                                       CONF.MOVIMENTACAO as Movimentacao,
-                                                                       CONF.DESUNITIZACAO as Desunitizacao,
-                                                                       --Lacrefechamento
-                                                                       CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
-                                                                       CASE 
-                                                                           WHEN ISNULL(CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
-                                                                           WHEN ISNULL(CONF.CNTR, '') <> '' THEN 'CONTEINER'
-                                                                           ELSE 'REDEX'
-                                                                       END AS TipoCarga
-                                                                   FROM dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
-                                                                   LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.ID_CONTEINER
-                                                                   WHERE BL.ID_CONTEINER = @idConteiner --'AMFU315608-0'
-                                                                   ORDER BY CONF.ID DESC
+                                                                    CONF.ID AS ID,
+                                                                    CONF.TIPO_CONFERENCIA as Tipo,
+                                                                    CONF.EMBALAGEM,
+                                                                    CONF.BL as Lote,
+                                                                    BL.VIAGEM,
+                                                                    CONF.CNTR,
+                                                                    CONF.INICIO,
+                                                                    CONF.TERMINO,
+                                                                    CONF.NOME_CLIENTE as NomeCliente,
+                                                                    CONF.CPF_CLIENTE as CpfCliente,
+                                                                    CONF.QTDE_AVARIADA as QuantidadeAvariada,
+                                                                    CONF.OBS_AVARIA as ObservacaoAvaria,
+                                                                    CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
+                                                                    
+                                                                    -- 🔄 Aqui convertemos 2 -> TRUE e qualquer outro valor -> FALSE
+                                                                    CASE 
+                                                                        WHEN CONF.DIVERGENCIA_QUALIFICACAO = 2 THEN CAST(1 AS BIT)
+                                                                        ELSE CAST(0 AS BIT)
+                                                                    END as DivergenciaQualificacao,
+                                                                
+                                                                    CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
+                                                                    CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
+                                                                    CONF.CONFREMOTA as ConferenciaRemota,
+                                                                    CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
+                                                                    CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
+                                                                    CONF.QTD_AJUDANTES as QuantidadeAjudantes,
+                                                                    CONF.QTD_OPERADORES as QuantidadeOperadores,
+                                                                    CONF.MOVIMENTACAO as Movimentacao,
+                                                                    CONF.DESUNITIZACAO as Desunitizacao,
+                                                                    CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
+                                                                
+                                                                    CASE 
+                                                                        WHEN ISNULL(CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
+                                                                        WHEN ISNULL(CONF.CNTR, '') <> '' THEN 'CONTEINER'
+                                                                        ELSE 'REDEX'
+                                                                    END AS TipoCarga
+                                                                
+                                                                FROM dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
+                                                                LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.ID_CONTEINER
+                                                                WHERE BL.ID_CONTEINER = @idConteiner
+                                                                ORDER BY CONF.ID DESC;
+
                                                                   ";
+        public const string BuscarConferenciaPorId = @"SELECT
+                                                        	DISTINCT 
+                                                            CONF.ID AS ID,
+                                                        	CONF.TIPO_CONFERENCIA as Tipo,
+                                                        	CONF.EMBALAGEM,
+                                                        	CONF.BL as Lote,
+                                                        	BL.VIAGEM,
+                                                        	CONF.CNTR,
+                                                        	CONF.INICIO,
+                                                        	CONF.TERMINO,
+                                                        	CONF.NOME_CLIENTE as NomeCliente,
+                                                        	CONF.CPF_CLIENTE as CpfCliente,
+                                                        	CONF.QTDE_AVARIADA as QuantidadeAvariada,
+                                                        	CONF.OBS_AVARIA as ObservacaoAvaria,
+                                                        	CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
+                                                        	-- 🔄 Aqui convertemos 2 -> TRUE e qualquer outro valor -> FALSE
+                                                                                                                            CASE
+                                                        		WHEN CONF.DIVERGENCIA_QUALIFICACAO = 2 THEN CAST(1 AS BIT)
+                                                        		ELSE CAST(0 AS BIT)
+                                                        	END as DivergenciaQualificacao,
+                                                        	CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
+                                                        	CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
+                                                        	CONF.CONFREMOTA as ConferenciaRemota,
+                                                        	CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
+                                                        	CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
+                                                        	CONF.QTD_AJUDANTES as QuantidadeAjudantes,
+                                                        	CONF.QTD_OPERADORES as QuantidadeOperadores,
+                                                        	CONF.MOVIMENTACAO as Movimentacao,
+                                                        	CONF.DESUNITIZACAO as Desunitizacao,
+                                                        	CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
+                                                        	CASE
+                                                        		WHEN ISNULL(CONF.BL,
+                                                        		0) <> 0 THEN 'CARGA SOLTA'
+                                                        		WHEN ISNULL(CONF.CNTR,
+                                                        		'') <> '' THEN 'CONTEINER'
+                                                        		ELSE 'REDEX'
+                                                        	END AS TipoCarga
+                                                        FROM
+                                                        	dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
+                                                        LEFT JOIN dbo.TB_CNTR_BL BL ON
+                                                        	CONF.CNTR = BL.ID_CONTEINER
+                                                        WHERE
+                                                        	CONF.ID = @id";
+        public const string BUscarConferenciaPorLote = @"SELECT 
+                                                            tecf.Id AS Id, 
+                                                            tecf.BL AS NumeroBl, 
+                                                            tecf.CNTR AS NumeroCntr, 
+                                                            tecf.INICIO, 
+                                                            tecf.TERMINO, 
+                                                            tecf.NOME_CLIENTE, 
+                                                            tecf.CPF_CLIENTE, 
+                                                            tecf.QTDE_AVARIADA, 
+                                                            tecf.OBS_AVARIA,
+                                                            tecf.DIVERGENCIA_QTDE AS DivergenciaQuantidade, 
+                                                            tecf.DIVERGENCIA_QUALIFICACAO, 
+                                                            tecf.OBS_DIVERGENCIA, 
+                                                            tecf.RETIRADA_AMOSTRA, 
+                                                            CASE 
+                                                                WHEN ISNULL(tecf.BL, 0) <> 0 THEN 'CARGA SOLTA'
+                                                                WHEN ISNULL(tecf.CNTR, 0) <> 0 THEN 'CONTEINER'
+                                                                ELSE 'REDEX'
+                                                            END AS TipoCarga
+                                                        FROM SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA tecf 
+                                                        WHERE tecf.BL = @idLote";
         public const string BuscarConferenciaPorAgendamento = @"SELECT DISTINCT 
                                                                      '' AS NumeroBl,
                                                                      --C.AUTONUM AS CNTR,
@@ -157,11 +228,11 @@
                                                         VALUES (
                                                         	@Cntr,
                                                             @Bl,@Inicio,@CpfConferente,@NomeConferente,@CpfCliente,
-                                                        	@NomeCliente, @QtdeDivergente,@DivergenciaQualificacao,@ObservacaoDivergencia,
+                                                        	@NomeCliente, @QuantidadeDivergente,@DivergenciaQualificacao,@ObservacaoDivergencia,
                                                         	@RetiradaAmostra,
                                                             @ConferenciaRemota,'I','C',
                                                             @QtdeVolumesDivergentes,
-                                                            @QtdeRepresentantes,
+                                                            @QuantidadeRepresentantes,
                                                         	@QuantidadeAjudantes,
                                                             @QuantidadeOperadores,
                                                             @Movimentacao,@Desunitizacao,@QuantidadeDocumentos
@@ -269,6 +340,7 @@
                                                      	      dte.CODE as Codigo,
                                                      	      dte.DESCR as Descricao
                                                       FROM DTE_TB_EMBALAGENS dte";
+        public const string FinalizarConferencia = @"UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET TERMINO = GETDATE() WHERE ID = @idConferencia";
 
         #region DESCARGA_EXPORTACAO
         public const string CarregarRegistro = @"SELECT
