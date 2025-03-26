@@ -443,7 +443,9 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 param.Add("talieId", command.TalieId);
                 param.Add("talieItemId", command.TalieItemId);
                 param.Add("idRegistro", command.Registro);
-                param.Add("id", command.Marcante);
+                param.Add("codigoMarcante", command.Marcante);
+                param.Add("quantidade", command.Quantidade);
+                param.Add("local", command.Local);
 
                 var ret = await connection.ExecuteAsync(query, param);
                 if (ret > 0)

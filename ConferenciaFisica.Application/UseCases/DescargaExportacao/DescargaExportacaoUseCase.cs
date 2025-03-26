@@ -348,7 +348,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 TalieItemId = input.TalieItemId,
                 Marcante = input.Marcante,
                 Quantidade = input.Quantidade,
-                Armazem = input.Armazen,
+                Armazem = input.Armazem,
                 Local = input.Local
             };
             var result = await _repository.GravarMarcante(command);

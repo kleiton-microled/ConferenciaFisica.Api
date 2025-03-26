@@ -588,8 +588,9 @@
 	                                           	ARMAZEM = @armazem, 
 	                                           	--PLACA_C = @placa,
 	                                           	AUTONUM_TALIE = @talieId,
-	                                           	AUTONUM_TI = @talieItemId
-	                                           WHERE AUTONUM_REG = @idRegistro";
+	                                           	AUTONUM_TI = @talieItemId,
+                                                VOLUMES = @quantidade
+	                                           WHERE AUTONUM_REG = @idRegistro AND STR_CODE128 = @codigoMarcante";
 
 
         public const string ListarTiposFoto = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_FOTO;";
@@ -721,7 +722,8 @@
 	                                                          tmr.AUTONUM_TALIE as TalieId,
 	                                                          tmr.AUTONUM_TI as TalieItemId,
 	                                                          tmr.STR_CODE128 as Numero,
-	                                                          tmr.AUTONUM_CS_YARD as Local
+	                                                          tmr.AUTONUM_CS_YARD as Local,
+                                                              tmr.ARMAZEM as Armazem
 	                                                       FROM REDEX.dbo.TB_MARCANTES_RDX tmr 
 	                                                       WHERE tmr.AUTONUM_TI = @talieItemId";
         public const string ExcluirMarcanteTalieItem = @"UPDATE REDEX.dbo.TB_MARCANTES_RDX 
