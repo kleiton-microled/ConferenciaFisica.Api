@@ -135,7 +135,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             }
 
             // Obtém a quantidade total permitida
-            var quantidadeTotalPermitida = 20;// _talieBusiness.BuscarQuantidadeTotalDaNotaFiscal(itemAlterado.NotaFiscal);
+            var quantidadeTotalPermitida = request.QuantidadeNf; //_talieBusiness.BuscarQuantidadeTotalDaNotaFiscal(itemAlterado.NotaFiscal);
 
             if (quantidadeTotalPermitida <= 0)
             {

@@ -9,7 +9,7 @@
         public int TalieId { get; set; }
         public int TalieItemId { get; set; }
         public string Numero { get; set; }
-        public int Local { get; set; }
+        public string Local { get; set; }
         public int Armazem { get; set; }
     }
 }

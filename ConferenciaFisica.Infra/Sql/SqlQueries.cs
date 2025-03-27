@@ -189,7 +189,17 @@
 															 INNER JOIN SGIPA.dbo.TB_CNTR_BL C ON A.CNTR = C.AUTONUM
 															 WHERE CONVERT(VARCHAR, DT_PREVISTA, 112) >= CONVERT(VARCHAR, GETDATE(), 112)
 															 AND ID_STATUS_AGENDAMENTO = 0 
-															 AND CNTR IS NOT NULL";
+															 AND CNTR IS NOT NULL 
+                                                             AND PATIO IN @patiosPermitidos";
+        public const string CarregarLotesAgendamentos = @"SELECT 
+                                                             LOTE AS Display, 
+                                                             LOTE AS Autonum
+                                                         FROM TB_AGENDAMENTO_POSICAO A
+                                                         INNER JOIN TB_AGENDA_POSICAO_MOTIVO B ON A.AUTONUM = B.AUTONUM_AGENDA_POSICAO
+                                                          WHERE CONVERT(VARCHAR, DT_PREVISTA, 112) >= CONVERT(VARCHAR, GETDATE(), 112)
+                                                         AND ID_STATUS_AGENDAMENTO = 0 
+                                                         AND LOTE IS NOT NULL
+                                                         AND AUTONUMPATIO IN @patiosPermitidos";
         public const string CarregarConteinerAgendamentoUnion = @"	UNION
 																  SELECT 
 																      ID_CONTEINER AS Display, 
@@ -585,8 +595,8 @@
 
         public const string GravarMarcante = @"UPDATE REDEX.dbo.TB_MARCANTES_RDX 
 	                                           SET DT_ASSOCIACAO = GETDATE(), 
-	                                           	ARMAZEM = @armazem, 
-	                                           	--PLACA_C = @placa,
+	                                           	ARMAZEM = ISNULL(@Armazem, 0),
+	                                           	YARD = @Yard,
 	                                           	AUTONUM_TALIE = @talieId,
 	                                           	AUTONUM_TI = @talieItemId,
                                                 VOLUMES = @quantidade
@@ -722,7 +732,7 @@
 	                                                          tmr.AUTONUM_TALIE as TalieId,
 	                                                          tmr.AUTONUM_TI as TalieItemId,
 	                                                          tmr.STR_CODE128 as Numero,
-	                                                          tmr.AUTONUM_CS_YARD as Local,
+	                                                          tmr.YARD as Local,
                                                               tmr.ARMAZEM as Armazem
 	                                                       FROM REDEX.dbo.TB_MARCANTES_RDX tmr 
 	                                                       WHERE tmr.AUTONUM_TI = @talieItemId";

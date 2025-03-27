@@ -15,29 +15,21 @@ namespace ConferenciaFisica.Infra.Repositories
             _connectionFactory = connectionFactory;
         }
 
-        public async Task<IEnumerable<LoteAgendamentoDto>> CarregarLotesAgendamentoAsync(string filtro)
+        public async Task<IEnumerable<LoteAgendamentoDto>> CarregarLotesAgendamentoAsync(string filtro, List<int> patiosPermitidos)
         {
             using var connection = _connectionFactory.CreateConnection();
 
-            var sql = @"
-                SELECT 
-                    LOTE AS Display, 
-                    LOTE AS Autonum
-                FROM TB_AGENDAMENTO_POSICAO A
-                INNER JOIN TB_AGENDA_POSICAO_MOTIVO B ON A.AUTONUM = B.AUTONUM_AGENDA_POSICAO
-                WHERE CONVERT(VARCHAR, DT_PREVISTA, 103) = CONVERT(VARCHAR, GETDATE(), 103)
-                AND ID_STATUS_AGENDAMENTO = 0 
-                AND LOTE IS NOT NULL";
+            var sql = SqlQueries.CarregarLotesAgendamentos;
 
             if (!string.IsNullOrEmpty(filtro))
             {
                 sql += " AND LOTE = @Filtro";
             }
 
-            return await connection.QueryAsync<LoteAgendamentoDto>(sql, new { Filtro = filtro });
+            return await connection.QueryAsync<LoteAgendamentoDto>(sql, new { Filtro = filtro, patiosPermitidos });
         }
 
-        public async Task<IEnumerable<ConteinerAgendamentoDto>> CarregarCntrAgendamentoAsync(string filtro)
+        public async Task<IEnumerable<ConteinerAgendamentoDto>> CarregarCntrAgendamentoAsync(string filtro, List<int> patiospermitidos)
         {
             using var connection = _connectionFactory.CreateConnection();
 
@@ -55,7 +47,7 @@ namespace ConferenciaFisica.Infra.Repositories
                 sql += " AND ID_CONTEINER = @Filtro";
             }
 
-            return await connection.QueryAsync<ConteinerAgendamentoDto>(sql, new { Filtro = filtro });
+            return await connection.QueryAsync<ConteinerAgendamentoDto>(sql, new { Filtro = filtro, patiospermitidos });
         }
     }
 }

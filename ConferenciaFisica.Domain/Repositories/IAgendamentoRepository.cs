@@ -4,8 +4,8 @@ namespace ConferenciaFisica.Domain.Repositories
 {
     public interface IAgendamentoRepository
     {
-        Task<IEnumerable<LoteAgendamentoDto>> CarregarLotesAgendamentoAsync(string filtro);
-        Task<IEnumerable<ConteinerAgendamentoDto>> CarregarCntrAgendamentoAsync(string filtro);
+        Task<IEnumerable<LoteAgendamentoDto>> CarregarLotesAgendamentoAsync(string filtro, List<int> patiosPermitidos);
+        Task<IEnumerable<ConteinerAgendamentoDto>> CarregarCntrAgendamentoAsync(string filtro, List<int> patiospermitidos);
 
     }
 }

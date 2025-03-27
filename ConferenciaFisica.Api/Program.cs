@@ -1,43 +1,45 @@
 ﻿using ConferenciaFisica.Application.Mapping;
-using ConferenciaFisica.Application.UseCases.Agendamento;
-using ConferenciaFisica.Application.UseCases.Agendamento.Interfaces;
-using ConferenciaFisica.Application.UseCases.Avarias;
-using ConferenciaFisica.Application.UseCases.Avarias.Interface;
-using ConferenciaFisica.Application.UseCases.Conferencia;
-using ConferenciaFisica.Application.UseCases.Conferencia.Interfaces;
-using ConferenciaFisica.Application.UseCases.DescargaExportacao;
-using ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces;
-using ConferenciaFisica.Application.UseCases.Documentos;
-using ConferenciaFisica.Application.UseCases.Documentos.Interfaces;
-using ConferenciaFisica.Application.UseCases.Embalagens;
-using ConferenciaFisica.Application.UseCases.Embalagens.Interfaces;
-using ConferenciaFisica.Application.UseCases.Imagens;
-using ConferenciaFisica.Application.UseCases.Imagens.Interfaces;
-using ConferenciaFisica.Application.UseCases.Lacres;
-using ConferenciaFisica.Application.UseCases.Lacres.Interfaces;
-using ConferenciaFisica.Application.UseCases.Utils;
-using ConferenciaFisica.Application.UseCases.Utils.Interfaces;
-using ConferenciaFisica.Domain.Repositories;
-using ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory;
-using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.HealthChecks;
-using ConferenciaFisica.Infra.Repositories;
-using ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ConferenciaFisica.Infra.Extensions;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
+            )
+        };
+    });
+
 
 // Habilitando CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
-        policy => policy.AllowAnyOrigin() // Libera qualquer origem
-                        .AllowAnyMethod() // Permite qualquer método (GET, POST, PUT, DELETE, etc.)
-                        .AllowAnyHeader()); // Permite qualquer cabeçalho
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .WithExposedHeaders("Authorization"));
 });
+
 
 // Adicionando serviços ao container
 builder.Services.AddControllers()
@@ -49,41 +51,37 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Insira o token JWT assim: Bearer {seu_token}",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
 //builder.Services.AddOpenApi();
-builder.Services.AddSingleton<SqlServerConnectionFactory>();
+builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddScoped<IBuscarConferenciaUseCase, BuscarConferenciaUseCase>();
-builder.Services.AddScoped<IConferenciaRepository, ConferenciaRepository>();
-
-builder.Services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
-builder.Services.AddScoped<ICarregarLotesAgendamentoUseCase, CarregarLotesAgendamentoUseCase>();
-builder.Services.AddScoped<ICarregarCntrAgendamentoUseCase, CarregarCntrAgendamentoUseCase>();
-builder.Services.AddScoped<IIniciarConferenciaUseCase, IniciarConferenciaUseCase>();
-builder.Services.AddScoped<IAtualizarConferenciaUseCase, AtualizarConferenciaUseCase>();
-builder.Services.AddScoped<ICadastrosAdicionaisUseCase, CadastrosAdicionaisUseCase>();
-builder.Services.AddScoped<ITiposLacresUseCase, TiposLacresUseCase>();
-builder.Services.AddScoped<ILacresUseCase, LacresUseCase>();
-builder.Services.AddScoped<IDocumentoConferenciaUseCase, DocumentoConferenciaUseCase>();
-builder.Services.AddScoped<ITiposAvariasUseCase, TiposAvariasUseCase>();
-builder.Services.AddScoped<IAvariasConferenciaUseCase, AvariasConfereciaUseCase>();
-builder.Services.AddScoped<IAvariasRepository, AvariasRepository>();
-
-builder.Services.AddScoped<ITiposDocumentosUseCase, TiposDocumentosUseCase>();
-builder.Services.AddScoped<IEmbalagensUseCase, EmbalagensUseCase>();
-builder.Services.AddScoped<ITiposDocumentosRepository, TiposDocumentosRepository>();
-builder.Services.AddScoped<IEmbalagensRepository, EmbalagensRepository>();
-
-//Descarga Exportacao
-builder.Services.AddScoped<IDescargaExportacaoUseCase, DescargaExportacaoUseCase>();
-builder.Services.AddScoped<IDescargaExportacaoRepository, DescargaExportacaoRepository>();
-builder.Services.AddScoped<ITipoFotoUseCase, ProcessoUseCase>();
-builder.Services.AddScoped<IImagemRepository, ImagemRepository>();
-builder.Services.AddScoped<ITiposProcessoRepository, TipoProcessoRepository>();
-builder.Services.AddScoped<ITiposProcessosUseCase, TiposProcessosUseCase>();
-builder.Services.AddScoped<ITipoProcessoFotoUtilUseCase, TipoProcessoFotoUtilUseCase>();
-builder.Services.AddScoped<ITiposProcessoFotoRepository, TiposProcessoFotoRepository>();
-
+builder.Services.AddExtensionServices();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 
@@ -107,16 +105,19 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseStaticFiles();
 
-
 app.UseRouting();
+app.UseAuthentication(); // 🔐 Primeiro autentica...
+app.UseAuthorization();  // 🔒 Depois autoriza!
 
 // 🔥 Middleware Global de Tratamento de Erros
 app.UseMiddleware<GlobalExceptionMiddleware>();
-app.MapControllers();
 
-// Criando um endpoint para Health Check
 app.UseEndpoints(endpoints =>
 {
+    // Mapeia os controllers
+    endpoints.MapControllers();
+
+    // Health Check
     endpoints.MapHealthChecks("/health", new HealthCheckOptions
     {
         ResponseWriter = async (context, report) =>
@@ -125,14 +126,13 @@ app.UseEndpoints(endpoints =>
             await context.Response.WriteAsync(result);
         }
     });
-});
 
-app.UseEndpoints(endpoints =>
-{
+    // (Opcional) Rota padrão - normalmente usada em MVC tradicional
     endpoints.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
 });
+
 
 app.Run();
 

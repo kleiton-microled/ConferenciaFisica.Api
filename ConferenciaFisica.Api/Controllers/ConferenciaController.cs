@@ -5,7 +5,9 @@ using ConferenciaFisica.Application.UseCases.Conferencia;
 using ConferenciaFisica.Application.UseCases.Conferencia.Interfaces;
 using ConferenciaFisica.Application.UseCases.Documentos.Interfaces;
 using ConferenciaFisica.Application.UseCases.Lacres.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ConferenciaFisica.Api.Controllers
 {
@@ -43,6 +45,16 @@ namespace ConferenciaFisica.Api.Controllers
             _documentosUseCase = documentosUseCase;
         }
 
+        [HttpGet("teste-auth")]
+        [Authorize]
+        public IActionResult Teste()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var roles = User.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+            return Ok(new { userId, roles });
+        }
+
+
         [HttpGet("buscar")]
         public async Task<IActionResult> BuscarConferencia([FromQuery] string cntr = "", [FromQuery] string lote = "")
         {
@@ -65,6 +77,7 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(resultado);
         }
 
+        [Authorize]
         [HttpGet("lotes")]
         public async Task<IActionResult> CarregarLotesAgendamento([FromQuery] string filtro = "")
         {
@@ -76,6 +89,7 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(result);
         }
 
+        [Authorize]
         [HttpGet("conteineres")]
         public async Task<IActionResult> CarregarCntrAgendamento([FromQuery] string filtro = "")
         {

@@ -439,13 +439,12 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 string query = SqlQueries.GravarMarcante;
                 DynamicParameters param = new DynamicParameters();
                 param.Add("armazem", command.Armazem);
-                //param.Add("placa", command.Placa);
+                param.Add("yard", command.Local);
                 param.Add("talieId", command.TalieId);
                 param.Add("talieItemId", command.TalieItemId);
                 param.Add("idRegistro", command.Registro);
                 param.Add("codigoMarcante", command.Marcante);
                 param.Add("quantidade", command.Quantidade);
-                param.Add("local", command.Local);
 
                 var ret = await connection.ExecuteAsync(query, param);
                 if (ret > 0)
