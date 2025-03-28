@@ -238,7 +238,6 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             }
         }
 
-
         public Task<int> AtualizarAvaria(CadastroAvariaCommand command)
         {
             throw new NotImplementedException();
@@ -653,7 +652,6 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             return await connection.ExecuteScalarAsync<int>(sql);
         }
 
-
         public async Task<bool> VerificarEmissaoEtiquetasAsync(int talieId)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
@@ -841,5 +839,14 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             }
         }
 
+        public async Task<IEnumerable<Yard>> BuscarYard(string pesquisa)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            string query = SqlQueries.BuscarYardPorTermo;
+
+            var ret = await connection.QueryAsync<Yard>(query, new { term = $"%{pesquisa}%" });
+
+            return ret;
+        }
     }
 }

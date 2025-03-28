@@ -36,6 +36,9 @@ namespace ConferenciaFisica.Application.Mapping
 
             CreateMap<TipoProcessoFotoViewModel, TipoProcessoFotoModel>();
             CreateMap<TipoProcessoFotoModel, TipoProcessoFotoViewModel>();
+
+            CreateMap<LocaisYardViewModel, Yard>();
+            CreateMap<Yard, LocaisYardViewModel>();
         }
     }
 }

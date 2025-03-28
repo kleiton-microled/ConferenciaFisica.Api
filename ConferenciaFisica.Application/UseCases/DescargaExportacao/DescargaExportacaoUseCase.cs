@@ -5,12 +5,15 @@ using ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces;
 using ConferenciaFisica.Application.ViewModels;
 using ConferenciaFisica.Contracts.Commands;
 using ConferenciaFisica.Contracts.DTOs;
+using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Entities.DescargaExportacao;
 using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory;
 using Microsoft.Win32;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
 {
@@ -79,12 +82,12 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             var _serviceResult = new ServiceResult<bool>();
 
             var talie = _mapper.Map<TalieDTO>(request.Talie);
-            if(talie is not null)
+            if (talie is not null)
             {
                 talie.Operacao = "1";
                 talie.Equipe = 1;
             }
-            
+
             var command = DescargaExportacaoCommand.CreateNew(request.Registro, talie, request.Placa, request.Reserva, request.Cliente);
 
             var talieId = await _repository.AtualizarOuCriarTalie(command);
@@ -450,6 +453,11 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
         private async Task<bool> VerificarEmissaoEtiquetasAsync(int id)
         {
             return await _repository.VerificarEmissaoEtiquetasAsync(id);
+        }
+
+        public async Task<IEnumerable<LocaisYardViewModel>> BuscarYard(string search)
+        {
+            return _mapper.Map<IEnumerable<Yard>, IEnumerable<LocaisYardViewModel>>(await _repository.BuscarYard(search));
         }
     }
 }

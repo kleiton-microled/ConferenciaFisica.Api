@@ -15,7 +15,7 @@ namespace ConferenciaFisica.Application.Commands
         [JsonPropertyName("embalagem")]
         public int Embalagem { get; set; }
 
-        [JsonPropertyName("lote")]
+        [JsonPropertyName("bl")]
         public string? Bl { get; set; }
 
         [JsonPropertyName("inicio")]

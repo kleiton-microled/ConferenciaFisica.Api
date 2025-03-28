@@ -99,6 +99,14 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("locais")]
+        public async Task<IActionResult> GetLocais([FromQuery] string termo)
+        {
+            var result = await _descargaExportacaoUseCase.BuscarYard(termo);
+
+            return Ok(result);
+        }
+
         [HttpPost("processo")]
         public async Task<IActionResult> AnexarProcesso([FromBody] ProcessoViewModel input)
         {

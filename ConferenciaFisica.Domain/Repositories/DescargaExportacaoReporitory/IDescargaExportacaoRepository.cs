@@ -27,6 +27,7 @@ namespace ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory
         Task<bool> ValidarCargaTransferidaAsync(int talieId);
         Task<bool> FecharTalieAsync(int talieId);
         Task FinalizarReservaAsync(int booId);
+        Task<IEnumerable<Yard>> BuscarYard(string pesquisa);
 
     }
 }

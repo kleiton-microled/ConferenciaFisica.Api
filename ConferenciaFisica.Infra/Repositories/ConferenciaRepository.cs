@@ -49,9 +49,14 @@ namespace ConferenciaFisica.Infra.Repositories
             try
             {
                 using var connection = _connectionFactory.CreateConnection();
-                const string query = SqlQueries.BUscarConferenciaPorLote;
+                string query = SqlQueries.BUscarConferenciaPorLote;
 
                 var ret = await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { idLote });
+                if (ret is null)
+                {
+                    query = SqlQueries.BuscarLotePorAgendamento;
+                    ret = await connection.QueryFirstOrDefaultAsync<Conferencia>(query, new { idLote });
+                }
 
                 return ret;
             }

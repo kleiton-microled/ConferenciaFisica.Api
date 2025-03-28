@@ -36,7 +36,7 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
 
             Domain.Entities.Conferencia conferencia = null;
 
-            if (!string.IsNullOrEmpty(idConteiner))
+            if (!string.IsNullOrEmpty(idConteiner) && idConteiner != "0")
             {
                 conferencia = await _conferenciaRepository.BuscarPorConteinerAsync(idConteiner);
                
@@ -52,7 +52,7 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
 
             if (conferencia == null)
             {
-                return ServiceResult<Domain.Entities.Conferencia>.Failure("Conferência não encontrada.");
+                return ServiceResult<Domain.Entities.Conferencia>.Success(conferencia,"Conferência não encontrada.");
             }
 
             return ServiceResult<Domain.Entities.Conferencia>.Success(conferencia, "Conferência localizada com sucesso.");

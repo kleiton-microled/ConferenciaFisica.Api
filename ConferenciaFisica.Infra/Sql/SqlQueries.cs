@@ -6,7 +6,7 @@
                                                                     CONF.ID AS ID,
                                                                     CONF.TIPO_CONFERENCIA as Tipo,
                                                                     CONF.EMBALAGEM,
-                                                                    CONF.BL as Lote,
+                                                                    CONF.BL,
                                                                     BL.VIAGEM,
                                                                     CONF.CNTR,
                                                                     CONF.INICIO,
@@ -89,27 +89,51 @@
                                                         	CONF.CNTR = BL.ID_CONTEINER
                                                         WHERE
                                                         	CONF.ID = @id";
-        public const string BUscarConferenciaPorLote = @"SELECT 
-                                                            tecf.Id AS Id, 
-                                                            tecf.BL AS NumeroBl, 
-                                                            tecf.CNTR AS NumeroCntr, 
-                                                            tecf.INICIO, 
-                                                            tecf.TERMINO, 
-                                                            tecf.NOME_CLIENTE, 
-                                                            tecf.CPF_CLIENTE, 
-                                                            tecf.QTDE_AVARIADA, 
-                                                            tecf.OBS_AVARIA,
-                                                            tecf.DIVERGENCIA_QTDE AS DivergenciaQuantidade, 
-                                                            tecf.DIVERGENCIA_QUALIFICACAO, 
-                                                            tecf.OBS_DIVERGENCIA, 
-                                                            tecf.RETIRADA_AMOSTRA, 
-                                                            CASE 
-                                                                WHEN ISNULL(tecf.BL, 0) <> 0 THEN 'CARGA SOLTA'
-                                                                WHEN ISNULL(tecf.CNTR, 0) <> 0 THEN 'CONTEINER'
-                                                                ELSE 'REDEX'
-                                                            END AS TipoCarga
-                                                        FROM SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA tecf 
-                                                        WHERE tecf.BL = @idLote";
+        public const string BUscarConferenciaPorLote = @"SELECT
+                                                        	DISTINCT 
+                                                            CONF.ID AS ID,
+                                                        	CONF.TIPO_CONFERENCIA as Tipo,
+                                                        	CONF.EMBALAGEM,
+                                                        	CONF.BL,
+                                                        	BL.VIAGEM,
+                                                        	CONF.CNTR,
+                                                        	CONF.INICIO,
+                                                        	CONF.TERMINO,
+                                                        	CONF.NOME_CLIENTE as NomeCliente,
+                                                        	CONF.CPF_CLIENTE as CpfCliente,
+                                                        	CONF.QTDE_AVARIADA as QuantidadeAvariada,
+                                                        	CONF.OBS_AVARIA as ObservacaoAvaria,
+                                                        	CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
+                                                        	-- 🔄 Aqui convertemos 2 -> TRUE e qualquer outro valor -> FALSE
+                                                                                                                            CASE
+                                                        		WHEN CONF.DIVERGENCIA_QUALIFICACAO = 2 THEN CAST(1 AS BIT)
+                                                        		ELSE CAST(0 AS BIT)
+                                                        	END as DivergenciaQualificacao,
+                                                        	CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
+                                                        	CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
+                                                        	CONF.CONFREMOTA as ConferenciaRemota,
+                                                        	CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
+                                                        	CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
+                                                        	CONF.QTD_AJUDANTES as QuantidadeAjudantes,
+                                                        	CONF.QTD_OPERADORES as QuantidadeOperadores,
+                                                        	CONF.MOVIMENTACAO as Movimentacao,
+                                                        	CONF.DESUNITIZACAO as Desunitizacao,
+                                                        	CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
+                                                        	CASE
+                                                        		WHEN ISNULL(CONF.BL,
+                                                        		0) <> 0 THEN 'CARGA SOLTA'
+                                                        		WHEN ISNULL(CONF.CNTR,
+                                                        		'') <> '' THEN 'CONTEINER'
+                                                        		ELSE 'REDEX'
+                                                        	END AS TipoCarga
+                                                        FROM
+                                                        	dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
+                                                        LEFT JOIN dbo.TB_CNTR_BL BL ON
+                                                        	CONF.CNTR = BL.ID_CONTEINER
+                                                        WHERE
+                                                        	CONF.BL = @idLote
+                                                        ORDER BY
+                                                        	CONF.ID DESC";
         public const string BuscarConferenciaPorAgendamento = @"SELECT DISTINCT 
                                                                      '' AS NumeroBl,
                                                                      --C.AUTONUM AS CNTR,
@@ -138,6 +162,35 @@
                                                                 LEFT JOIN dbo.TB_MOTIVO_POSICAO T ON T.CODE = M.MOTIVO_POSICAO
                                                                 WHERE P.DATA_CANCELAMENTO IS NULL 
                                                                 AND C.ID_CONTEINER = @idConteiner --'AMFU315608-0'
+                                                                ORDER BY P.DT_PREVISTA DESC";
+        public const string BuscarLotePorAgendamento = @"SELECT DISTINCT 
+                                                                     B.AUTONUM AS Bl,
+                                                                     --C.AUTONUM AS CNTR,
+                                                                     --B.NUMERO,
+                                                                     B.VIAGEM as Viagem,
+                                                                     D.EMBALAGEM as Embalagem,
+                                                                     D.QUANTIDADE as Quantidade,
+                                                                     C.ID_CONTEINER as Cntr,
+                                                                     P.DT_PREVISTA as DataPrevista,
+                                                                     T.DESCR AS MotivoAbertura,
+                                                                     --G.QUANTIDADE AS QUANTIDADE_CNTR,
+                                                                     G.EMBALAGEM AS EMBALAGEM_CNTR,
+                                                                     'CONTEINER' AS TIPO_CARGA,
+                                                                     C.LACRE_ORIGEM,
+                                                                     C.LACRE2,
+                                                                     C.LACRE3,
+                                                                     C.LACRE4,
+                                                                     C.LACRE_IPA
+                                                                FROM dbo.TB_BL B  
+                                                                LEFT JOIN dbo.TB_CARGA_SOLTA D ON D.BL = B.AUTONUM 
+                                                                LEFT JOIN dbo.TB_AMR_CNTR_BL A ON A.BL = B.AUTONUM 
+                                                                LEFT JOIN dbo.TB_CNTR_BL C ON A.CNTR = C.AUTONUM 
+                                                                LEFT JOIN dbo.TB_CARGA_CNTR G ON G.BL = B.AUTONUM 
+                                                                LEFT JOIN dbo.TB_AGENDAMENTO_POSICAO P ON P.CNTR = C.AUTONUM 
+                                                                LEFT JOIN dbo.TB_AGENDA_POSICAO_MOTIVO M ON M.AUTONUM_AGENDA_POSICAO = P.AUTONUM
+                                                                LEFT JOIN dbo.TB_MOTIVO_POSICAO T ON T.CODE = M.MOTIVO_POSICAO
+                                                                WHERE P.DATA_CANCELAMENTO IS NULL 
+                                                                AND B.AUTONUM = @idLote
                                                                 ORDER BY P.DT_PREVISTA DESC";
         public const string BuscarConferenciaPorReserva = @"SELECT DISTINCT 
                                                                 CONF.ID,
@@ -191,15 +244,23 @@
 															 AND ID_STATUS_AGENDAMENTO = 0 
 															 AND CNTR IS NOT NULL 
                                                              AND PATIO IN @patiosPermitidos";
-        public const string CarregarLotesAgendamentos = @"SELECT 
-                                                             LOTE AS Display, 
-                                                             LOTE AS Autonum
-                                                         FROM TB_AGENDAMENTO_POSICAO A
-                                                         INNER JOIN TB_AGENDA_POSICAO_MOTIVO B ON A.AUTONUM = B.AUTONUM_AGENDA_POSICAO
-                                                          WHERE CONVERT(VARCHAR, DT_PREVISTA, 112) >= CONVERT(VARCHAR, GETDATE(), 112)
-                                                         AND ID_STATUS_AGENDAMENTO = 0 
-                                                         AND LOTE IS NOT NULL
-                                                         AND AUTONUMPATIO IN @patiosPermitidos";
+        public const string CarregarLotesAgendamentos = @"SELECT
+                                                        	A.LOTE AS Display,
+                                                        	A.LOTE AS Autonum
+                                                        FROM
+                                                        	TB_AGENDAMENTO_POSICAO A
+                                                        INNER JOIN TB_AGENDA_POSICAO_MOTIVO B ON
+                                                        	A.AUTONUM = B.AUTONUM_AGENDA_POSICAO
+                                                        INNER JOIN SGIPA.dbo.TB_BL tb ON A.LOTE = tb.AUTONUM 
+                                                        WHERE
+                                                        	CONVERT(VARCHAR,
+                                                        	A.DT_PREVISTA,
+                                                        	112) >= CONVERT(VARCHAR,
+                                                        	GETDATE(),
+                                                        	112)
+                                                        	AND A.ID_STATUS_AGENDAMENTO = 0
+                                                        	AND ISNULL(A.CNTR,0) = 0
+                                                        	AND tb.PATIO IN @patiosPermitidos";
         public const string CarregarConteinerAgendamentoUnion = @"	UNION
 																  SELECT 
 																      ID_CONTEINER AS Display, 
@@ -249,6 +310,7 @@
                                                         )";
         public const string AtualizarConferencia = @"UPDATE TB_EFETIVACAO_CONF_FISICA
 	                                                    SET TERMINO = GETDATE(), 
+                                                        BL = @bl,
 	                                                    CPF_CONFERENTE = @cpfConferente, 
 	                                                    NOME_CONFERENTE = @nomeConferente,
 	                                                    CPF_CLIENTE = @cpfCliente, 
@@ -824,6 +886,15 @@
                                                         @Yard, @Armazem, @AutonumPatios, @Patio, @Imo, @Uno, @Imo2, @Uno2, @Imo3, 
                                                         @Uno3, @Imo4, @Uno4, @CodProduto, @CodEan
                                                     )";
+
+        public const string BuscarYardPorTermo = @"SELECT
+                                                   tyc.AUTONUM as Id,
+                                                   	tyc.YARD as Descricao
+                                                   FROM
+                                                   	SGIPA.dbo.TB_YARD_CS tyc
+                                                   WHERE
+                                                   	tyc.ARMAZEM  = 4152
+                                                   	AND tyc.YARD LIKE @term";
 
         #endregion DESCARGA_EXPORTACAO
     }

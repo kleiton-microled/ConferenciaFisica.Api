@@ -4,7 +4,7 @@
     {
         public long Id { get; set; }
         public int Tipo { get; set; }
-        public string NumeroBl { get; set; }
+        public string Bl { get; set; }
         public string Viagem { get; set; }
         public DateTime DataPrevista { get; set; }
         public string MotivoAbertura { get; set; }
