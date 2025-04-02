@@ -7,13 +7,7 @@ using ConferenciaFisica.Contracts.Commands;
 using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Entities.DescargaExportacao;
-using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory;
-using Microsoft.Win32;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
 {
@@ -88,7 +82,14 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 talie.Equipe = 1;
             }
 
-            var command = DescargaExportacaoCommand.CreateNew(request.Registro, talie, request.Placa, request.Reserva, request.Cliente);
+            var command = DescargaExportacaoCommand.CreateNew(request.Registro, 
+                                                             talie, 
+                                                             request.Placa, 
+                                                             request.Reserva, 
+                                                             request.Cliente,
+                                                             request.IdReserva,
+                                                             request.IdConferente,
+                                                             request.IdEquipe);
 
             var talieId = await _repository.AtualizarOuCriarTalie(command);
             if (talieId > 0)
@@ -210,7 +211,8 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                     Remonte = request.Remonte,
                     Fumigacao = request.Fumigacao,
                     Madeira = request.Madeira,
-                    Fragil = request.Fragil
+                    Fragil = request.Fragil,
+                    NotaFiscalId= itemOriginal.NotaFiscalId
                 };
 
                 var inserirNovo = await _repository.CadastrarTalieItem(novoItem, registro);
@@ -255,7 +257,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             return _serviceResult;
         }
 
-        public async Task<ServiceResult<bool>> ExcluirTalieItem(int registroId, int talieId)
+        public async Task<ServiceResult<bool>> ExcluirTalieItem(int registroId, int talieId, string notaFiscal)
         {
             var serviceResult = new ServiceResult<bool>();
             var registro = await _repository.BuscarRegistroAsync(registroId);
@@ -267,7 +269,8 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 return serviceResult;
             }
 
-            var talieBase = registro.Talie?.TalieItem?.FirstOrDefault();
+            //var talieBase = registro.Talie?.TalieItem?.FirstOrDefault();
+            var talieBase = registro.Talie.TalieItem.Where(x => x.NotaFiscal == notaFiscal).FirstOrDefault();
             if (talieBase is null)
             {
                 serviceResult.Mensagens.Add("Talie do registro nao encontrado");
@@ -275,14 +278,14 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 return serviceResult;
             }
 
-            if (registro.Talie?.TalieItem.Count <= 1 || talieBase.Id == talieId)
+            if (registro.Talie?.TalieItem.Where(x => x.NotaFiscal == notaFiscal).ToList().Count <= 1 || talieBase.Id == talieId)
             {
-                serviceResult.Mensagens.Add("Nao foi possivel exluir primeiro talie!");
+                serviceResult.Mensagens.Add("Não é possível excluir o o primeiro item de uma nota fiscal!");
 
                 return serviceResult;
             }
 
-            var talieToRemove = registro.Talie.TalieItem.FirstOrDefault(x => x.Id == talieId);
+            var talieToRemove = registro.Talie.TalieItem.Where(x => x.NotaFiscal == notaFiscal).FirstOrDefault(x => x.Id == talieId);
             if (talieToRemove is null)
             {
                 serviceResult.Mensagens.Add("Talie nao encontrado!");

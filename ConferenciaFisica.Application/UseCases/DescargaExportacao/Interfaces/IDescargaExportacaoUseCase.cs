@@ -15,7 +15,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces
         Task<ServiceResult<IEnumerable<ArmazensViewModel>>> CarregarArmazens(int patio);
         Task<ServiceResult<IEnumerable<MarcantesViewModel>>> CarregarMarcantes(int talieItem);
         Task<ServiceResult<bool>> GravarMarcante(MarcanteInput input);
-        Task<ServiceResult<bool>> ExcluirTalieItem(int registroId, int talieId);
+        Task<ServiceResult<bool>> ExcluirTalieItem(int registroId, int talieId, string notaFiscal);
         Task<ServiceResult<bool>> ExcluirMarcanteTalieItem(int id);
         Task<ServiceResult<bool>> FinalizarProcesso(int id, bool crossdock);
         Task<IEnumerable<LocaisYardViewModel>> BuscarYard(string search);

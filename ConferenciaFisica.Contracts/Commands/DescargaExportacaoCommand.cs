@@ -9,8 +9,15 @@ namespace ConferenciaFisica.Contracts.Commands
         public string Placa { get; set; }
         public string Reserva { get; set; }
         public string Cliente { get; set; }
+        public int? IdReserva { get; set; }
+        public int? IdConferente { get; set; }
+        public int? IdEquipe { get; set; }
 
-        public static DescargaExportacaoCommand CreateNew(int registro, TalieDTO talie, string placa, string reserva, string cliente)
+        public static DescargaExportacaoCommand CreateNew(int registro, 
+            TalieDTO talie, 
+            string placa, 
+            string reserva,
+            string cliente, int idReserva, int idConferente, int idEquipe)
         {
             var cmd = new DescargaExportacaoCommand();
             cmd.Registro = registro;
@@ -18,6 +25,9 @@ namespace ConferenciaFisica.Contracts.Commands
             cmd.Placa = placa;
             cmd.Reserva = reserva;
             cmd.Cliente = cliente;
+            cmd.IdReserva = idReserva;
+            cmd.IdConferente = idConferente;
+            cmd.IdEquipe = idEquipe;
 
             return cmd;
         }

@@ -7,5 +7,8 @@
         public string Placa { get; set; }
         public string Reserva { get; set; }
         public string Cliente { get; set; }
+        public int IdReserva { get; set; }
+        public int IdConferente { get; set; }
+        public int IdEquipe { get; set; }
     }
 }

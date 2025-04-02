@@ -22,7 +22,7 @@
         public bool Madeira { get; set; } = false;
         public bool Avariado { get; set; }
         public string Yard { get; set; }
-        public int NotaFiscalId { get; set; }
+        public int? NotaFiscalId { get; set; }
         public string IMO { get; set; }
         public string IMO2 { get; set; }
         public string IMO3 { get; set; }

@@ -244,7 +244,7 @@
 															 AND ID_STATUS_AGENDAMENTO = 0 
 															 AND CNTR IS NOT NULL 
                                                              AND PATIO IN @patiosPermitidos";
-        public const string CarregarLotesAgendamentos = @"SELECT
+        public const string CarregarLotesAgendamentos = @"SELECT DISTINCT
                                                         	A.LOTE AS Display,
                                                         	A.LOTE AS Autonum
                                                         FROM
@@ -483,11 +483,11 @@
                                                 UPDATE REDEX..tb_talie
                                                 SET 
                                                     flag_descarga = 1,
-                                                    flag_estufagem = 1,
+                                                    flag_estufagem = 0,
                                                     flag_carregamento = 0,
                                                     crossdocking = 0,
-                                                    conferente = @Conferente,
-                                                    equipe = @Equipe,
+                                                    conferente = @conferente,
+                                                    equipe = @equipe,
                                                     forma_operacao = @Operacao,
                                                     termino =@termino
                                                 OUTPUT INSERTED.autonum_talie INTO @OutputTable
@@ -502,7 +502,8 @@
                                         flag_carregamento, 
                                         crossdocking, 
                                         conferente, 
-                                        equipe, 
+                                        equipe,
+                                        autonum_boo,
                                         autonum_reg
                                         ) 
                                         VALUES 
@@ -513,8 +514,9 @@
                                             0,--FLAG ESTUFAGEM
                                             0,--FLAG CARREGAMENTO 
                                             0,--CROSDOCKING 
-                                            @Conferente, --ID 
-                                            @Equipe, --ID
+                                            @conferente, --ID 
+                                            @equipe, --ID
+                                            @idReserva,
                                             --autonum_boo
                                             --forma_operacao
                                             --autonum_gate
@@ -897,5 +899,37 @@
                                                    	AND tyc.YARD LIKE @term";
 
         #endregion DESCARGA_EXPORTACAO
+        #region MOVIMENTACAO_CARGA_SOLTA
+        public const string BuscarMarcantesPorTermo = @"SELECT
+                                                	tm.AUTONUM as Id,
+                                                	tm.STR_CODE128 as Numero
+                                                FROM
+                                                	REDEX.dbo.TB_MARCANTES_RDX tm
+                                                WHERE
+                                                	--tm.ARMAZEM  = 4152
+                                                	tm.STR_CODE128 LIKE @term";
+        public const string BuscarCargaParaMovimentar = @"SELECT 
+	                                                    	tmr.AUTONUM as IdMarcante,
+	                                                    	tmr.STR_CODE128 as NumeroMarcante,
+	                                                    	tmr.AUTONUM_REG as Registro,
+	                                                    	tmr.ARMAZEM as Armazem,
+	                                                    	tmr.YARD as Local,
+	                                                    	tmr.ETQ_PRATELEIRA as EtiquetaPrateleira,
+	                                                    	trc.NF as NotaFiscal,
+	                                                    	tmr.VOLUMES as Quantidade,
+	                                                    	tti.AUTONUM_EMB as Embalagem,
+	                                                    	tti.LOTE as Lote,
+	                                                    	tti.IMO as Imo,
+	                                                    	tti.UNO as Uno,
+	                                                    	'' as Anvisa,
+	                                                    	tb.REFERENCE as Reserva
+	                                                    FROM REDEX.dbo.TB_MARCANTES_RDX tmr 
+	                                                    	INNER JOIN REDEX.dbo.TB_REGISTRO_CS trc ON tmr.AUTONUM_REG = trc.AUTONUM_REG 
+	                                                    	INNER JOIN redex.dbo.TB_TALIE tt ON tmr.AUTONUM_TALIE = tt.AUTONUM_TALIE 
+	                                                    	INNER JOIN REDEX.dbo.TB_TALIE_ITEM tti ON tmr.AUTONUM_TI = tti.AUTONUM_TI
+	                                                    	INNER JOIN REDEX.dbo.TB_BOOKING tb ON tmr.AUTONUM_BOO = tb.AUTONUM_BOO 
+	                                                    	WHERE tmr.AUTONUM = @idMarcante";
+        public static string MovimentarCarga = "SP_MovimentarCargaSolta";
+        #endregion
     }
 }

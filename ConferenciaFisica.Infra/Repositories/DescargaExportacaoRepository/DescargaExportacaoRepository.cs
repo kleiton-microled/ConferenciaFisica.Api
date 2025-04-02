@@ -101,9 +101,10 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 {
                     Placa = command.Placa,
                     Inicio = DateTime.Now,
-                    Conferente = command.Talie?.Conferente,
-                    Equipe = command.Talie?.Equipe,
-                    CodigoRegistro = command.Registro
+                    Conferente = 1,
+                    Equipe = 1,
+                    CodigoRegistro = command.Registro,
+                    IdReserva = 365016,
                 });
 
                 return talieId;
@@ -315,7 +316,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                                         INNER JOIN REDEX..tb_booking_carga bcg ON rcs.autonum_bcg = bcg.autonum_bcg
                                         WHERE reg.autonum_reg = @CodigoRegistro";
 
-            var reg = connection.Query(queryDescarga, new { CodigoRegistro = registro }).ToList().FirstOrDefault();
+            var reg = connection.Query(queryDescarga, new { CodigoRegistro = registro }).Where(x=> x.NF == item.NotaFiscal).FirstOrDefault();
 
             string insertItem = @"
                                         INSERT INTO REDEX..tb_talie_item (
@@ -520,16 +521,16 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                     #region PARAMETERS
                     DynamicParameters parameters = new DynamicParameters();
                     parameters.Add("id", novoId);
-                    parameters.Add("AutonumBcg", 1);//todo
+                    parameters.Add("AutonumBcg", registro.IdBookingCarga);//TODO, vem da tabela TB_REGISTRO_CS - 359731
                     parameters.Add("QuantidadeEntrada", registro.Quantidade);
                     parameters.Add("AutonumEmb", registro.Embalagem);
                     parameters.Add("AutonumPro", registro.Produto);
                     parameters.Add("Marca", registro.Marca);
-                    parameters.Add("VolumeDeclarado", 0);
+                    parameters.Add("VolumeDeclarado", 0); //TODO - Calculo altura x largura x comprimento CLA
                     parameters.Add("Comprimento", registro.Comprimento);
                     parameters.Add("Largura", registro.Largura);
                     parameters.Add("Altura", registro.Altura);
-                    parameters.Add("Bruto", 0); //todo
+                    parameters.Add("Bruto", registro.Peso);
                     parameters.Add("QtdeUnit", registro.Quantidade);
                     parameters.Add("DataRegistro", data.DataTermino);
                     parameters.Add("AutonumRegcs", registro.RegistroCargaSolta);
@@ -588,6 +589,10 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                     // 🔹 Atualizando TB_PATIO_CS
                     string sqlUpdatePatio = "UPDATE REDEX.dbo.TB_PATIO_CS SET pcs_pai = @Id WHERE autonum_pcs = @Id";
                     await connection.ExecuteAsync(sqlUpdatePatio, new { Id = novoId }, transaction);
+
+                    //TOUpdate TB_MARCANTE_RDX set Autonum_pcs where autonum_ti = @Id
+                    await connection.ExecuteAsync("Update REDEX.dbo.TB_MARCANTES_RDX set Autonum_pcs = @Id where autonum_ti = @idTalieItem", 
+                        new {id= novoId, idTalieItem = registro.Id }, transaction);
                 }
 
                 await transaction.CommitAsync();

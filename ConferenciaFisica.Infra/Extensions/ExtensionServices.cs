@@ -30,6 +30,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using ConferenciaFisica.Application.UseCases.Marcantes;
+using ConferenciaFisica.Application.UseCases.MovimentacaoCargaSolta;
 
 namespace ConferenciaFisica.Infra.Extensions
 {
@@ -70,6 +72,12 @@ namespace ConferenciaFisica.Infra.Extensions
             services.AddScoped<ITiposProcessosUseCase, TiposProcessosUseCase>();
             services.AddScoped<ITipoProcessoFotoUtilUseCase, TipoProcessoFotoUtilUseCase>();
             services.AddScoped<ITiposProcessoFotoRepository, TiposProcessoFotoRepository>();
+
+            services.AddScoped<IMarcantesUseCase, MarcantesUseCase>();
+            services.AddScoped<IMarcantesRepository, MarcanteRepository>();
+
+            services.AddScoped<IMovimentacaoCargaSoltaUseCase, MovimentacaoCargaSoltaUseCase>();
+            services.AddScoped<IMovimentacaoCargaSoltaRepository, MovimentacaoCargaSoltaRepository>();
 
 
             return services;
