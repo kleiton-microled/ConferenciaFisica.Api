@@ -32,6 +32,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using ConferenciaFisica.Application.UseCases.Marcantes;
 using ConferenciaFisica.Application.UseCases.MovimentacaoCargaSolta;
+using ConferenciaFisica.Application.UseCases.SaidaCaminhao.Interfaces;
+using ConferenciaFisica.Application.UseCases.SaidaCaminhao;
 
 namespace ConferenciaFisica.Infra.Extensions
 {
@@ -78,6 +80,8 @@ namespace ConferenciaFisica.Infra.Extensions
 
             services.AddScoped<IMovimentacaoCargaSoltaUseCase, MovimentacaoCargaSoltaUseCase>();
             services.AddScoped<IMovimentacaoCargaSoltaRepository, MovimentacaoCargaSoltaRepository>();
+            services.AddScoped<ISaidaDeCaminhaoUseCase, SaidaDeCaminhaoUseCase>();
+            services.AddScoped<ISaidaDoCaminhaoRepository, SaidaCaminhaoRepository>();
 
 
             return services;
