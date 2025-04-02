@@ -897,5 +897,44 @@
                                                    	AND tyc.YARD LIKE @term";
 
         #endregion DESCARGA_EXPORTACAO
+
+        #region SAIDA_CAMINHAO
+
+        public const string BuscarDadosCaminhao = @"
+                    SELECT
+                        PR.AUTONUM as PreRegistroId,
+                        PR.PROTOCOLO,
+	                    PR.PLACA as Placa,
+	                    PR.CARRETA as PlacaCarreta,
+                        PR.DATA_CHEGADA as DataChegada,
+                        GN.FLAG_GATE_IN as GateIn,
+                        GN.FLAG_GATE_OUT as GateOut,
+                        GN.BRUTO AS PesoBruto, PR.TICKET
+                    FROM 
+                        REDEX..TB_PRE_REGISTRO PR
+                    LEFT JOIN 
+                        REDEX..TB_REGISTRO REG ON PR.AUTONUM_REG = REG.AUTONUM_REG
+                    LEFT JOIN 
+                        REDEX..TB_GATE_NEW GN ON REG.AUTONUM_GATE=GN.AUTONUM
+                    {0}";
+
+        public const string UpdateSaidaCaminhaoPatio = @"
+                    UPDATE
+	                    REDEX..TB_PRE_REGISTRO
+                        SET
+                            DATA_SAIDA = GETDATE()
+                        WHERE 
+                            AUTONUM = @PreRegistroId";
+
+        public const string UpdateSaidaCaminhaoEstacionamento = @"
+                    UPDATE
+	                    REDEX..TB_PRE_REGISTRO
+                        SET                          
+                            Saida_Deic_Patio = GetDate(),
+                            LOCAL=2,
+                            DATA_CHEGADA= GetDate()
+                        WHERE 
+                            AUTONUM = @PreRegistroId";
+        #endregion
     }
 }
