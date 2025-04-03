@@ -155,14 +155,15 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 return _serviceResult;
             }
 
-            // Soma as quantidades dos itens relacionados, ignorando o próprio item
-            var quantidadeTotalUsada = itensRelacionados
-                .Where(i => i.Id != request.Id) // Ignorar o próprio item
-                .Sum(i => i.QtdDescarga);
+            var quantidadeByNF = itensRelacionados
+                                        .Where(i => i.NotaFiscal == request.NotaFiscal);
 
+            var quantidadeTotalUsadaV2 = quantidadeByNF
+                                        .Where(i => i.Id != request.Id) // Ignorar o próprio item
+                                        .Sum(i => i.QtdDescarga);
 
             // Calcula a quantidade disponível
-            var quantidadeDisponivel = quantidadeTotalPermitida - quantidadeTotalUsada;
+            var quantidadeDisponivel = quantidadeTotalPermitida - quantidadeTotalUsadaV2;
 
             // Valida se a quantidade informada pode ser usada
             if (request.QuantidadeDescarga > quantidadeDisponivel)
