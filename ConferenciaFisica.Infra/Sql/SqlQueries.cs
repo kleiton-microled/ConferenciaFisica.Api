@@ -525,7 +525,7 @@
                                         
                                         SELECT CAST(SCOPE_IDENTITY() as int)";
         public const string ListaTalieItens = @"SELECT tti.AUTONUM_TI as Id,
-                                            	   tti.NF,
+                                            	   tti.NF AS NotaFiscal,
                                             	   tti.QTDE_DESCARGA QtdDescarga,
                                                    (SELECT ISNULL(SUM(QUANTIDADE),0) FROM REDEX..TB_REGISTRO_CS WHERE AUTONUM_REGCS = trc.AUTONUM_REGCS) As QtdNf,
                                             	   tti.AUTONUM_EMB as CodigoEmbalagem,
@@ -931,6 +931,7 @@
 	                                                    	WHERE tmr.AUTONUM = @idMarcante";
         public static string MovimentarCarga = "SP_MovimentarCargaSolta";
 
+        #endregion
         #region SAIDA_CAMINHAO
 
         public const string BuscarDadosCaminhao = @"
