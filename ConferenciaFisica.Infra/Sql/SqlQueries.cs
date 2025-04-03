@@ -930,7 +930,110 @@
 	                                                    	INNER JOIN REDEX.dbo.TB_BOOKING tb ON tmr.AUTONUM_BOO = tb.AUTONUM_BOO 
 	                                                    	WHERE tmr.AUTONUM = @idMarcante";
         public static string MovimentarCarga = "SP_MovimentarCargaSolta";
+        #endregion
 
+        #region ESTUFAGEM CONTEINER
+        public const string BuscarPlanejamento = @"SELECT 
+                                                      ISNULL(cli.fantasia, '') AS Cliente,
+                                                      ro.autonum_ro as AutonumRo,
+                                                      cc.id_conteiner as Conteiner,
+                                                      ISNULL(boo.reference, '') AS Reserva,
+                                                      boo.autonum_boo as AutonumBoo,
+                                                      ro.autonum_patio as AutonumPatio,
+                                                      boo.autonum_parceiro as Parceiro,
+                                                      FORMAT(tal.inicio, 'dd/MM/yy HH:mm') AS INICIO,
+                                                      FORMAT(tal.termino, 'dd/MM/yy HH:mm') AS TERMINO,
+                                                      ISNULL(tal.conferente, 0) AS CONFERENTE,
+                                                      ISNULL(tal.equipe, 0) AS EQUIPE,
+                                                      CASE ISNULL(tal.FORMA_OPERACAO, '-') 
+                                                          WHEN '-' THEN -1 
+                                                          WHEN 'A' THEN 1 
+                                                          WHEN 'M' THEN 2 
+                                                      END AS Operacao,
+                                                      ISNULL(tal.autonum_talie, 0) AS AutonumTalie,
+                                                      --ISNULL(tal.auo, 0) AS autonum_camera,
+                                                      ISNULL(cc.yard, '') AS Yard
+                                                      --ISNULL(tal.idtimeline, 0) AS idtimeline
+                                                  FROM 
+                                                      redex.dbo.tb_romaneio ro
+                                                  INNER JOIN 
+                                                      redex.dbo.tb_patio cc ON ro.autonum_patio = cc.autonum_patio
+                                                  INNER JOIN 
+                                                      redex.dbo.tb_booking boo ON ro.autonum_boo = boo.autonum_boo
+                                                  INNER JOIN 
+                                                      redex.dbo.tb_cad_parceiros cli ON boo.autonum_parceiro = cli.autonum
+                                                  LEFT JOIN 
+                                                      redex.dbo.tb_talie tal ON ro.autonum_ro = tal.autonum_ro
+                                                  WHERE ro.autonum_ro = @planejamento";
+        public const string BUscarPlan = @"SELECT ISNULL(SUM(rcs.qtde), 0) AS Quanto
+                                            FROM redex.dbo.tb_romaneio ro
+                                            INNER JOIN redex.dbo.tb_romaneio_cs rcs ON ro.autonum_ro = rcs.autonum_ro
+                                            INNER JOIN redex.dbo.TB_patio_cs pcs ON rcs.autonum_pcs = pcs.autonum_pcs
+                                           WHERE ro.autonum_ro = @planejamento";
+        public const string BuscarItensEstufados = @"SELECT 
+                                                        ROW_NUMBER() OVER (ORDER BY boo.reference, sc.codproduto) AS nr,
+                                                        sc.QTDE_SAIDA as QtdeSaida,
+                                                        sc.autonum_sc as AutonumSc,
+                                                        emb.descricao_emb as DescricaoEmbalagem,
+                                                        pcs.codproduto as CodigoProduto,
+                                                        pro.desc_produto as DescricaoProduto,
+                                                        nf.num_nf as NumeroNotaFiscal,
+                                                        boo.reference as Reserva,
+                                                        boo.autonum_boo as AutonumBoo,
+                                                        boo.OS as Lote,
+                                                        nf.autonum_sd_boo as AutonumSdBoo,
+                                                        sc.autonum_rcs as AutonumRcs,
+                                                        sc.codproduto as CodigoBarra
+                                                    FROM 
+                                                        redex.dbo.tb_saida_carga sc
+                                                    INNER JOIN 
+                                                        redex.dbo.tb_patio_cs pcs ON sc.autonum_pcs = pcs.autonum_pcs
+                                                    LEFT JOIN 
+                                                        redex.dbo.tb_cad_embalagens emb ON pcs.autonum_emb = emb.autonum_emb
+                                                    INNER JOIN 
+                                                        redex.dbo.tb_notas_fiscais nf ON pcs.autonum_nf = nf.autonum_nf
+                                                    INNER JOIN 
+                                                        redex.dbo.tb_booking_carga bcg ON pcs.autonum_bcg = bcg.autonum_bcg
+                                                    LEFT JOIN 
+                                                        redex.dbo.tb_cad_produtos pro ON bcg.autonum_pro = pro.autonum_pro
+                                                    INNER JOIN 
+                                                        redex.dbo.tb_booking boo ON bcg.autonum_boo = boo.autonum_boo
+                                                    WHERE 
+                                                        sc.autonum_patio = @patio
+                                                    ORDER BY 
+                                                        boo.reference, sc.codproduto
+                                                    ";
+        public const string BuscarEtiquetas = @"SELECT DISTINCT 
+                                                e.lote as Lote,
+                                                sc.qtde_saida as QtdSaida,
+                                                e.codproduto AS Etiqueta,
+                                                boo.reference as REserva,
+                                                '' AS DescricaoEmbalagem,
+                                                sc.codproduto AS CodigoBarras,
+                                                sc.autonum_sc as AutonumSc,
+                                                sc.autonum_rcs as AutonumRcs,
+                                                '' as CodigoProduto,
+                                                '' AS DescricaoProduto,
+                                                '' AS NumeroNotaFiscal
+                                            FROM 
+                                                redex.dbo.etiquetas e
+                                            INNER JOIN 
+                                                redex.dbo.tb_booking boo ON e.autonum_boo = boo.autonum_boo
+                                            LEFT JOIN 
+                                                redex.dbo.tb_saida_carga sc ON e.codproduto = sc.codproduto
+                                            WHERE 
+                                                sc.codproduto IS NULL
+                                                AND e.autonum_boo IN (
+                                                    SELECT bcg.autonum_boo
+                                                    FROM redex.dbo.tb_romaneio_cs rcs
+                                                    INNER JOIN redex.dbo.tb_patio_cs pcs ON rcs.autonum_pcs = pcs.autonum_pcs
+                                                    INNER JOIN redex.dbo.tb_booking_carga bcg ON pcs.autonum_bcg = bcg.autonum_bcg
+                                                    WHERE rcs.autonum_ro = @planejamento
+                                                    GROUP BY bcg.autonum_boo
+                                                )
+                                            ORDER BY 
+                                                e.lote, e.codproduto;";
+        #endregion
         #region SAIDA_CAMINHAO
 
         public const string BuscarDadosCaminhao = @"
@@ -969,5 +1072,16 @@
                         WHERE 
                             AUTONUM = @PreRegistroId";
         #endregion
+
+        public const string ListarConferentes = @"SELECT 
+                                                      autonum_eqp AS Id, 
+                                                      nome_eqp AS Nome
+                                                  FROM 
+                                                      redex.dbo.tb_equipe
+                                                  WHERE 
+                                                      flag_ativo = 1 
+                                                      AND flag_conferente = 1
+                                                  ORDER BY 
+                                                      nome_eqp;";
     }
 }

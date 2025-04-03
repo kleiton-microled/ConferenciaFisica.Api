@@ -34,6 +34,11 @@ using ConferenciaFisica.Application.UseCases.Marcantes;
 using ConferenciaFisica.Application.UseCases.MovimentacaoCargaSolta;
 using ConferenciaFisica.Application.UseCases.SaidaCaminhao.Interfaces;
 using ConferenciaFisica.Application.UseCases.SaidaCaminhao;
+using ConferenciaFisica.Application.UseCases.estufagemConteiner.Interfaces;
+using ConferenciaFisica.Application.UseCases.estufagemConteiner;
+using ConferenciaFisica.Domain.Repositories.EstufagemConteiner;
+using ConferenciaFisica.Infra.Repositories.EstufagemConteinerRepository;
+using ConferenciaFisica.Application.UseCases.Conferentes;
 
 namespace ConferenciaFisica.Infra.Extensions
 {
@@ -82,6 +87,16 @@ namespace ConferenciaFisica.Infra.Extensions
             services.AddScoped<IMovimentacaoCargaSoltaRepository, MovimentacaoCargaSoltaRepository>();
             services.AddScoped<ISaidaDeCaminhaoUseCase, SaidaDeCaminhaoUseCase>();
             services.AddScoped<ISaidaDoCaminhaoRepository, SaidaCaminhaoRepository>();
+
+            services.AddScoped<IPlanejamentoUseCase, PlanejamentoUseCase>();
+            services.AddScoped<IEstufagemConteinerRepository, EstufagemConteinerRepository>();
+
+            services.AddScoped<IItensEstufadosUseCase, ItensEstufadosUseCase>();
+            services.AddScoped<IEtiquetasUseCase, EtiquetasUseCase>();
+
+            services.AddScoped<IConferentesUseCase, ConferenteUseCase>();
+            services.AddScoped<IColetorRepository, ColetorRepository>();
+
 
 
             return services;
