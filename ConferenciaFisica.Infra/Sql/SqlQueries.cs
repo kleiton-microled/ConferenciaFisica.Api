@@ -970,6 +970,7 @@
                                             INNER JOIN redex.dbo.tb_romaneio_cs rcs ON ro.autonum_ro = rcs.autonum_ro
                                             INNER JOIN redex.dbo.TB_patio_cs pcs ON rcs.autonum_pcs = pcs.autonum_pcs
                                            WHERE ro.autonum_ro = @planejamento";
+        public const string BuscarValorTTL = @"select sum(qtde_saida) ttl from redex.dbo.tb_saida_carga where autonum_ro= @planejamento";
         public const string BuscarItensEstufados = @"SELECT 
                                                         ROW_NUMBER() OVER (ORDER BY boo.reference, sc.codproduto) AS nr,
                                                         sc.QTDE_SAIDA as QtdeSaida,
@@ -1083,5 +1084,16 @@
                                                       AND flag_conferente = 1
                                                   ORDER BY 
                                                       nome_eqp;";
+        public const string ListarEquipes = @"SELECT 
+                                                autonum_eqp AS Id,
+                                                nome_eqp AS Nome
+                                            FROM 
+                                                redex.dbo.tb_equipe
+                                            WHERE 
+                                                flag_ativo = 1 
+                                                AND flag_operador = 1
+                                            ORDER BY 
+                                                nome_eqp;
+                                            ";
     }
 }

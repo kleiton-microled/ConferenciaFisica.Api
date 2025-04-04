@@ -5,8 +5,8 @@
         public string Cliente { get; set; }
         public string Reserva { get; set; }
         public string Conteiner { get; set; }
-        public DateTime? Inicio { get; set; }
-        public DateTime? Termino { get; set; }
+        public string? Inicio { get; set; }
+        public string? Termino { get; set; }
         public int Conferente { get; set; }
         public int Equipe { get; set; }
         public int Operacao { get; set; }
@@ -21,6 +21,7 @@
         public bool PossuiMarcantes { get; set; }
         public int QtdePlanejada { get; set; }
         public int Plan { get; set; }
+        public int Ttl { get; set; }
         public int Produto { get; set; }
     }
 

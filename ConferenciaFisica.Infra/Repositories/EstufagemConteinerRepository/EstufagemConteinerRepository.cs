@@ -33,6 +33,11 @@ namespace ConferenciaFisica.Infra.Repositories.EstufagemConteinerRepository
                 if(plan > 0)
                     ret.Plan = plan;
 
+                //string ttlQuery = SqlQueries.BuscarValorTTL;
+                //var ttl = await connection.QueryFirstOrDefaultAsync<int>(ttlQuery, new { planejamento }, transaction);
+                //if (ttl > 0)
+                //    ret.Ttl = ttl;
+
                 await transaction.CommitAsync();
                 return ret;
             }

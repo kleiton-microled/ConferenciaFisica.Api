@@ -1,5 +1,6 @@
 ﻿using ConferenciaFisica.Application.UseCases.Conferentes;
 using ConferenciaFisica.Application.UseCases.Embalagens.Interfaces;
+using ConferenciaFisica.Application.UseCases.Equipes;
 using ConferenciaFisica.Application.UseCases.Marcantes;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,11 +12,13 @@ namespace ConferenciaFisica.Api.Controllers
     {
         private readonly IMarcantesUseCase _marcantesUse;
         private readonly IConferentesUseCase _conferenteUseCase;
+        private readonly IEquipesUseCase _equipesUseCase;
 
-        public ColetorController(IMarcantesUseCase marcantesUseCase, IConferentesUseCase conferenteUseCase)
+        public ColetorController(IMarcantesUseCase marcantesUseCase, IConferentesUseCase conferenteUseCase, IEquipesUseCase equipesUseCase)
         {
             _marcantesUse = marcantesUseCase;
             _conferenteUseCase = conferenteUseCase;
+            _equipesUseCase = equipesUseCase;
         }
 
         [HttpGet("marcantes")]
@@ -30,6 +33,14 @@ namespace ConferenciaFisica.Api.Controllers
         public async Task<IActionResult> GetConferentes()
         {
             var result = await _conferenteUseCase.ListarConferentes();
+
+            return Ok(result);
+        }
+
+        [HttpGet("equipes")]
+        public async Task<IActionResult> GetEquipes()
+        {
+            var result = await _equipesUseCase.ListarEquipes();
 
             return Ok(result);
         }

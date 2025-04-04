@@ -5,5 +5,6 @@ namespace ConferenciaFisica.Domain.Repositories
     public interface IColetorRepository
     {
         Task<IEnumerable<ConferenteDTO>> ListarConferentes();
+        Task<IEnumerable<EquipeDTO>> ListarEquipes();
     }
 }

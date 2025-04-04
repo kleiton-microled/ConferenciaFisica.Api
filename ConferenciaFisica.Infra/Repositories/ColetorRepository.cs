@@ -37,5 +37,23 @@ namespace ConferenciaFisica.Infra.Repositories
                 throw;
             }
         }
+
+        public async Task<IEnumerable<EquipeDTO>> ListarEquipes()
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var sql = SqlQueries.ListarEquipes;
+                return await connection.QueryAsync<EquipeDTO>(sql);
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
     }
 }
