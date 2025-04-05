@@ -87,5 +87,25 @@ namespace ConferenciaFisica.Infra.Repositories.EstufagemConteinerRepository
                 throw new Exception($"Erro ao processar: {ex.Message}", ex);
             }
         }
+
+        public async Task<SaldoCargaMarcanteDto> BuscarSaldoCargaMarcante(int planejamento, string codigoMarcante)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
+
+            await using var transaction = await connection.BeginTransactionAsync();
+            try
+            {
+                string query = SqlQueries.BuscarSaldoCargaMarcante;
+                var ret = await connection.QueryFirstOrDefaultAsync<SaldoCargaMarcanteDto>(query, new { planejamento, codigoMarcante }, transaction);
+
+                await transaction.CommitAsync();
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception($"Erro ao processar: {ex.Message}", ex);
+            }
+        }
     }
 }

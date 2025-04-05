@@ -318,19 +318,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
             var reg = connection.Query(queryDescarga, new { CodigoRegistro = registro }).Where(x=> x.NF == item.NotaFiscal).FirstOrDefault();
 
-            string insertItem = @"
-                                        INSERT INTO REDEX..tb_talie_item (
-                                            autonum_talie, autonum_regcs, qtde_descarga, tipo_descarga, 
-                                            diferenca, obs, qtde_disponivel, comprimento, largura, altura, peso, 
-                                            qtde_estufagem, marca, remonte, fumigacao, flag_fragil, flag_madeira, 
-                                            YARD, armazem, autonum_nf, nf, imo, uno, imo2, uno2, imo3, uno3, imo4, uno4, 
-                                            autonum_emb, autonum_pro
-                                        ) VALUES (
-                                            @AutonumTalie, @AutonumRegcs, @QtdDescarga, 'PARCIAL', 
-                                            '0', '', 0, @comprimento, @largura, @altura, @Peso, 0, '', @remonte, @fumigacao, @flagfragil, @flagmadeira, NULL, NULL, 
-                                            @NfId, @NF, @IMO, @UNO, @IMO2, @UNO2, @IMO3, @UNO3, @IMO4, @UNO4, 
-                                            @AutonumEmb, @AutonumPro
-                                        )";
+            string insertItem = SqlQueries.AtualizarAvariaConferencia;
 
 
             parameters.Add("AutonumTalie", item.TalieId);

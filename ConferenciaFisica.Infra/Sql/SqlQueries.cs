@@ -2,6 +2,7 @@
 {
     public static class SqlQueries
     {
+        #region CONFERENCIA FISICA
         public const string BuscarConferenciaPorIdContainer = @"SELECT DISTINCT 
                                                                     CONF.ID AS ID,
                                                                     CONF.TIPO_CONFERENCIA as Tipo,
@@ -413,7 +414,7 @@
                                                      	      dte.DESCR as Descricao
                                                       FROM DTE_TB_EMBALAGENS dte";
         public const string FinalizarConferencia = @"UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET TERMINO = GETDATE() WHERE ID = @idConferencia";
-
+        #endregion
         #region DESCARGA_EXPORTACAO
         public const string CarregarRegistro = @"SELECT
                                                     	--REGISTRO
@@ -666,6 +667,50 @@
                                                 VOLUMES = @quantidade
 	                                           WHERE AUTONUM_REG = @idRegistro AND STR_CODE128 = @codigoMarcante";
 
+        public const string InsertTalieItem = @"INSERT INTO
+                                                 	REDEX..tb_talie_item (
+                                                    autonum_talie,
+                                                 	autonum_regcs,
+                                                 	qtde_descarga,
+                                                 	tipo_descarga,
+                                                 	diferenca,
+                                                 	obs,
+                                                 	qtde_disponivel,
+                                                 	comprimento,
+                                                 	largura,
+                                                 	altura,
+                                                 	peso,
+                                                 	qtde_estufagem,
+                                                 	marca,
+                                                 	remonte,
+                                                 	fumigacao,
+                                                 	flag_fragil,
+                                                 	flag_madeira,
+                                                 	YARD,
+                                                 	armazem,
+                                                 	autonum_nf,
+                                                 	nf,
+                                                 	imo,
+                                                 	uno,
+                                                 	imo2,
+                                                 	uno2,
+                                                 	imo3,
+                                                 	uno3,
+                                                 	imo4,
+                                                 	uno4,
+                                                 	autonum_emb,
+                                                 	autonum_pro
+                                                 )
+                                                 VALUES ( @AutonumTalie,@AutonumRegcs,@QtdDescarga,'PARCIAL','0',
+                                                 '',0,@comprimento,@largura,@altura,@Peso,0,'',@remonte,@fumigacao,
+                                                 @flagfragil,@flagmadeira,NULL,NULL,@NfId,@NF,@IMO,@UNO,@IMO2,@UNO2,
+                                                 @IMO3,
+                                                 @UNO3,
+                                                 @IMO4,
+                                                 @UNO4, 
+                                                 @AutonumEmb,
+                                                 @AutonumPro
+                                                 )";
 
         public const string ListarTiposFoto = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_FOTO;";
 
@@ -965,6 +1010,37 @@
                                                   LEFT JOIN 
                                                       redex.dbo.tb_talie tal ON ro.autonum_ro = tal.autonum_ro
                                                   WHERE ro.autonum_ro = @planejamento";
+        public const string BuscarSaldoCargaMarcante = @"SELECT
+                                                    	rcs.autonum_rcs AutonumRcs,
+                                                    	pcs.autonum_pcs AutonumPcs,
+                                                    	boo.autonum_boo AutonumBoo,
+                                                    	boo.reference as ReservaCarga,
+                                                    	nf.num_nf NumNf,
+                                                    	nf.autonum_nf AutonumNf,
+                                                    	RCS.QTDE Qtde,
+                                                    	rcs.qtde-(
+                                                    	select
+                                                    		isnull(sum(qtde_saida),
+                                                    		0)
+                                                    	from
+                                                    		redex.dbo.tb_saida_carga sc
+                                                    	where
+                                                    		sc.AUTONUM_PCS = rcs.autonum_pcs) Saldo,
+                                                    m.STR_CODE128 as Marcante
+                                                    FROM
+                                                    	REDEX.DBO.TB_ROMANEIO_CS RCS
+                                                    INNER JOIN REDEX.DBO.TB_PATIO_CS PCS ON
+                                                    	RCS.AUTONUM_PCS = PCS.AUTONUM_PCS
+                                                    inner join REDEX.DBO.tb_booking_carga BCG on
+                                                    	pcs.autonum_BCG = BCG.autonum_BCG
+                                                    inner join REDEX.DBO.tb_booking BOO on
+                                                    	BCG.autonum_BOO = BOO.autonum_BOO
+                                                    inner join REDEX.DBO.TB_NOTAS_FISCAIS nf on
+                                                    	PCS.AUTONUM_NF = nf.AUTONUM_NF
+                                                    inner join REDEX.DBO.tb_marcantes_rdx m on
+                                                    	rcs.autonum_pcs = m.AUTONUM_PCS
+                                                    WHERE
+                                                    	rcs.autonum_ro = @planejamento and m.STR_CODE128 = @codigomarcante --000000000027";
         public const string BUscarPlan = @"SELECT ISNULL(SUM(rcs.qtde), 0) AS Quanto
                                             FROM redex.dbo.tb_romaneio ro
                                             INNER JOIN redex.dbo.tb_romaneio_cs rcs ON ro.autonum_ro = rcs.autonum_ro

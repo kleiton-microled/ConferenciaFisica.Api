@@ -42,6 +42,17 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(resultado);
         }
 
+        [HttpGet("saldo-carga-marcante")]
+        public async Task<IActionResult> BuscarSaldoCargaMarcante([FromQuery] int planejamento, string codigoMarcante)
+        {
+            var resultado = await _planjamentoUseCase.BuscarSaldoCargaMarcante(planejamento, codigoMarcante);
+
+            if (!resultado.Status && !string.IsNullOrEmpty(resultado.Error))
+                return BadRequest(resultado);
+
+            return Ok(resultado);
+        }
+
         [HttpGet("etiquetas")]
         public async Task<IActionResult> CarregarEtiquetas([FromQuery] int planejamento)
         {
