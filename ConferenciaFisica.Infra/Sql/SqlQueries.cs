@@ -943,6 +943,50 @@
                                                    	tyc.ARMAZEM  = 4152
                                                    	AND tyc.YARD LIKE @term";
 
+        public const string CrossDockBuscarInfoTalie = @"select pcs.* 
+                                                        from REDEX.dbo.tb_patio_cs pcs 
+                                                        inner join REDEX.dbo.tb_talie_item ti on pcs.talie_descarga = ti.autonum_ti
+                                                        where ti.autonum_talie = @talieId";
+
+        public const string CrossDockSetPatioToF = @"UPDATE REDEX.dbo.tb_patio 
+                                                        SET ef = 'F' 
+                                                     WHERE autonum_patio = @patioId";
+
+
+
+        public const string CrossDockGetRomaneioId = @"SELECT autonum_ro 
+                                                        FROM REDEX.dbo.tb_romaneio 
+                                                        WHERE autonum_patio = @patioId";
+
+        public const string CrossDockProximoIdSequencial = @"SELECT NEXT VALUE FOR REDEX.dbo.seq_tb_romaneio";
+
+        public const string CrossDockInserirRomaneio = @"INSERT INTO REDEX.dbo.tb_romaneio (
+                                                            autonum_ro,
+                                                            data_inclusao,
+                                                            usuario,
+                                                            autonum_patio,
+                                                            data_programacao,
+                                                            obs,
+                                                            autonum_boo,
+                                                            VISIT_CODE,
+                                                            DATA_AGENDAMENTO,
+                                                            SEM_NF,
+                                                            flag_historico,
+                                                            crossdocking
+                                                        ) VALUES (
+                                                            @ID,
+                                                            GETDATE(),
+                                                            @nUser,
+                                                            @mskConteinerTag,
+                                                            GETDATE(),
+                                                            '',
+                                                            @Reserva_CC,
+                                                            '',
+                                                            NULL,
+                                                            0,
+                                                            1,
+                                                            1
+                                                        )";
         #endregion DESCARGA_EXPORTACAO
         #region MOVIMENTACAO_CARGA_SOLTA
         public const string BuscarMarcantesPorTermo = @"SELECT

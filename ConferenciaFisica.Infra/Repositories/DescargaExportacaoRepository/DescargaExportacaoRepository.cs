@@ -63,6 +63,67 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             }
         }
 
+        public async Task<IEnumerable<PatioCsCrossDock>> BuscarTalieCrossDock(int id)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
+            var query = SqlQueries.CrossDockBuscarInfoTalie;
+
+            var ret = await connection.QueryAsync<PatioCsCrossDock>(query, new { talieId = id });
+
+            return ret;
+        }
+
+        public async Task<int?> CrossDockGetNumeroReservaContainer(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var query = SqlQueries.CrossDockBuscarInfoTalie;
+
+                var ret = await connection.QuerySingleAsync<int?>(query, new { talieId = id });
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;    
+            }
+        }
+
+        public async Task<int> GetCrossDockRomaneioId(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var query = SqlQueries.CrossDockGetRomaneioId;
+
+                var ret = await connection.QuerySingleAsync<int>(query);
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<bool> CrossDockUpdatePatioF(int id)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
+            var query = SqlQueries.CrossDockSetPatioToF;
+
+            var result = await connection.ExecuteAsync(query, new {patioId = id});
+
+            return result > 0;
+        }
+
+
         public async Task<int> AtualizarOuCriarTalie(DescargaExportacaoCommand command)
         {
             using var connection = _connectionFactory.CreateConnection();
@@ -841,5 +902,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
             return ret;
         }
+
+
     }
 }
