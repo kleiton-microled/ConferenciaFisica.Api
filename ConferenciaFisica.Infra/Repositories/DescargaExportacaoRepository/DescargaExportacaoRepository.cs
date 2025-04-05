@@ -903,6 +903,74 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             return ret;
         }
 
+        Task<int?> IDescargaExportacaoRepository.GetCrossDockRomaneioId(int patioContainer)
+        {
+            throw new NotImplementedException();
+        }
 
+        public Task<int> GetCrossDockSequencialId()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task InserirRomaneio(int romaneioId, string usuario, string container, int reservaContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task InserirRomaneioCs(int autonumPcs, decimal qtdeEntrada)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<object>> CrossDockBuscarTaliePorContainer(int patioContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DateTime> CrossDockGetDataInicoEstufagem(int patioContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DateTime> CrossDockGetDataFimEstufagem(int patioContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CrossDockUpdateTalieItem(DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int patioContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateRomaneio(int v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<object>?> CrossDockCriarTalie(int patioContainer, DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int reservaContainer, int romaneioId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task InserirSaidaNF(int patioContainer, int numeroNf, int quantidadeEstufada)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CrossDockAtualizarQuantidadeEstufadaNF(int numeroNf, int quantidadeEstufada)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> GetQuantidadeSaidaCarga(int autonumPcs)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdatepatioCsFlag(int autonumPcs)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
