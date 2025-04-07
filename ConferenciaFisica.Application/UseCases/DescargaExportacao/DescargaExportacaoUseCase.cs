@@ -82,10 +82,10 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 talie.Equipe = 1;
             }
 
-            var command = DescargaExportacaoCommand.CreateNew(request.Registro, 
-                                                             talie, 
-                                                             request.Placa, 
-                                                             request.Reserva, 
+            var command = DescargaExportacaoCommand.CreateNew(request.Registro,
+                                                             talie,
+                                                             request.Placa,
+                                                             request.Reserva,
                                                              request.Cliente,
                                                              request.IdReserva,
                                                              request.IdConferente,
@@ -155,6 +155,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 return _serviceResult;
             }
 
+
             var quantidadeByNF = itensRelacionados
                                         .Where(i => i.NotaFiscal == request.NotaFiscal);
 
@@ -214,10 +215,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                     Fumigacao = request.Fumigacao,
                     Madeira = request.Madeira,
                     Fragil = request.Fragil,
-                    NotaFiscalId= itemOriginal.NotaFiscalId,
-                    Observacao = itemOriginal.Observacao,
-                    Carimbo = itemOriginal.Carimbo,
-                    CargaNumerada = itemOriginal.CargaNumerada
+                    NotaFiscalId = itemOriginal.NotaFiscalId
                 };
 
                 var inserirNovo = await _repository.CadastrarTalieItem(novoItem, registro);
@@ -406,10 +404,9 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             return _serviceResult;
         }
 
-        public async Task<ServiceResult<bool>> FinalizarProcesso(int talie, bool crossdock)
+        public async Task<ServiceResult<bool>> FinalizarProcesso(int talie, bool crossdock,string usuario, string container = "", int patioContainer = 0)
         {
             var _serviceResult = new ServiceResult<bool>();
-
             //Validar quantidade registrada X quantidade descarregada
             if (!crossdock)
             {
@@ -425,29 +422,83 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 //    _serviceResult.Result = false;
                 //    _serviceResult.Mensagens.Add("Consta pendência de emissão de etiquetas deste registro. Deseja continuar assim mesmo?");
                 //}
-            }
 
-            var result = await _repository.FinalizarProcesso(talie);
+                var result = await _repository.FinalizarProcesso(talie);
 
-            if (result)
-            {
-                var isValid = await _repository.ValidarCargaTransferidaAsync(talie);
-                if (isValid)
+                if (result)
                 {
-                    var fecharTalie = await _repository.FecharTalieAsync(talie);
-                    if (fecharTalie)
+                    var isValid = await _repository.ValidarCargaTransferidaAsync(talie);
+                    if (isValid)
                     {
-                        await _repository.FinalizarReservaAsync(talie);
+                        var fecharTalie = await _repository.FecharTalieAsync(talie);
+                        if (fecharTalie)
+                        {
+                            await _repository.FinalizarReservaAsync(talie);
 
-                        _serviceResult.Result = result;
-                        _serviceResult.Mensagens.Add("Processo finalizado com sucesso!");
+                            _serviceResult.Result = result;
+                            _serviceResult.Mensagens.Add("Processo finalizado com sucesso!");
+                        }
+                    }
+                    else
+                    {
+                        _serviceResult.Mensagens.Add("Falha ao tentar finalizar o processo!");
                     }
                 }
-                else
-                {
-                    _serviceResult.Mensagens.Add("Falha ao tentar finalizar o processo!");
-                }
             }
+            else
+            {
+                var dtRs = await _repository.BuscarTalieCrossDock(talie);
+                if (dtRs != null && dtRs.Any()) await _repository.CrossDockUpdatePatioF(patioContainer);
+
+                var reservaContainer = await _repository.CrossDockGetNumeroReservaContainer(patioContainer) ?? 0;
+
+                int romaneioId = await _repository.GetCrossDockRomaneioId(patioContainer) ?? 0;
+                if(romaneioId == 0)
+                {
+                    romaneioId = await _repository.GetCrossDockSequencialId();
+
+                    await _repository.InserirRomaneio(romaneioId, usuario, container, reservaContainer);
+
+                    foreach (var item in dtRs)
+                    {
+                        await _repository.InserirRomaneioCs(item.AutonumPcs, item.QtdeEntrada);
+                    }
+
+                    DateTime dataInicioEstufagem = await _repository.CrossDockGetDataInicoEstufagem(patioContainer);
+                    DateTime dataFimEstufagem = await _repository.CrossDockGetDataFimEstufagem(patioContainer);
+
+                    var talieByContainer = await _repository.CrossDockBuscarTaliePorContainer(patioContainer);
+                    if (talieByContainer == null || !talieByContainer.Any())
+                    {
+                        // retornar o item criado
+                        talieByContainer = await _repository.CrossDockCriarTalie(patioContainer, dataInicioEstufagem, dataFimEstufagem, reservaContainer, romaneioId);
+
+                        // id do talie criado
+                        await _repository.UpdateRomaneio(124);
+                    }
+                    else
+                    {
+                        await _repository.CrossDockUpdateTalieItem(dataInicioEstufagem, dataFimEstufagem,patioContainer );
+                    }
+
+                    foreach (var item in dtRs)
+                    {
+                        await _repository.InserirSaidaNF(patioContainer,123, 2 );
+                        await _repository.CrossDockAtualizarQuantidadeEstufadaNF(1, 234 );
+
+                        //await _repository.InserirSaidaCarga( );
+
+                        int quantidadeSaida = await _repository.GetQuantidadeSaidaCarga(item.AutonumPcs);
+
+                        if(quantidadeSaida >= item.QtdeEntrada)
+                        {
+                            await _repository.UpdatepatioCsFlag(item.AutonumPcs);
+                        }
+                    }
+                }
+
+            }
+
 
 
             return _serviceResult;

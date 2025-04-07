@@ -63,6 +63,67 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             }
         }
 
+        public async Task<IEnumerable<PatioCsCrossDock>> BuscarTalieCrossDock(int id)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
+            var query = SqlQueries.CrossDockBuscarInfoTalie;
+
+            var ret = await connection.QueryAsync<PatioCsCrossDock>(query, new { talieId = id });
+
+            return ret;
+        }
+
+        public async Task<int?> CrossDockGetNumeroReservaContainer(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var query = SqlQueries.CrossDockBuscarInfoTalie;
+
+                var ret = await connection.QuerySingleAsync<int?>(query, new { talieId = id });
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;    
+            }
+        }
+
+        public async Task<int> GetCrossDockRomaneioId(int id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var query = SqlQueries.CrossDockGetRomaneioId;
+
+                var ret = await connection.QuerySingleAsync<int>(query);
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<bool> CrossDockUpdatePatioF(int id)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
+            var query = SqlQueries.CrossDockSetPatioToF;
+
+            var result = await connection.ExecuteAsync(query, new {patioId = id});
+
+            return result > 0;
+        }
+
+
         public async Task<int> AtualizarOuCriarTalie(DescargaExportacaoCommand command)
         {
             using var connection = _connectionFactory.CreateConnection();
@@ -843,6 +904,76 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             var ret = await connection.QueryAsync<Yard>(query, new { term = $"%{pesquisa}%" });
 
             return ret;
+        }
+
+        Task<int?> IDescargaExportacaoRepository.GetCrossDockRomaneioId(int patioContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> GetCrossDockSequencialId()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task InserirRomaneio(int romaneioId, string usuario, string container, int reservaContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task InserirRomaneioCs(int autonumPcs, decimal qtdeEntrada)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<object>> CrossDockBuscarTaliePorContainer(int patioContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DateTime> CrossDockGetDataInicoEstufagem(int patioContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DateTime> CrossDockGetDataFimEstufagem(int patioContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CrossDockUpdateTalieItem(DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int patioContainer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateRomaneio(int v)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<object>?> CrossDockCriarTalie(int patioContainer, DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int reservaContainer, int romaneioId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task InserirSaidaNF(int patioContainer, int numeroNf, int quantidadeEstufada)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CrossDockAtualizarQuantidadeEstufadaNF(int numeroNf, int quantidadeEstufada)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> GetQuantidadeSaidaCarga(int autonumPcs)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdatepatioCsFlag(int autonumPcs)
+        {
+            throw new NotImplementedException();
         }
     }
 }

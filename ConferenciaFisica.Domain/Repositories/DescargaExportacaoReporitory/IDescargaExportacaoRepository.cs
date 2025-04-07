@@ -28,6 +28,22 @@ namespace ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory
         Task<bool> FecharTalieAsync(int talieId);
         Task FinalizarReservaAsync(int booId);
         Task<IEnumerable<Yard>> BuscarYard(string pesquisa);
-
+        Task<IEnumerable<PatioCsCrossDock>> BuscarTalieCrossDock(int id);
+        Task<bool> CrossDockUpdatePatioF(int id);
+        Task<int?> CrossDockGetNumeroReservaContainer(int patioId);
+        Task<int?> GetCrossDockRomaneioId(int patioContainer);
+        Task<int> GetCrossDockSequencialId();
+        Task InserirRomaneio(int romaneioId, string usuario, string container, int reservaContainer);
+        Task InserirRomaneioCs(int autonumPcs, decimal qtdeEntrada);
+        Task<IEnumerable<object>> CrossDockBuscarTaliePorContainer(int patioContainer);
+        Task<DateTime> CrossDockGetDataInicoEstufagem(int patioContainer);
+        Task<DateTime> CrossDockGetDataFimEstufagem(int patioContainer);
+        Task CrossDockUpdateTalieItem(DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int patioContainer);
+        Task UpdateRomaneio(int v);
+        Task<IEnumerable<object>?> CrossDockCriarTalie(int patioContainer, DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int reservaContainer, int romaneioId);
+        Task InserirSaidaNF(int patioContainer, int numeroNf, int quantidadeEstufada);
+        Task CrossDockAtualizarQuantidadeEstufadaNF(int numeroNf, int quantidadeEstufada);
+        Task<int> GetQuantidadeSaidaCarga(int autonumPcs);
+        Task UpdatepatioCsFlag(int autonumPcs);
     }
 }
