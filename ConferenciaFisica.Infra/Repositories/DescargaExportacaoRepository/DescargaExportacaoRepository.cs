@@ -265,23 +265,26 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             parameters.Add("@QtdDescarga", item.QtdDescarga);
             parameters.Add("@IdEmbalagem", item.CodigoEmbalagem);
             parameters.Add("@Comprimento", item.Comprimento);
-            parameters.Add("@Altura", item.Altura); // Corrigido para 'Altura'
-            parameters.Add("@Largura", item.Largura); // Corrigido para 'Largura'
+            parameters.Add("@Altura", item.Altura); 
+            parameters.Add("@Largura", item.Largura); 
             parameters.Add("@Peso", item.Peso);
             parameters.Add("@Imo", item.IMO);
             parameters.Add("@Imo2", item.IMO2);
             parameters.Add("@Imo3", item.IMO3);
             parameters.Add("@Imo4", item.IMO4);
-            parameters.Add("@Imo5", item.IMO5);
+            //parameters.Add("@Imo5", item.IMO5);
             parameters.Add("@Uno", item.UNO);
             parameters.Add("@Uno2", item.UNO2);
             parameters.Add("@Uno3", item.UNO3);
             parameters.Add("@Uno4", item.UNO4);
-            parameters.Add("@Uno5", item.UNO5);
+            //parameters.Add("@Uno5", item.UNO5);
             parameters.Add("@Observacao", item.Observacao);
             parameters.Add("@Fragil", item.Fragil);
             parameters.Add("@Madeira", item.Madeira);
             parameters.Add("@Remonte", item.Remonte);
+            parameters.Add("@Fumigacao", item.Fumigacao);
+            parameters.Add("@Carimbo", item.Carimbo);
+            parameters.Add("@CargaNumerada", item.CargaNumerada);
 
             var ret = await connection.ExecuteAsync(query, parameters);
             if (ret > 0)
@@ -299,8 +302,6 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
         public async Task<bool> CadastrarTalieItem(TalieItem item, int registro)
         {
             using var connection = _connectionFactory.CreateConnection();
-            string query = SqlQueries.AtualizarTalieItem;
-
             var parameters = new DynamicParameters();
 
             string queryDescarga = @"
@@ -318,7 +319,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
             var reg = connection.Query(queryDescarga, new { CodigoRegistro = registro }).Where(x=> x.NF == item.NotaFiscal).FirstOrDefault();
 
-            string insertItem = SqlQueries.AtualizarAvariaConferencia;
+            string insertItem = SqlQueries.InsertTalieItem;
 
 
             parameters.Add("AutonumTalie", item.TalieId);
@@ -328,8 +329,8 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             parameters.Add("@NfId", item.NotaFiscalId);
             parameters.Add("@Nf", item.NotaFiscal);
             parameters.Add("@Comprimento", item.Comprimento);
-            parameters.Add("@Largura", item.Altura);
-            parameters.Add("@Altura", item.Largura);
+            parameters.Add("@Largura", item.Largura);
+            parameters.Add("@Altura", item.Altura);
             parameters.Add("@Imo", item.IMO);
             parameters.Add("@Imo2", item.IMO2);
             parameters.Add("@Imo3", item.IMO3);
@@ -344,6 +345,8 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             parameters.Add("@FlagFragil", item.Fragil);
             parameters.Add("AutonumEmb", item.CodigoEmbalagem);
             parameters.Add("AutonumPro", reg.autonum_pro);
+            parameters.Add("@Carimbo", item.Carimbo);
+            parameters.Add("@CargaNumerada", item.CargaNumerada);
 
             var ret = await connection.ExecuteAsync(insertItem, parameters);
             if (ret > 0)

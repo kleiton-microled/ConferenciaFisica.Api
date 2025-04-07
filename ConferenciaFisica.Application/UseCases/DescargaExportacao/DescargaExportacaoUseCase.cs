@@ -201,6 +201,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                     Peso = request.Peso,
                     Comprimento = request.Comprimento,
                     Largura = request.Largura,
+                    Altura = request.Altura,
                     IMO = request.IMO,
                     IMO2 = request.IMO2,
                     IMO3 = request.IMO3,
@@ -213,7 +214,10 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                     Fumigacao = request.Fumigacao,
                     Madeira = request.Madeira,
                     Fragil = request.Fragil,
-                    NotaFiscalId= itemOriginal.NotaFiscalId
+                    NotaFiscalId= itemOriginal.NotaFiscalId,
+                    Observacao = itemOriginal.Observacao,
+                    Carimbo = itemOriginal.Carimbo,
+                    CargaNumerada = itemOriginal.CargaNumerada
                 };
 
                 var inserirNovo = await _repository.CadastrarTalieItem(novoItem, registro);

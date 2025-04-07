@@ -38,5 +38,7 @@
         public int QtdDescarga { get; set; }
         public string Resumo { get; set; }
         public string Observacao { get; set; }
+        public bool Carimbo { get; set; }
+        public bool CargaNumerada { get; set; }
     }
 }
