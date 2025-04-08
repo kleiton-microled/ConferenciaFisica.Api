@@ -202,6 +202,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                     Peso = request.Peso,
                     Comprimento = request.Comprimento,
                     Largura = request.Largura,
+                    Altura = request.Altura,
                     IMO = request.IMO,
                     IMO2 = request.IMO2,
                     IMO3 = request.IMO3,

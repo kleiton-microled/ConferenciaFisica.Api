@@ -435,8 +435,8 @@
                                                         tti.NF as NotaFiscal,
                                                         tti.REMONTE,
 														tti.FUMIGACAO,
-														tti.IMO As IMO1,
-														tti.UNO As UNO1,
+														tti.IMO,
+														tti.UNO,
 														tti.IMO2,
 														tti.UNO2,
 														tti.IMO3,
@@ -452,6 +452,9 @@
 														tti.LARGURA,
 														tti.ALTURA,
 														tti.PESO,
+                                                        tti.OBS as Observacao,
+                                                        tti.CARIMBO as Carimbo,
+                                                        tti.CARGA_NUMERADA as CargaNumerada,
 	                                                    tce.DESCRICAO_EMB as Embalagem,
 														tce.SIGLA AS EmbalagemSigla,
 														tce.AUTONUM_EMB As CodigoEmbalagem,
@@ -600,16 +603,19 @@
                                                    										   IMO2 = @Imo2,
                                                    										   IMO3 = @Imo3,
                                                    										   IMO4 = @Imo4,
-                                                   										   IMO5 = @Imo5,
+                                                   										   --IMO5 = @Imo5,
                                                    										   UNO = @Uno,
                                                    										   UNO2 = @Uno2,
                                                    										   UNO3 = @Uno3,
                                                    										   UNO4 = @Uno4,
-                                                   										   UNO5 = @Uno5,
+                                                   										   --UNO5 = @Uno5,
                                                                                            OBS = @Observacao,
+                                                                                           FUMIGACAO = @Fumigacao,
                                                                                            FLAG_MADEIRA = @Madeira,
                                                                                            FLAG_FRAGIL = @Fragil,
-                                                                                           REMONTE = @Remonte
+                                                                                           REMONTE = @Remonte,
+                                                                                           CARIMBO = @Carimbo,
+                                                                                           CARGA_NUMERADA = @CargaNumerada
                                                                                            
                                                    WHERE AUTONUM_TI = @TalieItemId";
         public const string BuscarTaliItemPorId = @"SELECT
@@ -699,7 +705,9 @@
                                                  	imo4,
                                                  	uno4,
                                                  	autonum_emb,
-                                                 	autonum_pro
+                                                 	autonum_pro,
+                                                    carimbo,
+                                                    carga_numerada
                                                  )
                                                  VALUES ( @AutonumTalie,@AutonumRegcs,@QtdDescarga,'PARCIAL','0',
                                                  '',0,@comprimento,@largura,@altura,@Peso,0,'',@remonte,@fumigacao,
@@ -709,7 +717,9 @@
                                                  @IMO4,
                                                  @UNO4, 
                                                  @AutonumEmb,
-                                                 @AutonumPro
+                                                 @AutonumPro,
+                                                 @Carimbo, 
+                                                 @CargaNumerada
                                                  )";
 
         public const string ListarTiposFoto = @"SELECT ID as Id, Codigo, Descricao FROM REDEX.dbo.TB_TIPOS_FOTO;";
