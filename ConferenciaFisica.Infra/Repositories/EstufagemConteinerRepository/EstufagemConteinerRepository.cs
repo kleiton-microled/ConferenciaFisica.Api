@@ -107,5 +107,24 @@ namespace ConferenciaFisica.Infra.Repositories.EstufagemConteinerRepository
                 throw new Exception($"Erro ao processar: {ex.Message}", ex);
             }
         }
+
+        public async Task<bool> IniciarEstufagem(TalieInsertDTO talie)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
+            var query = SqlQueries.IniciarEstufagem;
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("@AutonumPatio", talie.AutonumPatio);
+            parameters.Add("@AutonumBoo", talie.AutonumBoo);
+            parameters.Add("@FormaOperacao", talie.Operacao);
+            parameters.Add("@Conferente", talie.Conferente);
+            parameters.Add("@Equipe", talie.Equipe);
+            parameters.Add("@AutonumRo", talie.AutonumRo);
+
+
+            var result = await connection.ExecuteAsync(query, parameters);
+
+            return result > 0;
+        }
     }
 }

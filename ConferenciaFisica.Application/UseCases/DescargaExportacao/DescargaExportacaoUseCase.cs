@@ -518,5 +518,10 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
         {
             return _mapper.Map<IEnumerable<Yard>, IEnumerable<LocaisYardViewModel>>(await _repository.BuscarYard(search));
         }
+
+        public Task<ServiceResult<bool>> FinalizarProcesso(int id, bool crossdock)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

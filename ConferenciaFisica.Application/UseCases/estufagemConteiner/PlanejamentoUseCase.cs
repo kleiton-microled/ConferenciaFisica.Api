@@ -1,12 +1,13 @@
 ﻿using ConferenciaFisica.Application.Common.Models;
 using ConferenciaFisica.Application.UseCases.estufagemConteiner.Interfaces;
 using ConferenciaFisica.Contracts.DTOs.EstufagemConteiner;
+using ConferenciaFisica.Domain.Entities.DescargaExportacao;
 using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Domain.Repositories.EstufagemConteiner;
 
 namespace ConferenciaFisica.Application.UseCases.estufagemConteiner
 {
-    
+
     public class PlanejamentoUseCase : IPlanejamentoUseCase
     {
         private readonly IEstufagemConteinerRepository _repository;
@@ -36,6 +37,24 @@ namespace ConferenciaFisica.Application.UseCases.estufagemConteiner
             }
 
             return ServiceResult<SaldoCargaMarcanteDto>.Success(data, "Dados localizado com sucesso.");
+        }
+
+        public async Task<ServiceResult<bool>> IniciarEstufagem(TalieInsertDTO talie)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+
+            var result = await _repository.IniciarEstufagem(talie);
+            if (result)
+            {
+                _serviceResult.Result = result;
+                _serviceResult.Mensagens.Add("Serviço Iniciado com sucesso!");
+            }
+            else
+            {
+                _serviceResult.Mensagens.Add("Falha ao tentar iniciar!");
+            }
+
+            return _serviceResult;
         }
     }
 }

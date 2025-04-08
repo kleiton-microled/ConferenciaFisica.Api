@@ -1,4 +1,6 @@
 ﻿using ConferenciaFisica.Application.UseCases.estufagemConteiner.Interfaces;
+using ConferenciaFisica.Application.ViewModels;
+using ConferenciaFisica.Contracts.DTOs.EstufagemConteiner;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenciaFisica.Api.Controllers
@@ -7,7 +9,7 @@ namespace ConferenciaFisica.Api.Controllers
     [Route("api/estufagem-conteiner")]
     public class EstufagemConteinerController : ControllerBase
     {
-        private readonly IPlanejamentoUseCase _planjamentoUseCase;
+        private readonly IPlanejamentoUseCase _planejamentoUseCase;
         private readonly IItensEstufadosUseCase _itensEstufadosUseCase;
         private readonly IEtiquetasUseCase _etiquetasUseCase;
 
@@ -15,7 +17,7 @@ namespace ConferenciaFisica.Api.Controllers
                                             IItensEstufadosUseCase itensEstufadosUseCase,
                                             IEtiquetasUseCase etiquetasUseCase)
         {
-            _planjamentoUseCase = planjamentoUseCase;
+            _planejamentoUseCase = planjamentoUseCase;
             _itensEstufadosUseCase = itensEstufadosUseCase;
             _etiquetasUseCase = etiquetasUseCase;
         }
@@ -23,7 +25,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpGet("planejamento")]
         public async Task<IActionResult> CarregarPlanejamento([FromQuery] int planejamento)
         {
-            var resultado = await _planjamentoUseCase.BuscarPlanejamento(planejamento);
+            var resultado = await _planejamentoUseCase.BuscarPlanejamento(planejamento);
 
             if (!resultado.Status && !string.IsNullOrEmpty(resultado.Error))
                 return BadRequest(resultado);
@@ -45,7 +47,7 @@ namespace ConferenciaFisica.Api.Controllers
         [HttpGet("saldo-carga-marcante")]
         public async Task<IActionResult> BuscarSaldoCargaMarcante([FromQuery] int planejamento, string codigoMarcante)
         {
-            var resultado = await _planjamentoUseCase.BuscarSaldoCargaMarcante(planejamento, codigoMarcante);
+            var resultado = await _planejamentoUseCase.BuscarSaldoCargaMarcante(planejamento, codigoMarcante);
 
             if (!resultado.Status && !string.IsNullOrEmpty(resultado.Error))
                 return BadRequest(resultado);
@@ -63,5 +65,19 @@ namespace ConferenciaFisica.Api.Controllers
 
             return Ok(resultado);
         }
+
+        [HttpPost("iniciar-estufagem")]
+        public async Task<IActionResult> GravarTalie([FromBody] TalieInsertDTO request)
+        {
+            var result = await _planejamentoUseCase.IniciarEstufagem(request);
+
+            if (!result.Status)
+                return NotFound(result.Mensagens);
+
+            return Ok(result);
+
+        }
+
+
     }
 }

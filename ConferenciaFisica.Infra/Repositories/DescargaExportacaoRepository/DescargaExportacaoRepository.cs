@@ -123,7 +123,6 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             return result > 0;
         }
 
-
         public async Task<int> AtualizarOuCriarTalie(DescargaExportacaoCommand command)
         {
             using var connection = _connectionFactory.CreateConnection();
