@@ -950,13 +950,19 @@
 
         public const string CrossDockSetPatioToF = @"UPDATE REDEX.dbo.tb_patio 
                                                         SET ef = 'F' 
-                                                     WHERE autonum_patio = @patioId";
+                                                     WHERE autonum_patio = @id";
 
 
 
         public const string CrossDockGetRomaneioId = @"SELECT autonum_ro 
                                                         FROM REDEX.dbo.tb_romaneio 
-                                                        WHERE autonum_patio = @patioId";
+                                                        WHERE autonum_patio = @id";
+
+
+        public const string CrossDockInsertRomaneio = @"SELECT autonum_ro 
+                                                        FROM REDEX.dbo.tb_romaneio 
+                                                        WHERE autonum_patio = @id";
+
 
         public const string CrossDockProximoIdSequencial = @"SELECT NEXT VALUE FOR REDEX.dbo.seq_tb_romaneio";
 
@@ -974,7 +980,7 @@
                                                             flag_historico,
                                                             crossdocking
                                                         ) VALUES (
-                                                            @ID,
+                                                            @id,
                                                             GETDATE(),
                                                             @nUser,
                                                             @mskConteinerTag,
@@ -987,6 +993,23 @@
                                                             1,
                                                             1
                                                         )";
+
+        public const string CrossDockInserirRomaneioCs = @"INSERT INTO REDEX.dbo.tb_romaneio_cs 
+                                                            (
+                                                            autonum_rcs, 
+                                                            autonum_ro, 
+                                                            autonum_pcs, 
+                                                            qtde, 
+                                                            volume
+                                                            ) 
+                                                            VALUES 
+                                                            (
+                                                            @nextId, 
+                                                            @autonumRo, 
+                                                            @autonumPcs,
+                                                            @qtdeEntrada,
+                                                            0)";
+
         #endregion DESCARGA_EXPORTACAO
         #region MOVIMENTACAO_CARGA_SOLTA
         public const string BuscarMarcantesPorTermo = @"SELECT

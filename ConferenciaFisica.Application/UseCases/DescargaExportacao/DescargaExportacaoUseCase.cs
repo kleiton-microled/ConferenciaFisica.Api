@@ -403,7 +403,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             return _serviceResult;
         }
 
-        public async Task<ServiceResult<bool>> FinalizarProcesso(int talie, bool crossdock,string usuario, string container = "", int patioContainer = 0)
+        public async Task<ServiceResult<bool>> FinalizarProcesso(int talie, bool crossdock,string usuario, int patioContainer = 0)
         {
             var _serviceResult = new ServiceResult<bool>();
             //Validar quantidade registrada X quantidade descarregada
@@ -454,26 +454,29 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
                 int romaneioId = await _repository.GetCrossDockRomaneioId(patioContainer) ?? 0;
                 if(romaneioId == 0)
                 {
-                    romaneioId = await _repository.GetCrossDockSequencialId();
+                    //romaneioId = await _repository.GetCrossDockSequencialId();
 
-                    await _repository.InserirRomaneio(romaneioId, usuario, container, reservaContainer);
+                    romaneioId= await _repository.InserirRomaneio(romaneioId, usuario, patioContainer, reservaContainer);
 
                     foreach (var item in dtRs)
                     {
-                        await _repository.InserirRomaneioCs(item.AutonumPcs, item.QtdeEntrada);
+                        await _repository.InserirRomaneioCs(romaneioId, item.AutonumPcs, item.QtdeEntrada);
                     }
 
-                    DateTime dataInicioEstufagem = await _repository.CrossDockGetDataInicoEstufagem(patioContainer);
-                    DateTime dataFimEstufagem = await _repository.CrossDockGetDataFimEstufagem(patioContainer);
+                    //DateTime dataInicioEstufagem = await _repository.CrossDockGetDataInicoEstufagem(patioContainer);
+                    //DateTime dataFimEstufagem = await _repository.CrossDockGetDataFimEstufagem(patioContainer);
+                    // TODO: Entender como pegar essa data
+                    DateTime dataInicioEstufagem =DateTime.Now;
+                    DateTime dataFimEstufagem = DateTime.Now;
 
                     var talieByContainer = await _repository.CrossDockBuscarTaliePorContainer(patioContainer);
-                    if (talieByContainer == null || !talieByContainer.Any())
+                    if (talieByContainer == null || talieByContainer == 0)
                     {
                         // retornar o item criado
-                        talieByContainer = await _repository.CrossDockCriarTalie(patioContainer, dataInicioEstufagem, dataFimEstufagem, reservaContainer, romaneioId);
-
-                        // id do talie criado
-                        await _repository.UpdateRomaneio(124);
+                        await _repository.CrossDockCriarTalie(patioContainer, dataInicioEstufagem, dataFimEstufagem, reservaContainer, romaneioId, "");
+                        talieByContainer = await _repository.CrossDockGetLastTalie();
+                        
+                        if(talieByContainer != null) await _repository.UpdateRomaneio(talieByContainer.Value, romaneioId);
                     }
                     else
                     {
@@ -482,10 +485,10 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
 
                     foreach (var item in dtRs)
                     {
-                        await _repository.InserirSaidaNF(patioContainer,123, 2 );
-                        await _repository.CrossDockAtualizarQuantidadeEstufadaNF(1, 234 );
+                        await _repository.InserirSaidaNF(patioContainer,item.AutonumNf, item.QtdeEstufagem );
+                        await _repository.CrossDockAtualizarQuantidadeEstufadaNF(item.AutonumNf, item.QtdeEstufagem);
 
-                        //await _repository.InserirSaidaCarga( );
+                        await _repository.CrossDockInserirSaidaCarga(item.AutonumPcs, item.QtdeEntrada, item.AutonumEmb,item.Bruto, item.Altura, item.Comprimento, item.Largura, item.VolumeDeclarado, patioContainer, DateTime.Now.ToString(), item.AutonumNf, talieByContainer, romaneioId);
 
                         int quantidadeSaida = await _repository.GetQuantidadeSaidaCarga(item.AutonumPcs);
 
