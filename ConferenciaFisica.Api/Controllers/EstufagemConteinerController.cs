@@ -78,6 +78,30 @@ namespace ConferenciaFisica.Api.Controllers
 
         }
 
+        [HttpGet("estufar")]
+        public async Task<IActionResult> Estufar(TalieInsertDTO request)
+        {
+            var result = await _planejamentoUseCase.Estufar(request);
+
+            if (!result.Status)
+                return NotFound(result.Mensagens);
+
+            return Ok(result);
+
+        }
+
+        [HttpPost("finalizar")]
+        public async Task<IActionResult> Finalizar([FromBody] TalieInsertDTO request)
+        {
+            var result = await _planejamentoUseCase.Finalizar(request);
+
+            if (!result.Status)
+                return NotFound(result.Mensagens);
+
+            return Ok(result);
+
+        }
+
 
     }
 }

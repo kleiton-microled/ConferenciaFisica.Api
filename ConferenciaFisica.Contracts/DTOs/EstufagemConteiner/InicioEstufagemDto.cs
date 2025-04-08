@@ -11,6 +11,7 @@
         public bool FlagEstufagem { get; set; } = true;
         public bool FlagCarregamento { get; set; } = true;
         public bool Crossdocking { get; set; } = false;
+
     }
 
 }

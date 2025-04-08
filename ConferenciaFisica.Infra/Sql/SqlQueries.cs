@@ -1088,36 +1088,47 @@
                                                       redex.dbo.tb_talie tal ON ro.autonum_ro = tal.autonum_ro
                                                   WHERE ro.autonum_ro = @planejamento";
         public const string BuscarSaldoCargaMarcante = @"SELECT
-                                                    	rcs.autonum_rcs AutonumRcs,
-                                                    	pcs.autonum_pcs AutonumPcs,
-                                                    	boo.autonum_boo AutonumBoo,
-                                                    	boo.reference as ReservaCarga,
-                                                    	nf.num_nf NumNf,
-                                                    	nf.autonum_nf AutonumNf,
-                                                    	RCS.QTDE Qtde,
-                                                    	rcs.qtde-(
-                                                    	select
-                                                    		isnull(sum(qtde_saida),
-                                                    		0)
-                                                    	from
-                                                    		redex.dbo.tb_saida_carga sc
-                                                    	where
-                                                    		sc.AUTONUM_PCS = rcs.autonum_pcs) Saldo,
-                                                    m.STR_CODE128 as Marcante
-                                                    FROM
-                                                    	REDEX.DBO.TB_ROMANEIO_CS RCS
-                                                    INNER JOIN REDEX.DBO.TB_PATIO_CS PCS ON
-                                                    	RCS.AUTONUM_PCS = PCS.AUTONUM_PCS
-                                                    inner join REDEX.DBO.tb_booking_carga BCG on
-                                                    	pcs.autonum_BCG = BCG.autonum_BCG
-                                                    inner join REDEX.DBO.tb_booking BOO on
-                                                    	BCG.autonum_BOO = BOO.autonum_BOO
-                                                    inner join REDEX.DBO.TB_NOTAS_FISCAIS nf on
-                                                    	PCS.AUTONUM_NF = nf.AUTONUM_NF
-                                                    inner join REDEX.DBO.tb_marcantes_rdx m on
-                                                    	rcs.autonum_pcs = m.AUTONUM_PCS
-                                                    WHERE
-                                                    	rcs.autonum_ro = @planejamento and m.STR_CODE128 = @codigomarcante --000000000027";
+                                                        	rcs.autonum_rcs AutonumRcs,
+                                                        	pcs.autonum_pcs AutonumPcs,
+                                                        	boo.autonum_boo AutonumBoo,
+                                                        	boo.reference as ReservaCarga,
+                                                        	ro.AUTONUM_PATIO as AutonumPatio,
+                                                        	ISNULL(pcs.autonum_emb, 0) AS AutonumEmb,
+                                                        	ISNULL(pcs.bruto, 0) AS bruto,
+                                                        	ISNULL(pcs.comprimento, 0) AS Comprimento,
+                                                            ISNULL(pcs.largura, 0) AS Largura,
+                                                            ISNULL(pcs.altura, 0) AS Altura,
+                                                            ISNULL(pcs.autonum_pro, 0) AS autonumPro,
+                                                            ISNULL(rcs.autonum_rcs, 0) AS autonumRcs,
+                                                        	nf.num_nf NumNf,
+                                                        	nf.autonum_nf AutonumNf,
+                                                        	RCS.QTDE Qtde,
+                                                        	rcs.qtde-(
+                                                        	select
+                                                        		isnull(sum(qtde_saida),
+                                                        		0)
+                                                        	from
+                                                        		redex.dbo.tb_saida_carga sc
+                                                        	where
+                                                        		sc.AUTONUM_PCS = rcs.autonum_pcs) Saldo,
+                                                        	m.STR_CODE128 as Marcante
+                                                        FROM
+                                                        	REDEX.DBO.TB_ROMANEIO_CS RCS
+                                                        INNER JOIN REDEX.DBO.TB_PATIO_CS PCS ON
+                                                        	RCS.AUTONUM_PCS = PCS.AUTONUM_PCS
+                                                        INNER JOIN REDEX.DBO.tb_booking_carga BCG on
+                                                        	pcs.autonum_BCG = BCG.autonum_BCG
+                                                        INNER JOIN REDEX.DBO.tb_booking BOO on
+                                                        	BCG.autonum_BOO = BOO.autonum_BOO
+                                                        INNER JOIN REDEX.DBO.TB_NOTAS_FISCAIS nf on
+                                                        	PCS.AUTONUM_NF = nf.AUTONUM_NF
+                                                        INNER JOIN REDEX.DBO.tb_marcantes_rdx m on
+                                                        	rcs.autonum_pcs = m.AUTONUM_PCS
+                                                        INNER JOIN redex.dbo.tb_romaneio ro ON ro.AUTONUM_RO = RCS.AUTONUM_RO 
+                                                        WHERE
+                                                         rcs.autonum_ro = @planejamento
+                                                         and m.STR_CODE128 = @codigoMarcante --000000000027";
+
         public const string BUscarPlan = @"SELECT ISNULL(SUM(rcs.qtde), 0) AS Quanto
                                             FROM redex.dbo.tb_romaneio ro
                                             INNER JOIN redex.dbo.tb_romaneio_cs rcs ON ro.autonum_ro = rcs.autonum_ro
@@ -1213,6 +1224,75 @@
                                                                                 @Equipe,
                                                                                 @AutonumRo
                                                                             )";
+        public const string UpdateTbRomaneio = @"UPDATE redex.dbo.tb_romaneio
+                                                    SET autonum_talie = @AutonumTalie
+                                                 WHERE autonum_ro = @AutonumRo";
+        public const string AtualizarEstufagemTbTalie = @"UPDATE redex.dbo.tb_talie
+                                                        SET termino = GETDATE(),
+                                                            flag_fechado = 1
+                                                        WHERE autonum_patio = @AutonumPatio";
+        public const string EstufarCarga = @"INSERT INTO redex.dbo.tb_saida_carga (
+                                                                                   AUTONUM_SC,
+                                                                                   AUTONUM_PCS,
+                                                                                   QTDE_SAIDA,
+                                                                                   AUTONUM_EMB,
+                                                                                   PESO_BRUTO,
+                                                                                   ALTURA,
+                                                                                   COMPRIMENTO,
+                                                                                   LARGURA,
+                                                                                   VOLUME,
+                                                                                   AUTONUM_PATIO,
+                                                                                   ID_CONTEINER,
+                                                                                   MERCADORIA,
+                                                                                   DATA_ESTUFAGEM,
+                                                                                   AUTONUM_NFI,
+                                                                                   AUTONUM_RO,
+                                                                                   AUTONUM_TALIE,
+                                                                                   CODPRODUTO,
+                                                                                   AUTONUM_RCS
+                                                                               ) VALUES (
+                                                                                   @AutonumSc,
+                                                                                   @AutonumPcs,
+                                                                                   @QtdeSaida,
+                                                                                   @AutonumEmb,
+                                                                                   @PesoBruto,
+                                                                                   @Altura,
+                                                                                   @Comprimento,
+                                                                                   @Largura,
+                                                                                   @Volume,
+                                                                                   @AutonumPatio,
+                                                                                   @IdConteiner,
+                                                                                   @Mercadoria,
+                                                                                   GETDATE(),
+                                                                                   @AutonumNf,
+                                                                                   @AutonumRo,
+                                                                                   @AutonumTalie,
+                                                                                   @CodProduto,
+                                                                                   @AutonumRcs
+                                                                               )";
+        public const string EstufarUpdateTbMarcante = @"UPDATE redex.dbo.tb_marcantes_rdx
+                                                        SET volumes = volumes - @QtdeEstufar
+                                                        WHERE autonum = @AutonumMarcante";
+
+        public const string EstufarUpdateTbAmrNfSaida = @"INSERT INTO redex.dbo.tb_amr_nf_saida (AUTONUM_NFI,
+                                                                                                  AUTONUM_PATIO,
+                                                                                                  QTDE_ESTUFADA,
+                                                                                                  AUTONUM_PATIO_CS
+                                                                                                ) VALUES (
+                                                                                                  @AutonumNfi,
+                                                                                                  @AutonumPatio,
+                                                                                                  @QtdeEstufada,
+                                                                                                  @AutonumPcs
+                                                                                                )";
+
+        public const string EstufarUpdateTbPatio = @"UPDATE redex.dbo.tb_patio
+                                                     SET ef = 'F'
+                                                     WHERE autonum_patio = @AutonumPatio
+                                                       AND ef <> 'F'";
+
+        public const string AtualizarEstufagemTbRomaneio = @"UPDATE redex.dbo.tb_romaneio
+                                                                SET flag_historico = 1
+                                                            WHERE autonum_ro = @AutonumRo";
         #endregion
         #region SAIDA_CAMINHAO
 

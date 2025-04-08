@@ -11,6 +11,13 @@
         public int Qtde { get; set; }
         public int Saldo { get; set; }
         public string Marcante { get; set; } = string.Empty;
+        public long AutonumPatio { get; set; }
+        public long AutonumEmb { get; set; }
+        public decimal Bruto { get; set; }
+        public decimal Comprimento { get; set; }
+        public decimal Largura { get; set; }
+        public decimal Altura { get; set; }
+        public long AutonumPro { get; set; }
     }
 
 }

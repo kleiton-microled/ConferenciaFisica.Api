@@ -76,20 +76,20 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             var _serviceResult = new ServiceResult<bool>();
 
             var talie = _mapper.Map<TalieDTO>(request.Talie);
-            if (talie is not null)
-            {
-                talie.Operacao = "1";
-                talie.Equipe = 1;
-            }
-
+            //if (talie is not null)
+            //{
+            //    talie.Operacao = "1";
+            //    talie.Equipe = 1;
+            //}
+            
             var command = DescargaExportacaoCommand.CreateNew(request.Registro,
                                                              talie,
                                                              request.Placa,
                                                              request.Reserva,
                                                              request.Cliente,
                                                              request.IdReserva,
-                                                             request.IdConferente,
-                                                             request.IdEquipe);
+                                                             request.Talie.Conferente,
+                                                             request.Talie.Equipe);
 
             var talieId = await _repository.AtualizarOuCriarTalie(command);
             if (talieId > 0)

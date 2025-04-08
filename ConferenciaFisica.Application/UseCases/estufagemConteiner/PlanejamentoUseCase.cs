@@ -2,7 +2,6 @@
 using ConferenciaFisica.Application.UseCases.estufagemConteiner.Interfaces;
 using ConferenciaFisica.Contracts.DTOs.EstufagemConteiner;
 using ConferenciaFisica.Domain.Entities.DescargaExportacao;
-using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Domain.Repositories.EstufagemConteiner;
 
 namespace ConferenciaFisica.Application.UseCases.estufagemConteiner
@@ -52,6 +51,42 @@ namespace ConferenciaFisica.Application.UseCases.estufagemConteiner
             else
             {
                 _serviceResult.Mensagens.Add("Falha ao tentar iniciar!");
+            }
+
+            return _serviceResult;
+        }
+
+        public async Task<ServiceResult<bool>> Estufar(TalieInsertDTO request)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+
+            var result = await _repository.Estufar(request);
+            if (result)
+            {
+                _serviceResult.Result = result;
+                _serviceResult.Mensagens.Add("Carga Estufada com sucesso!");
+            }
+            else
+            {
+                _serviceResult.Mensagens.Add("Falha ao tentar estufar!");
+            }
+
+            return _serviceResult;
+        }
+
+        public async Task<ServiceResult<bool>> Finalizar(TalieInsertDTO talie)
+        {
+            var _serviceResult = new ServiceResult<bool>();
+
+            var result = await _repository.Finalizar(talie);
+            if (result)
+            {
+                _serviceResult.Result = result;
+                _serviceResult.Mensagens.Add("Serviço Finalizado com sucesso!");
+            }
+            else
+            {
+                _serviceResult.Mensagens.Add("Falha ao tentar finalizar!");
             }
 
             return _serviceResult;

@@ -9,5 +9,7 @@ namespace ConferenciaFisica.Domain.Repositories.EstufagemConteiner
         Task<IEnumerable<EtiquetaDTO>> BuscarEtiquetas(int planejamento);
         Task<SaldoCargaMarcanteDto> BuscarSaldoCargaMarcante(int planejamento, string codigoMarcante);
         Task<bool> IniciarEstufagem(TalieInsertDTO talie);
+        Task<bool> Estufar(TalieInsertDTO talie);
+        Task<bool> Finalizar(TalieInsertDTO talie);
     }
 }
