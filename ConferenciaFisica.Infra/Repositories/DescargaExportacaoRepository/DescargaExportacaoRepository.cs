@@ -7,6 +7,7 @@ using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.Sql;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using System.ComponentModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using static Dapper.SqlMapper;
@@ -89,11 +90,11 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return null;    
+                return null;
             }
         }
 
-        public async Task<int> GetCrossDockRomaneioId(int id)
+        public async Task<int?> GetCrossDockRomaneioId(int idQuery)
         {
             try
             {
@@ -101,7 +102,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
                 var query = SqlQueries.CrossDockGetRomaneioId;
 
-                var ret = await connection.QuerySingleAsync<int>(query);
+                var ret = await connection.QuerySingleOrDefaultAsync<int>(query, new { id = idQuery });
 
                 return ret;
             }
@@ -114,13 +115,20 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
         public async Task<bool> CrossDockUpdatePatioF(int id)
         {
-            using var connection = _connectionFactory.CreateConnection();
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
 
-            var query = SqlQueries.CrossDockSetPatioToF;
+                var query = SqlQueries.CrossDockSetPatioToF;
 
-            var result = await connection.ExecuteAsync(query, new {patioId = id});
+                var result = await connection.ExecuteAsync(query, new { id = id });
 
-            return result > 0;
+                return result > 0;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
         }
 
         public async Task<int> AtualizarOuCriarTalie(DescargaExportacaoCommand command)
@@ -377,7 +385,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                                         INNER JOIN REDEX..tb_booking_carga bcg ON rcs.autonum_bcg = bcg.autonum_bcg
                                         WHERE reg.autonum_reg = @CodigoRegistro";
 
-            var reg = connection.Query(queryDescarga, new { CodigoRegistro = registro }).Where(x=> x.NF == item.NotaFiscal).FirstOrDefault();
+            var reg = connection.Query(queryDescarga, new { CodigoRegistro = registro }).Where(x => x.NF == item.NotaFiscal).FirstOrDefault();
 
             string insertItem = SqlQueries.InsertTalieItem;
 
@@ -642,8 +650,8 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                     await connection.ExecuteAsync(sqlUpdatePatio, new { Id = novoId }, transaction);
 
                     //TOUpdate TB_MARCANTE_RDX set Autonum_pcs where autonum_ti = @Id
-                    await connection.ExecuteAsync("Update REDEX.dbo.TB_MARCANTES_RDX set Autonum_pcs = @Id where autonum_ti = @idTalieItem", 
-                        new {id= novoId, idTalieItem = registro.Id }, transaction);
+                    await connection.ExecuteAsync("Update REDEX.dbo.TB_MARCANTES_RDX set Autonum_pcs = @Id where autonum_ti = @idTalieItem",
+                        new { id = novoId, idTalieItem = registro.Id }, transaction);
                 }
 
                 await transaction.CommitAsync();
@@ -837,7 +845,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
             int rowsAffected = await connection.ExecuteAsync(sql, new { TalieId = talieId });
 
-            return rowsAffected > 0; 
+            return rowsAffected > 0;
         }
 
         public async Task FinalizarReservaAsync(int booId)
@@ -905,9 +913,290 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             return ret;
         }
 
-        Task<int?> IDescargaExportacaoRepository.GetCrossDockRomaneioId(int patioContainer)
+
+        //public async Task<int> GetCrossDockSequencialId()
+        //{
+        //    try
+        //    {
+        //        using var connection = _connectionFactory.CreateConnection();
+
+        //        var query = SqlQueries.CrossDockGetRomaneioId;
+
+        //        var ret = await connection.QuerySingleOrDefaultAsync<int>(query, new { id = idQuery });
+
+        //        return ret;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.Message);
+        //    }
+        //}
+
+        public async Task<int> InserirRomaneio(int romaneioId, string usuario, int container, int reservaContainer)
         {
-            throw new NotImplementedException();
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+              
+
+                var nextId = await ObterProximoIdAsync("seq_tb_romaneio");
+                var query = SqlQueries.CrossDockInserirRomaneio;
+
+                var ret = await connection.ExecuteAsync(query, new { Id = nextId, nUser = usuario, mskConteinerTag = container, Reserva_CC = reservaContainer });
+               
+                return nextId;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return 0;
+            }
+        }
+
+        public async Task InserirRomaneioCs(int romaneioId, int autonumPcs, decimal qtdeEntrada)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+               
+                var nextId = await ObterProximoIdAsync("seq_tb_romaneio_cs");
+
+                var query = SqlQueries.CrossDockInserirRomaneioCs;
+
+                var ret = await connection.ExecuteAsync(query, new { nextId = nextId, autonumRo = romaneioId, autonumPcs = autonumPcs, qtdeEntrada = qtdeEntrada });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public async Task<int?> CrossDockBuscarTaliePorContainer(int patioContainers)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                var query = @" SELECT autonum_talie 
+                                    FROM REDEX.dbo.tb_talie 
+                                    WHERE autonum_patio = @patioContainer 
+                                      AND flag_carregamento = 1;";
+
+                var result = await connection.QuerySingleOrDefaultAsync<int>(query, new { patioContainer = patioContainers });
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            return null;
+        }
+
+        public async Task<DateTime> CrossDockGetDataInicoEstufagem(int patioContainer)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                var nexIdQuery = @"SELECT MIN(inicio) 
+                                    FROM REDEX.dbo.TB_TALIE 
+                                        WHERE AUTONUM_PATIO = @patioContainer 
+                                    AND FLAG_DESCARGA = 1;";
+
+                var result = await connection.QuerySingleAsync<DateTime?>(nexIdQuery, new { patioContainer = patioContainer });
+
+                return result ?? new DateTime();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new DateTime();
+            }
+        }
+
+        public async Task<DateTime> CrossDockGetDataFimEstufagem(int patioContainer)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                var nexIdQuery = @"SELECT MIN(TERMINO) 
+                                    FROM REDEX.dbo.TB_TALIE 
+                                    WHERE AUTONUM_PATIO = @patioContainer 
+                                      AND FLAG_DESCARGA = 1;";
+
+                var result = await connection.QuerySingleAsync<DateTime>(nexIdQuery, new { patioContainer = patioContainer });
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new DateTime();
+            }
+        }
+
+        public async Task CrossDockUpdateTalieItem(DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int patioContainer)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                var query = @"UPDATE REDEX.dbo.tb_talie
+                                    SET inicio = @inicio,
+                                        termino = @termino
+                                    WHERE autonum_patio = @autonumPatio
+                                      AND flag_carregamento = 1";
+
+                var result = await connection.ExecuteAsync(query, new { inicio = dataInicioEstufagem, termino = dataFimEstufagem, autonumPatio = patioContainer });
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public async Task UpdateRomaneio(int talieCarregamento, int idRomaneio)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                var query = @"UPDATE REDEX.dbo.tb_romaneio
+                                    SET autonum_talie = @talieCarregamento
+                                    WHERE autonum_ro = @idRomaneio";
+
+                var result = await connection.ExecuteAsync(query, new { talieCarregamento = talieCarregamento, idRomaneio = idRomaneio });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public async Task<int?> CrossDockCriarTalie(int patioContainer, DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int reservaContainer, int romaneioId, string operacao)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                var query = @"INSERT INTO REDEX.dbo.tb_talie
+                                    (
+                                        autonum_patio, inicio, termino, flag_estufagem, crossdocking,
+                                        autonum_boo, forma_operacao, conferente, equipe,
+                                        flag_descarga, flag_carregamento, obs, autonum_ro, autonum_gate, flag_fechado
+                                    )
+                                    VALUES
+                                    (
+                                        @autonum_patio,
+                                        @inicio,
+                                        @termino,
+                                        1, -- flag_estufagem
+                                        1, -- crossdocking
+                                        @autonum_boo,
+                                        @forma_operacao,
+                                        NULL, -- conferente
+                                        NULL, -- equipe
+                                        0,    -- flag_descarga
+                                        1,    -- flag_carregamento
+                                        '',   -- obs
+                                        @autonum_ro,
+                                        0,    -- autonum_gate
+                                        1     -- flag_fechado
+                                    )";
+
+                var result = await connection.ExecuteAsync(query, new { autonum_patio = patioContainer, inicio = dataInicioEstufagem, termino = dataFimEstufagem, autonum_boo = reservaContainer, forma_operacao = operacao, autonum_ro = romaneioId });
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return null;
+            }
+        }
+
+        public async Task InserirSaidaNF(int patioContainer, int numeroNf, int quantidadeEstufada)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                var query = @"INSERT INTO REDEX.dbo.TB_AMR_NF_SAIDA 
+                            (AUTONUM_PATIO, AUTONUM_NFI, QTDE_ESTUFADA)
+                            VALUES
+                            (@autonumPatio, @autonumNf, @qtdeEstufada)";
+
+                var result = await connection.ExecuteAsync(query, new { autonumPatio = patioContainer, autonumNf = numeroNf, qtdeEstufada = quantidadeEstufada });
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public async Task CrossDockAtualizarQuantidadeEstufadaNF(int numeroNf, int quantidadeEstufada)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                var query = @"UPDATE REDEX.dbo.TB_NOTAS_ITENS 
+                                SET QTDE_ESTUFADA = @qtdeEstufada
+                                WHERE AUTONUM_NFI = @autonumNfi";
+
+                var result = await connection.ExecuteAsync(query, new { qtdeEstufada = quantidadeEstufada, autonumNfi = numeroNf });
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public async Task<int> GetQuantidadeSaidaCarga(int autonumPcs)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var nexIdQuery = @"DECLARE @total_saida DECIMAL(18,2);
+                                    SELECT @total_saida = ISNULL(SUM(qtde_saida), 0) 
+                                    FROM REDEX.dbo.tb_saida_carga 
+                                    WHERE autonum_pcs = @autonum_pcs;
+
+                                    SELECT @total_saida AS TotalSaida;";
+
+                return await connection.QuerySingleOrDefaultAsync<int>(nexIdQuery);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return 0;
+            }
+
+        }
+
+        public async Task UpdatepatioCsFlag(int autonumPcs)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var query = @"UPDATE REDEX.dbo.tb_patio_cs 
+                                SET flag_historico = 1 
+                                WHERE autonum_pcs = @autonum_pcs";
+
+                var result = await connection.ExecuteAsync(query, new
+                {
+                    autonum_pcs = autonumPcs
+                });
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         public Task<int> GetCrossDockSequencialId()
@@ -915,64 +1204,81 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             throw new NotImplementedException();
         }
 
-        public Task InserirRomaneio(int romaneioId, string usuario, string container, int reservaContainer)
+        public async Task<int?> CrossDockGetLastTalie()
         {
-            throw new NotImplementedException();
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                var nexIdQuery = @"SELECT IDENT_CURRENT('REDEX.dbo.TB_TALIE')";
+
+                var result = await connection.QuerySingleOrDefaultAsync<int>(nexIdQuery);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return null;
+            }
         }
 
-        public Task InserirRomaneioCs(int autonumPcs, decimal qtdeEntrada)
+        public async Task<int> ObterProximoIdAsync(string databaseName)
         {
-            throw new NotImplementedException();
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            string sql = $@"
+                INSERT INTO REDEX.dbo.{databaseName} (DATA)
+                OUTPUT inserted.AUTONUM
+                VALUES (GETDATE())";
+
+            return await connection.ExecuteScalarAsync<int>(sql);
         }
 
-        public Task<IEnumerable<object>> CrossDockBuscarTaliePorContainer(int patioContainer)
+        public async Task CrossDockInserirSaidaCarga(int autonumPcs, decimal qtdeEntrada, int autonumEmb, decimal bruto, decimal altura, decimal comprimento, decimal largura, decimal volumeDeclarado, int patioContainer, string v, int autonumNf, int? talieByContainer, int romaneioId)
         {
-            throw new NotImplementedException();
-        }
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
 
-        public Task<DateTime> CrossDockGetDataInicoEstufagem(int patioContainer)
-        {
-            throw new NotImplementedException();
-        }
+                var nextId = await ObterProximoIdAsync("seq_saida_carga");
 
-        public Task<DateTime> CrossDockGetDataFimEstufagem(int patioContainer)
-        {
-            throw new NotImplementedException();
-        }
+                var query = @"INSERT INTO REDEX.dbo.TB_SAIDA_CARGA 
+                                (
+                                    autonum_sc, AUTONUM_PCS, QTDE_SAIDA, AUTONUM_EMB, PESO_BRUTO, 
+                                    ALTURA, COMPRIMENTO, LARGURA, VOLUME, autonum_patio, 
+                                    ID_CONTEINER, MERCADORIA, DATA_ESTUFAGEM, autonum_nfi, autonum_talie, autonum_ro
+                                ) 
+                                VALUES 
+                                (
+                                    @id_sc, @autonum_pcs, @qtde_saida, @autonum_emb, @peso_bruto,
+                                    @altura, @comprimento, @largura, @volume, @autonum_patio,
+                                    @id_conteiner, @mercadoria, @data_estufagem, @autonum_nfi, @autonum_talie, @autonum_ro
+                                )";
 
-        public Task CrossDockUpdateTalieItem(DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int patioContainer)
-        {
-            throw new NotImplementedException();
-        }
+                var result = await connection.ExecuteAsync(query, new { id_sc = nextId,
+                    autonum_pcs = autonumPcs,
+                    qtde_saida = qtdeEntrada,
+                    autonum_emb= autonumEmb,
+                    peso_bruto= bruto,
+                    altura = altura,
+                    comprimento = comprimento,
+                    largura = largura,
+                    volume =volumeDeclarado,
+                    autonum_patio = patioContainer,
+                    id_conteiner = v,
+                    mercadoria = autonumNf,
+                    data_estufagem = DateTime.Now,
+                    autonum_nfi = autonumNf,
+                    autonum_talie = talieByContainer,
+                    autonum_ro = romaneioId
+                });
 
-        public Task UpdateRomaneio(int v)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<object>?> CrossDockCriarTalie(int patioContainer, DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int reservaContainer, int romaneioId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task InserirSaidaNF(int patioContainer, int numeroNf, int quantidadeEstufada)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task CrossDockAtualizarQuantidadeEstufadaNF(int numeroNf, int quantidadeEstufada)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<int> GetQuantidadeSaidaCarga(int autonumPcs)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdatepatioCsFlag(int autonumPcs)
-        {
-            throw new NotImplementedException();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }

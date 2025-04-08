@@ -33,17 +33,19 @@ namespace ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory
         Task<int?> CrossDockGetNumeroReservaContainer(int patioId);
         Task<int?> GetCrossDockRomaneioId(int patioContainer);
         Task<int> GetCrossDockSequencialId();
-        Task InserirRomaneio(int romaneioId, string usuario, string container, int reservaContainer);
-        Task InserirRomaneioCs(int autonumPcs, decimal qtdeEntrada);
-        Task<IEnumerable<object>> CrossDockBuscarTaliePorContainer(int patioContainer);
+        Task<int> InserirRomaneio(int romaneioId, string usuario, int container, int reservaContainer);
+        Task InserirRomaneioCs(int romaneioId, int autonumPcs, decimal qtdeEntrada);
+        Task<int?> CrossDockBuscarTaliePorContainer(int patioContainer);
         Task<DateTime> CrossDockGetDataInicoEstufagem(int patioContainer);
         Task<DateTime> CrossDockGetDataFimEstufagem(int patioContainer);
         Task CrossDockUpdateTalieItem(DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int patioContainer);
-        Task UpdateRomaneio(int v);
-        Task<IEnumerable<object>?> CrossDockCriarTalie(int patioContainer, DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int reservaContainer, int romaneioId);
+        Task UpdateRomaneio(int talieCarregamento, int idRomaneio);
+        Task<int?> CrossDockCriarTalie(int patioContainer, DateTime dataInicioEstufagem, DateTime dataFimEstufagem, int reservaContainer, int romaneioId, string operacao);
         Task InserirSaidaNF(int patioContainer, int numeroNf, int quantidadeEstufada);
         Task CrossDockAtualizarQuantidadeEstufadaNF(int numeroNf, int quantidadeEstufada);
         Task<int> GetQuantidadeSaidaCarga(int autonumPcs);
         Task UpdatepatioCsFlag(int autonumPcs);
+        Task<int?> CrossDockGetLastTalie();
+        Task CrossDockInserirSaidaCarga(int autonumPcs, decimal qtdeEntrada, int autonumEmb, decimal bruto, decimal altura, decimal comprimento, decimal largura, decimal volumeDeclarado, int patioContainer, string v, int autonumNf, int? talieByContainer, int romaneioId);
     }
 }

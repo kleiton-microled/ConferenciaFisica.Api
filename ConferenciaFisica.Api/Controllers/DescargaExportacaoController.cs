@@ -238,9 +238,9 @@ namespace ConferenciaFisica.Api.Controllers
         }
 
         [HttpGet("finalizar-processo")]
-        public async Task<IActionResult> FinalizarProcesso([FromQuery] int id, bool crossdock)
+        public async Task<IActionResult> FinalizarProcesso([FromQuery] int id, bool crossdock, string? user, int? container = null )
         {
-            var result = await _descargaExportacaoUseCase.FinalizarProcesso(id, crossdock);
+            var result = await _descargaExportacaoUseCase.FinalizarProcesso(id, crossdock, user, container ?? 0);
             if (!result.Status && !string.IsNullOrEmpty(result.Error))
                 return NotFound(result);
 
