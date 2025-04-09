@@ -1187,6 +1187,32 @@
                                                 )
                                             ORDER BY 
                                                 e.lote, e.codproduto;";
+        public const string IniciarEstufagem = @"INSERT INTO REDEX.dbo.TB_TALIE (
+                                                                                AUTONUM_PATIO,
+                                                                                INICIO,
+                                                                                TERMINO,
+                                                                                FLAG_ESTUFAGEM,
+                                                                                FLAG_CARREGAMENTO,
+                                                                                CROSSDOCKING,
+                                                                                AUTONUM_BOO,
+                                                                                FORMA_OPERACAO,
+                                                                                CONFERENTE,
+                                                                                EQUIPE,
+                                                                                AUTONUM_RO
+                                                                            )
+                                                                            VALUES (
+                                                                                @AutonumPatio,
+                                                                                GETDATE(),
+                                                                                NULL,
+                                                                                1,
+                                                                                1,
+                                                                                0,
+                                                                                @AutonumBoo,
+                                                                                @FormaOperacao,
+                                                                                @Conferente,
+                                                                                @Equipe,
+                                                                                @AutonumRo
+                                                                            )";
         #endregion
         #region SAIDA_CAMINHAO
 
