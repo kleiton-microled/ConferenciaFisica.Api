@@ -507,6 +507,7 @@
                                         crossdocking, 
                                         conferente, 
                                         equipe,
+                                        forma_operacao,
                                         autonum_boo,
                                         autonum_reg
                                         ) 
@@ -522,7 +523,7 @@
                                             @equipe, --ID
                                             @idReserva,
                                             --autonum_boo
-                                            --forma_operacao
+                                            @operacao
                                             --autonum_gate
                                             @CodigoRegistro --AutonumRegistro
                                         );
@@ -1279,7 +1280,7 @@
                                                                                                   QTDE_ESTUFADA,
                                                                                                   AUTONUM_PATIO_CS
                                                                                                 ) VALUES (
-                                                                                                  @AutonumNfi,
+                                                                                                  @AutonumNf,
                                                                                                   @AutonumPatio,
                                                                                                   @QtdeEstufada,
                                                                                                   @AutonumPcs

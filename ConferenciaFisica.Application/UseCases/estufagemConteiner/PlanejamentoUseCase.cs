@@ -56,7 +56,7 @@ namespace ConferenciaFisica.Application.UseCases.estufagemConteiner
             return _serviceResult;
         }
 
-        public async Task<ServiceResult<bool>> Estufar(TalieInsertDTO request)
+        public async Task<ServiceResult<bool>> Estufar(SaldoCargaMarcanteDto request)
         {
             var _serviceResult = new ServiceResult<bool>();
 

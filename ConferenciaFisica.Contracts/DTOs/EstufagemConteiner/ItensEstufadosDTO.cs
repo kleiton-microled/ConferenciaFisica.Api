@@ -3,7 +3,7 @@
     public class ItensEstufadosDTO
     {
         public int Nr { get; set; }                        // ROW_NUMBER()
-        public int QtdSaida { get; set; }                 // SC.QTDE_SAIDA
+        public int QtdeSaida { get; set; }                 // SC.QTDE_SAIDA
         public int AutonumSc { get; set; }                 // SC.AUTONUM_SC
         public string? DescricaoEmbalagem { get; set; }    // EMB.DESCRICAO_EMB
         public string? CodigoProduto { get; set; }         // PCS.CODPRODUTO

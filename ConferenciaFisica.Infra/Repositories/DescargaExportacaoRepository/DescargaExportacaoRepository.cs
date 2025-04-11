@@ -150,8 +150,8 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 var talieId = await connection.QueryFirstOrDefaultAsync<int>(updateSql, new
                 {
                     Conferente = command.Talie.Conferente,
-                    Equipe = command.Talie.Equipe,
-                    Operacao = command.Talie.Operacao,
+                    Equipe = command.Equipe,
+                    Operacao = command.Operacao,
                     CodigoRegistro = command.Registro,
                     Termino = command.Talie.Termino
                 });
@@ -170,7 +170,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                     Placa = command.Placa,
                     Inicio = DateTime.Now,
                     Conferente = 1,
-                    Equipe = 1,
+                    Equipe = command.Equipe,
                     CodigoRegistro = command.Registro,
                     IdReserva = 365016,
                 });

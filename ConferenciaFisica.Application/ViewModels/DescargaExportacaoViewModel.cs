@@ -9,6 +9,7 @@
         public string Cliente { get; set; }
         public int IdReserva { get; set; }
         public int IdConferente { get; set; }
-        public int IdEquipe { get; set; }
+        public int Equipe { get; set; }
+        public int Operacao { get; set; }
     }
 }

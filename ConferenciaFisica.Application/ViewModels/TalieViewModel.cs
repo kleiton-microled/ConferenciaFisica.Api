@@ -8,8 +8,8 @@ namespace ConferenciaFisica.Application.ViewModels
         public string Inicio { get; set; }
         public string? Termino { get; set; }
         public int Conferente { get; set; }
-        public int Equipe { get; set; } = 1;
-        public string? Operacao { get; set; } = "1";
+        public int Equipe { get; set; }
+        public string? Operacao { get; set; }
         public string? Observacao { get; set; }
         public List<TalieItemViewModel> TalieItem { get; set; }
     }

@@ -78,8 +78,8 @@ namespace ConferenciaFisica.Api.Controllers
 
         }
 
-        [HttpGet("estufar")]
-        public async Task<IActionResult> Estufar(TalieInsertDTO request)
+        [HttpPost("estufar")]
+        public async Task<IActionResult> Estufar([FromBody] SaldoCargaMarcanteDto request)
         {
             var result = await _planejamentoUseCase.Estufar(request);
 

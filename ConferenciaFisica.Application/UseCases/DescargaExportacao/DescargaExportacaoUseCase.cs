@@ -81,15 +81,16 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
             //    talie.Operacao = "1";
             //    talie.Equipe = 1;
             //}
-            
+
             var command = DescargaExportacaoCommand.CreateNew(request.Registro,
                                                              talie,
                                                              request.Placa,
                                                              request.Reserva,
                                                              request.Cliente,
                                                              request.IdReserva,
-                                                             request.Talie.Conferente,
-                                                             request.Talie.Equipe);
+                                                             request.IdConferente,
+                                                             request.Equipe,
+                                                             request.Operacao);
 
             var talieId = await _repository.AtualizarOuCriarTalie(command);
             if (talieId > 0)

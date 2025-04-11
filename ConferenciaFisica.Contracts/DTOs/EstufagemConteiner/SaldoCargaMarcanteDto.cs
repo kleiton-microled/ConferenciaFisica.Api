@@ -2,12 +2,15 @@
 {
     public class SaldoCargaMarcanteDto
     {
+        public int AutonumRo { get; set; }
         public int AutonumRcs { get; set; }
         public int AutonumPcs { get; set; }
         public int AutonumBoo { get; set; }
         public string ReservaCarga { get; set; } = string.Empty;
         public string NumNf { get; set; } = string.Empty;
         public int AutonumNf { get; set; }
+        public int AutonumTalie { get; set; }
+        public string Conteiner { get; set; } = string.Empty;
         public int Qtde { get; set; }
         public int Saldo { get; set; }
         public string Marcante { get; set; } = string.Empty;
@@ -18,6 +21,7 @@
         public decimal Largura { get; set; }
         public decimal Altura { get; set; }
         public long AutonumPro { get; set; }
+        public long IdMarcante { get; set; }
     }
 
 }

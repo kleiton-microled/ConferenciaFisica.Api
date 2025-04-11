@@ -140,7 +140,7 @@ namespace ConferenciaFisica.Infra.Repositories.EstufagemConteinerRepository
                 throw new Exception($"Erro ao processar: {ex.Message}", ex);
             }
 
-            
+
         }
 
         public async Task<bool> Finalizar(TalieInsertDTO talie)
@@ -154,7 +154,7 @@ namespace ConferenciaFisica.Infra.Repositories.EstufagemConteinerRepository
                 DynamicParameters parameters = new DynamicParameters();
                 parameters.Add("@AutonumPatio", talie.AutonumPatio);
                 parameters.Add("@AutonumRo", talie.AutonumRo);
-              
+
                 var result = await connection.ExecuteAsync(query, parameters, transaction);
 
                 //Atualizar TB_ROMANEIO
@@ -171,7 +171,7 @@ namespace ConferenciaFisica.Infra.Repositories.EstufagemConteinerRepository
             }
         }
 
-        public async Task<bool> Estufar(TalieInsertDTO talie)
+        public async Task<bool> Estufar(SaldoCargaMarcanteDto request)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
             await using var transaction = await connection.BeginTransactionAsync();
@@ -179,26 +179,30 @@ namespace ConferenciaFisica.Infra.Repositories.EstufagemConteinerRepository
             try
             {
                 var query = SqlQueries.EstufarCarga;
+                var idCs = await ObterProximoIdAsync("seq_SAIDA_CARGA");
+
                 DynamicParameters parameters = new DynamicParameters();
-                parameters.Add("@AutonumPatio", talie.AutonumPatio);
-                parameters.Add("@AutonumRo", talie.AutonumRo);
-                parameters.Add("@AutonumSc", talie.AutonumRo);
-                parameters.Add("@AutonumPcs", talie.AutonumRo);
-                parameters.Add("@QtdeSaida", talie.AutonumRo);
-                parameters.Add("@AutonumEmb", talie.AutonumRo);
-                parameters.Add("@PesoBruto", talie.AutonumRo);
-                parameters.Add("@Altura", talie.AutonumRo);
-                parameters.Add("@Comprimento", talie.AutonumRo);
-                parameters.Add("@Largura", talie.AutonumRo);
-                parameters.Add("@Volume", talie.AutonumRo);
-                parameters.Add("@AutonumPatio", talie.AutonumRo);
-                parameters.Add("@IdConteiner", talie.AutonumRo);
-                parameters.Add("@Mercadoria", talie.AutonumRo);
-                parameters.Add("@AutonumNf", talie.AutonumRo);
-                parameters.Add("@AutonumTalie", talie.AutonumRo);
-                parameters.Add("@CodProduto", talie.AutonumRo);
-                parameters.Add("@AutonumRcs", talie.AutonumRo);
-               
+                parameters.Add("@AutonumSc", idCs);
+                parameters.Add("@AutonumPatio", request.AutonumPatio);
+                parameters.Add("@AutonumRo", request.AutonumRo);
+                parameters.Add("@AutonumPcs", request.AutonumPcs);
+                parameters.Add("@QtdeSaida", 2);
+                parameters.Add("@AutonumEmb", request.AutonumEmb);
+                parameters.Add("@PesoBruto", request.Bruto);
+                parameters.Add("@Altura", request.Altura);
+                parameters.Add("@Comprimento", request.Comprimento);
+                parameters.Add("@Largura", request.Largura);
+                parameters.Add("@Volume", request.Saldo);//TODO
+                parameters.Add("@IdConteiner", request.Conteiner);
+                parameters.Add("@Mercadoria", 1003);
+                parameters.Add("@AutonumNf", request.AutonumNf);
+                parameters.Add("@AutonumTalie", request.AutonumTalie);
+                parameters.Add("@CodProduto", request.AutonumPro);
+                parameters.Add("@AutonumRcs", request.AutonumRcs);
+                parameters.Add("@QtdeEstufar", 2);
+                parameters.Add("@QtdeEstufada", 2);
+                parameters.Add("@AutonumMarcante", request.IdMarcante);
+
                 var result = await connection.ExecuteAsync(query, parameters, transaction);
 
                 //Atualizar TB_MARCANTE_RDX
@@ -221,6 +225,18 @@ namespace ConferenciaFisica.Infra.Repositories.EstufagemConteinerRepository
                 await transaction.RollbackAsync();
                 throw new Exception($"Erro ao processar: {ex.Message}", ex);
             }
+        }
+
+        private async Task<int> ObterProximoIdAsync(string databaseName)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync();
+
+            string sql = $@"
+                INSERT INTO REDEX.dbo.{databaseName} (DATA)
+                OUTPUT inserted.AUTONUM
+                VALUES (GETDATE())";
+
+            return await connection.ExecuteScalarAsync<int>(sql);
         }
     }
 }
