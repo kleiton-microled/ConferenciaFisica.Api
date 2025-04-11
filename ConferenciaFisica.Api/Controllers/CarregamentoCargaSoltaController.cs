@@ -25,26 +25,34 @@ namespace ConferenciaFisica.Api.Controllers
         }
 
         [HttpGet("ordens")]
-        public async Task<IActionResult> GetOrdens(int patio, string veiculo, string local, int quantidade, DateTime inicio)
+        public async Task<IActionResult> GetOrdens(int? patio, string? veiculo, string? local, int? quantidade, DateTime? inicio, string tipo = "I")
         {
-            var resultado = ServiceResult<EnumValueDTO[]>.Success(new List<EnumValueDTO>()
-            {
-                new EnumValueDTO()
-                {
-                    Id= 0,
-                    Codigo= 1,
-                    Descricao = "Carro 1"
-                },
-                new EnumValueDTO()
-                {
-                    Id= 1,
-                    Codigo= 2,
-                    Descricao = "Carro 2"
-                }
-            }.ToArray());
+            var resultado = await _carregamentoCargaSoltaUseCase.GetOrdens(patio, veiculo, local,quantidade, inicio);
+            
+            if (!resultado.Status)
+                return BadRequest(resultado);
 
-            //if (!resultado.Status)
-            //    return BadRequest(resultado);
+            return Ok(resultado);
+        }
+
+        [HttpGet("buscar")]
+        public async Task<IActionResult> GetBuscarMarcante(int marcante, int patio)
+        {
+            var resultado = await _carregamentoCargaSoltaUseCase.BuscarMacantes(marcante, patio);
+
+            if (!resultado.Status)
+                return BadRequest(resultado);
+
+            return Ok(resultado);
+        }
+
+        [HttpGet("salvar")]
+        public async Task<IActionResult> PostSalvarMarcante(int marcante, int? patio, string local, string placa)
+        {
+            var resultado = await _carregamentoCargaSoltaUseCase.SalvarMacantes(marcante, patio, local, placa);
+
+            if (!resultado.Status)
+                return BadRequest(resultado);
 
             return Ok(resultado);
         }

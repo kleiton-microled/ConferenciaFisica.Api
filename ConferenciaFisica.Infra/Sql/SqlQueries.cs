@@ -1355,5 +1355,200 @@
                                             ORDER BY 
                                                 nome_eqp;
                                             ";
+
+        #region CARREGAMENTO_CARGA_SOLTA
+        public const string GetVeiculos = @"SELECT 
+                                            '[' + tipo + '] ' + 
+                                            CASE MIN(ISNULL(DT_CARREGAMENTO, GETDATE()-365)) 
+                                                WHEN GETDATE()-365 THEN '( )' 
+                                                ELSE '(x)' 
+                                            END + 
+                                            MAX(ISNULL(PLACA_C,'')) + ' ' + 
+                                            MAX(ISNULL(PLACA_CARRETA, '')) + ' ' + 
+                                            MAX(ISNULL(MODELO,'')) AS DISPLAY 
+                                        FROM  SGIPA.dbo.VW_COL_CAM_CARREGAMENTO 
+                                        WHERE PATIO = @patioId
+                                        GROUP BY tipo, PLACA_C, PLACA_CARRETA;";
+
+        public const string GetOrdensCarregamento = @"SELECT 
+                                                        A.PLACA_C AS PlacaC ,
+                                                        A.PLACA_CARRETA AS PlacaCarreta,
+                                                        A.MODELO AS Modelo,
+                                                        A.ORDEM_CARREG AS OrdemCarreg,
+                                                    --    A.NUM_OC,
+                                                        A.QUANTIDADE AS Quantidade,
+                                                        A.AUTONUMCS AS Autonumcs,
+                                                        A.LOTE AS Lote,
+                                                        A.ITEM AS Item,
+                                                        A.EMBALAGEM AS Embalagem, 
+                                                        ISNULL(B.QTDE_CARREGADA, 0) AS QtdeCarregada 
+                                                    FROM 
+                                                        SGIPA.dbo.VW_COL_CAM_CARREGAMENTO A 
+                                                    LEFT JOIN (
+                                                        SELECT  
+                                                            SUM(volumes) AS QTDE_CARREGADA, 
+                                                            AUTONUM_CARGA AS AUTONUMCS 
+                                                        FROM 
+                                                            sgipa.dbo.tb_marcantes M 
+                                                        INNER JOIN 
+                                                            SGIPA.dbo.TB_CARGA_SOLTA_YARD Y ON M.AUTONUM_CS_YARD = Y.AUTONUM 
+                                                        WHERE 
+                                                            M.VOLUMES > 0 
+                                                            AND Y.YARD = 'CAM' 
+                                                            AND (M.PLACA_C IS NULL OR M.PLACA_C = @placa) 
+                                                        GROUP BY 
+                                                            M.AUTONUM_CARGA
+                                                    ) B ON A.AUTONUMCS = B.AUTONUMCS 
+                                                    WHERE 
+                                                        A.PLACA_C = @placa
+                                                    ORDER BY 
+                                                        A.LOTE, A.ITEM;";
+
+        public const string GetItensCarregadosTipoI = @"SELECT 
+                                                            RIGHT('000000000000' + ISNULL(CAST(M.autonum AS VARCHAR(12)), '0'), 12) AS Marcante, 
+                                                            M.VOLUMES AS Quantidade,
+                                                            C.BL AS Lote
+                                                        FROM 
+                                                            SGIPA.dbo.TB_MARCANTES M 
+                                                        INNER JOIN 
+                                                            SGIPA.dbo.TB_CARGA_SOLTA_YARD Y ON M.AUTONUM_CS_YARD = Y.AUTONUM 
+                                                        INNER JOIN 
+                                                            SGIPA.dbo.TB_CARGA_SOLTA C ON M.AUTONUM_CARGA = C.AUTONUM 
+                                                        WHERE 
+                                                            M.AUTONUM_CARGA IN (
+                                                                SELECT DISTINCT AUTONUMCS 
+                                                                FROM SGIPA.dbo.VW_COL_CAM_CARREGAMENTO 
+                                                            WHERE PLACA_C = @placa 
+                                                            )
+                                                            AND (M.PLACA_C =  @placa) 
+                                                            AND Y.YARD = 'CAM' 
+                                                        ORDER BY 
+                                                            C.BL, M.AUTONUM;";
+        public const string GetItensCarregados = @"SELECT 
+                                                        '' AS Marcante, 
+                                                        SUM(B.qtde_carregada) AS Quantidade,
+                                                        A.lote AS Lote
+                                                    FROM 
+                                                        redex.dbo.VW_COL_CAM_PARREGAMENTO A 
+                                                    INNER JOIN (
+                                                        SELECT  
+                                                            SUM(qtde_saida) AS QTDE_CARREGADA, 
+                                                            AUTONUM_pcs,
+                                                            AUTONUM_RCS
+                                                        FROM 
+                                                            redex.dbo.tb_saida_carga 
+                                                        GROUP BY 
+                                                            autonum_pcs,
+                                                            AUTONUM_RCS
+                                                    ) B ON A.AUTONUMCS = B.AUTONUM_pCS AND A.num_oc = B.AUTONUM_RCS
+                                                    WHERE 
+                                                        A.PLACA_C =  @placa 
+                                                    GROUP BY 
+                                                        A.lote;";
+
+        public const string GeMarcantePatio = @"SELECT
+                                                    M.AUTONUM AS MARCANTE,
+                                                    S.AUTONUM AS AUTONUMCS,
+                                                    S.BL AS LOTE,
+                                                    S.ITEM,
+                                                    M.VOLUMES AS QUANTIDADE,
+                                                    E.DESCR AS EMBALAGEM,
+                                                    S.MERCADORIA,
+                                                    S.MARCA,
+                                                    ISNULL(A.AUTONUM, 0) AS AUTONUM_ARMAZEM,
+                                                    A.DESCR AS DESCR_ARMAZEM,
+                                                    S.CNTR AS AUTONUMCNTR,
+                                                    C.Id_Conteiner,
+                                                    Y.YARD AS POSICAO,
+                                                    M.AUTONUM_CS_YARD
+                                                FROM
+                                                    SGIPA.dbo.TB_CARGA_SOLTA S
+                                                LEFT JOIN
+                                                    SGIPA.dbo.DTE_TB_EMBALAGENS E ON S.EMBALAGEM = E.CODE
+                                                LEFT JOIN
+                                                    SGIPA.dbo.TB_CNTR_BL C ON S.CNTR = C.AUTONUM
+                                                INNER JOIN
+                                                    SGIPA.dbo.TB_MARCANTES M ON S.AUTONUM = M.AUTONUM_CARGA
+                                                LEFT JOIN
+                                                    SGIPA.dbo.TB_CARGA_SOLTA_YARD Y ON M.AUTONUM_CS_YARD = Y.AUTONUM
+                                                LEFT JOIN
+                                                    SGIPA.dbo.TB_ARMAZENS_IPA A ON Y.ARMAZEM = A.AUTONUM
+                                                WHERE
+                                                    M.AUTONUM = @marcante
+                                                    AND S.PATIO = @patio ";
+
+        public const string getCarregamento = @" SELECT AUTONUMCS FROM SGIPA.dbo.VW_COL_CAM_CARREGAMENTO WHERE AUTONUMCS=@autonumCargaSolta AND PLACA_C=@placa";
+
+        public const string getCarregamentoQuantidade = @"SELECT 
+                                                                SUM(A.QUANTIDADE) AS QtdPrevista,
+                                                                SUM(ISNULL(B.QTDE_CARREGADA, 0)) AS QtdCarregada 
+                                                            FROM 
+                                                                SGIPA.dbo.VW_COL_CAM_CARREGAMENTO A 
+                                                            LEFT JOIN (
+                                                                SELECT  
+                                                                    SUM(volumes) AS QTDE_CARREGADA, 
+                                                                    AUTONUM_CARGA AS AUTONUMCS 
+                                                                FROM 
+                                                                    sgipa.dbo.tb_marcantes M 
+                                                                INNER JOIN 
+                                                                    SGIPA.dbo.TB_CARGA_SOLTA_YARD Y ON M.AUTONUM_CS_YARD = Y.AUTONUM 
+                                                                WHERE 
+                                                                    M.VOLUMES > 0 
+                                                                    AND Y.YARD = 'CAM' 
+                                                                    AND (M.PLACA_C IS NULL OR M.PLACA_C = 'ABC1234')  -- Substitua pela placa desejada
+                                                                GROUP BY 
+                                                                    M.AUTONUM_CARGA
+                                                            ) B ON A.AUTONUMCS = B.AUTONUMCS 
+                                                            WHERE 
+                                                                A.PLACA_C = @placa  -- Substitua pela placa desejada
+                                                                AND A.AUTONUMCS = @autonum";
+
+        public const string InsertCargaSoltaYard = @"INSERT INTO SGIPA.TB_CARGA_SOLTA_YARD 
+                                                    (
+                                                        AUTONUM,
+                                                        AUTONUM_CS,
+                                                        ARMAZEM,
+                                                        YARD,
+                                                        ORIGEM,
+                                                        QUANTIDADE,
+                                                        MOTIVO_COL,
+                                                        USUARIO_YARD
+                                                    ) 
+                                                    VALUES 
+                                                    (
+                                                        @nextIdYard,           -- Substitua pelo valor de AutonumCSYard
+                                                        @autonumCs,           -- Substitua pelo valor de txtAutonumCS.Text
+                                                        @armazem,           -- Substitua pelo valor de txtAutonumArmazem.Text
+                                                        'CAM',
+                                                        'I',
+                                                        @qtd,             -- Substitua pelo valor de txtQtde.Text
+                                                        8,
+                                                        @numUsuario             -- Substitua pelo valor de Session(""AUTONUMUSUARIO"")
+                                                    )";
+
+        public const string InsertCarregamento = @"INSERT INTO SGIPA.TB_CARGA_SOLTA_YARD 
+                                                    (
+                                                        AUTONUM,
+                                                        AUTONUM_CS,
+                                                        ARMAZEM,
+                                                        YARD,
+                                                        ORIGEM,
+                                                        QUANTIDADE,
+                                                        MOTIVO_COL,
+                                                        USUARIO_YARD
+                                                    ) 
+                                                    VALUES 
+                                                    (
+                                                        @nextIdYard,           -- Substitua pelo valor de AutonumCSYard
+                                                        @autonumCs,           -- Substitua pelo valor de txtAutonumCS.Text
+                                                        @armazem,           -- Substitua pelo valor de txtAutonumArmazem.Text
+                                                        'CAM',
+                                                        'I',
+                                                        @qtd,             -- Substitua pelo valor de txtQtde.Text
+                                                        8,
+                                                        @numUsuario             -- Substitua pelo valor de Session(""AUTONUMUSUARIO"")
+                                                    )";
+
+        #endregion
     }
 }
