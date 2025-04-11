@@ -2,6 +2,7 @@
 using ConferenciaFisica.Application.UseCases.Embalagens.Interfaces;
 using ConferenciaFisica.Application.UseCases.Equipes;
 using ConferenciaFisica.Application.UseCases.Marcantes;
+using ConferenciaFisica.Application.UseCases.Patios;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ConferenciaFisica.Api.Controllers
@@ -13,12 +14,17 @@ namespace ConferenciaFisica.Api.Controllers
         private readonly IMarcantesUseCase _marcantesUse;
         private readonly IConferentesUseCase _conferenteUseCase;
         private readonly IEquipesUseCase _equipesUseCase;
+        private readonly IPatiosUseCase _patiosUseCase;
 
-        public ColetorController(IMarcantesUseCase marcantesUseCase, IConferentesUseCase conferenteUseCase, IEquipesUseCase equipesUseCase)
+        public ColetorController(IMarcantesUseCase marcantesUseCase, 
+                                 IConferentesUseCase conferenteUseCase, 
+                                 IEquipesUseCase equipesUseCase, 
+                                 IPatiosUseCase patiosUseCase)
         {
             _marcantesUse = marcantesUseCase;
             _conferenteUseCase = conferenteUseCase;
             _equipesUseCase = equipesUseCase;
+            _patiosUseCase = patiosUseCase;
         }
 
         [HttpGet("marcantes")]
@@ -41,6 +47,14 @@ namespace ConferenciaFisica.Api.Controllers
         public async Task<IActionResult> GetEquipes()
         {
             var result = await _equipesUseCase.ListarEquipes();
+
+            return Ok(result);
+        }
+
+        [HttpGet("patios")]
+        public async Task<IActionResult> ListarPatios()
+        {
+            var result = await _patiosUseCase.ListarPatios();
 
             return Ok(result);
         }

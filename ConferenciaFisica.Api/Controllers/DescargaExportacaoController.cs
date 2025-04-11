@@ -3,6 +3,7 @@ using ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces;
 using ConferenciaFisica.Application.UseCases.Imagens.Interfaces;
 using ConferenciaFisica.Application.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.IO.Compression;
 
 namespace ConferenciaFisica.Api.Controllers
 {
@@ -67,7 +68,7 @@ namespace ConferenciaFisica.Api.Controllers
         }
 
         [HttpPost("tipos-processos")]
-        public async Task<IActionResult> CreateTipoProcesso([FromBody]TipoFotoViewModel input)
+        public async Task<IActionResult> CreateTipoProcesso([FromBody] TipoFotoViewModel input)
         {
             var result = await _processoUseCase.CreateTipoFoto(input);
 
@@ -238,7 +239,7 @@ namespace ConferenciaFisica.Api.Controllers
         }
 
         [HttpGet("finalizar-processo")]
-        public async Task<IActionResult> FinalizarProcesso([FromQuery] int id, bool crossdock, string? user, int? container = null )
+        public async Task<IActionResult> FinalizarProcesso([FromQuery] int id, bool crossdock, string? user, int? container = null)
         {
             var result = await _descargaExportacaoUseCase.FinalizarProcesso(id, crossdock, user, container ?? 0);
             if (!result.Status && !string.IsNullOrEmpty(result.Error))
@@ -246,6 +247,45 @@ namespace ConferenciaFisica.Api.Controllers
 
             return Ok(result);
         }
+
+        #region IMAGES
+        [HttpGet("processo/{talieId}/zip")]
+        public async Task<IActionResult> BaixarImagensZip(int talieId)
+        {
+            var result = await _processoUseCase.GetImagemByTalieId(talieId);
+
+            if (!result.Status || result.Result == null || !result.Result.Any())
+                return NotFound("Nenhuma imagem encontrada para esse processo.");
+
+            var imagens = result.Result;
+            var basePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"); // ou outro caminho raiz das imagens
+
+            using var memoryStream = new MemoryStream();
+            using (var zip = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+            {
+                foreach (var imagem in imagens)
+                {
+                    var fullImagePath = Path.Combine(basePath, imagem.ImagemPath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+
+                    if (!System.IO.File.Exists(fullImagePath))
+                        continue;
+
+                    var fileName = Path.GetFileName(fullImagePath);
+
+                    var zipEntry = zip.CreateEntry(fileName, CompressionLevel.Fastest);
+                    using var originalFileStream = System.IO.File.OpenRead(fullImagePath);
+                    using var entryStream = zipEntry.Open();
+                    await originalFileStream.CopyToAsync(entryStream);
+                }
+            }
+
+            memoryStream.Position = 0;
+            var zipFileName = $"processo_{talieId}_imagens.zip";
+
+            return File(memoryStream.ToArray(), "application/zip", zipFileName);
+        }
+
+        #endregion
     }
 
 }

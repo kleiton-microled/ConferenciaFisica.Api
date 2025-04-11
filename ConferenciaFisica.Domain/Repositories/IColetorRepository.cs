@@ -6,5 +6,6 @@ namespace ConferenciaFisica.Domain.Repositories
     {
         Task<IEnumerable<ConferenteDTO>> ListarConferentes();
         Task<IEnumerable<EquipeDTO>> ListarEquipes();
+        Task<IEnumerable<PatiosDTO>> ListarPatios();
     }
 }

@@ -1334,6 +1334,7 @@
                             AUTONUM = @PreRegistroId";
         #endregion
 
+        #region COMUM
         public const string ListarConferentes = @"SELECT 
                                                       autonum_eqp AS Id, 
                                                       nome_eqp AS Nome
@@ -1355,6 +1356,8 @@
                                             ORDER BY 
                                                 nome_eqp;
                                             ";
+        public const string ListarPatios = @"SELECT tp.AUTONUM as Id, tp.DESCR as Descricao FROM OPERADOR.dbo.TB_PATIOS tp";
+        #endregion
 
         #region CARREGAMENTO_CARGA_SOLTA
         public const string GetVeiculos = @"SELECT 

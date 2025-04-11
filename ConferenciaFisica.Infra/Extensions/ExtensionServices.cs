@@ -42,6 +42,7 @@ using ConferenciaFisica.Application.UseCases.Conferentes;
 using ConferenciaFisica.Application.UseCases.Equipes;
 using ConferenciaFisica.Application.UseCases.CarregamentoCargaSolta.Interface;
 using ConferenciaFisica.Application.UseCases.CarregamentoCargaSolta;
+using ConferenciaFisica.Application.UseCases.Patios;
 
 namespace ConferenciaFisica.Infra.Extensions
 {
@@ -99,6 +100,7 @@ namespace ConferenciaFisica.Infra.Extensions
 
             services.AddScoped<IConferentesUseCase, ConferenteUseCase>();
             services.AddScoped<IEquipesUseCase, EquipesUseCase>();
+            services.AddScoped<IPatiosUseCase, PatiosUseCase>();
             services.AddScoped<IColetorRepository, ColetorRepository>();
 
             services.AddScoped<ICarregamentoCargaSoltaUseCase, CarregamentoCargaSoltaUseCase>();
