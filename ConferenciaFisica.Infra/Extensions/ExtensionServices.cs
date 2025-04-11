@@ -40,6 +40,8 @@ using ConferenciaFisica.Domain.Repositories.EstufagemConteiner;
 using ConferenciaFisica.Infra.Repositories.EstufagemConteinerRepository;
 using ConferenciaFisica.Application.UseCases.Conferentes;
 using ConferenciaFisica.Application.UseCases.Equipes;
+using ConferenciaFisica.Application.UseCases.CarregamentoCargaSolta.Interface;
+using ConferenciaFisica.Application.UseCases.CarregamentoCargaSolta;
 
 namespace ConferenciaFisica.Infra.Extensions
 {
@@ -98,6 +100,9 @@ namespace ConferenciaFisica.Infra.Extensions
             services.AddScoped<IConferentesUseCase, ConferenteUseCase>();
             services.AddScoped<IEquipesUseCase, EquipesUseCase>();
             services.AddScoped<IColetorRepository, ColetorRepository>();
+
+            services.AddScoped<ICarregamentoCargaSoltaUseCase, CarregamentoCargaSoltaUseCase>();
+            services.AddScoped<ICarregamentoCargaSoltaRepository, CarregamentoCargaSoltaRepository>();
 
 
 
