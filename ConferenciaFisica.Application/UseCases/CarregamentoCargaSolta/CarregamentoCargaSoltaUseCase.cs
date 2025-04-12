@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Numerics;
 using ConferenciaFisica.Application.Common.Models;
 using ConferenciaFisica.Application.UseCases.CarregamentoCargaSolta.Interface;
 using ConferenciaFisica.Application.ViewModels;
@@ -35,22 +37,22 @@ namespace ConferenciaFisica.Application.UseCases.CarregamentoCargaSolta
         {
             try
             {
-                var marcanteByQuery = await _carregamentoCargaSoltaRepository.GetMarcanteByIdEPatio(marcante, patio);
+                //var marcanteByQuery = await _carregamentoCargaSoltaRepository.GetMarcanteByIdEPatio(marcante, patio);
 
-                if (marcanteByQuery is null) return ServiceResult<object>.Failure("Marcante nao encontrado");
+                //if (marcanteByQuery is null) return ServiceResult<object>.Failure("Marcante nao encontrado");
 
-                var itensCarregados = await _carregamentoCargaSoltaRepository.GetAutonumCs(marcanteByQuery.AUTONUMCS, placa);
+                //var itensCarregados = await _carregamentoCargaSoltaRepository.GetAutonumCs(marcanteByQuery.AUTONUMCS, placa);
 
-                if (itensCarregados == 0 || itensCarregados is null) ServiceResult<object>.Failure("Nao pertence a esse carregamento");
+                //if (itensCarregados == 0 || itensCarregados is null) ServiceResult<object>.Failure("Nao pertence a esse carregamento");
 
-                if (local == "CAM") return ServiceResult<object>.Failure("Marcante já carregado");
+                //if (local == "CAM") return ServiceResult<object>.Failure("Marcante já carregado");
 
-                var quantidadeCarregamento = await _carregamentoCargaSoltaRepository.GetQuantidadeCarregamento(marcanteByQuery.AUTONUMCS, placa);
+                //var quantidadeCarregamento = await _carregamentoCargaSoltaRepository.GetQuantidadeCarregamento(marcanteByQuery.AUTONUMCS, placa);
 
-                if (quantidadeCarregamento is null) return ServiceResult<object>.Failure("Quantidade carregamento nao encontrado");
-                if (quantidadeCarregamento.QtdCarregada > quantidadeCarregamento.QtdPrevista) return ServiceResult<object>.Failure("Quantidade superior ao registrado");
+                //if (quantidadeCarregamento is null) return ServiceResult<object>.Failure("Quantidade carregamento nao encontrado");
+                //if (quantidadeCarregamento.QtdCarregada > quantidadeCarregamento.QtdPrevista) return ServiceResult<object>.Failure("Quantidade superior ao registrado");
 
-                await _carregamentoCargaSoltaRepository.UpdateMarcanteAndCargaSolta(marcante, patio, local, placa, marcanteByQuery, itensCarregados);
+                //await _carregamentoCargaSoltaRepository.UpdateMarcanteAndCargaSolta(marcante, patio, local, placa, marcanteByQuery, itensCarregados);
 
                 return ServiceResult<object>.Success("Executado com sucesso");
             }
@@ -64,8 +66,8 @@ namespace ConferenciaFisica.Application.UseCases.CarregamentoCargaSolta
         {
             try
             {
-                var ordens = await _carregamentoCargaSoltaRepository.GetOrdens(veiculo);
-                var itensCarregados = await _carregamentoCargaSoltaRepository.GetItensCarregados(veiculo, tipo);
+                var ordens = await _carregamentoCargaSoltaRepository.GetOrdens(veiculo.Trim('\''));
+                var itensCarregados = await _carregamentoCargaSoltaRepository.GetItensCarregados(veiculo.Trim('\''), tipo);
 
 
                 return ServiceResult<CarregamentoOrdem>.Success(new CarregamentoOrdem()
@@ -98,6 +100,7 @@ namespace ConferenciaFisica.Application.UseCases.CarregamentoCargaSolta
                     {
                         Id = i,
                         Codigo = i++,
+                        Label = actual,
                         Descricao = actual
                     });
                 }
@@ -107,6 +110,41 @@ namespace ConferenciaFisica.Application.UseCases.CarregamentoCargaSolta
             catch (Exception exception)
             {
                 return ServiceResult<EnumValueDTO[]>.Failure(exception.Message);
+            }
+        }
+
+        public async Task<ServiceResult<object>> Finalizar(string placa, int usuarioId, DateTime? inicio)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(placa)) return ServiceResult<object>.Failure("Placa invalida");
+
+                if (inicio == null || inicio == default) return ServiceResult<object>.Failure("Data de inicio invalida");
+
+                var carregamento = await _carregamentoCargaSoltaRepository.GetCarregamentoId(placa);
+                if (carregamento == null || !carregamento.Any()) return ServiceResult<object>.Failure($"Carregamento nao encontrado com placa {placa}");
+
+                bool finalizado = await _carregamentoCargaSoltaRepository.FinalizarRedexCargaSolta(placa, inicio, usuarioId, 11);
+
+                return finalizado ? ServiceResult<object>.Success(finalizado) : ServiceResult<object>.Failure("Falha ao tentar finalizar");
+            }
+            catch (Exception exception)
+            {
+                return ServiceResult<object>.Failure(exception.Message);
+            }
+        }
+
+        public async Task<ServiceResult<DateTime?>> Iniciar(string veiculo)
+        {
+            try
+            {
+                var carregamento = await _carregamentoCargaSoltaRepository.IniciarCarregamento(veiculo);
+
+                return carregamento != null? ServiceResult<DateTime?>.Success(carregamento) : ServiceResult<DateTime?>.Failure("Falha ao tentar iniciar");
+            }
+            catch (Exception exception)
+            {
+                return ServiceResult<DateTime?>.Failure(exception.Message);
             }
         }
     }

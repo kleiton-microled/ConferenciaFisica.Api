@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Domain.Entities;
+using ConferenciaFisica.Domain.Entities.CarregamentoDeCargaSolta;
 using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.Sql;
@@ -67,7 +68,7 @@ namespace ConferenciaFisica.Infra.Repositories
                 using var connection = _connectionFactory.CreateConnection();
                 string query = SqlQueries.GeMarcantePatio;
 
-                var result = await connection.QueryFirstOrDefaultAsync<MarcantePatioModel>(query, new { marcante = marcante, patio= patio });
+                var result = await connection.QueryFirstOrDefaultAsync<MarcantePatioModel>(query, new { marcanteId = marcante });
 
                 return result;
             }
@@ -103,7 +104,7 @@ namespace ConferenciaFisica.Infra.Repositories
                 using var connection = _connectionFactory.CreateConnection();
                 string query = SqlQueries.getCarregamentoQuantidade;
 
-                var result = await connection.QueryFirstOrDefaultAsync<QuantidadeCarregamentoModel?>(query, new { autonum = placa, placa = aUTONUMCS});
+                var result = await connection.QueryFirstOrDefaultAsync<QuantidadeCarregamentoModel?>(query, new { autonum = placa, placa = aUTONUMCS });
 
                 return result;
             }
@@ -115,7 +116,7 @@ namespace ConferenciaFisica.Infra.Repositories
         }
 
 
-public async Task<int> ObterProximoIdAsync(string databaseName)
+        public async Task<int> ObterProximoIdAsync(string databaseName)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync();
 
@@ -132,7 +133,7 @@ public async Task<int> ObterProximoIdAsync(string databaseName)
             using var connection = _connectionFactory.CreateConnection();
             string query = SqlQueries.GetVeiculos;
 
-            var result = await connection.QueryAsync<string>(query, new {patioId = patio });
+            var result = await connection.QueryAsync<string>(query, new { patioId = patio });
 
             return result.ToArray();
         }
@@ -147,39 +148,39 @@ public async Task<int> ObterProximoIdAsync(string databaseName)
 
             try
             {
-                int updateId;
-                string updateQuery = "UPDATE SGIPA.dbo.TB_CARGA_SOLTA_YARD SET QUANTIDADE=0 WHERE AUTONUM=" + marcanteByQuery.AUTONUM_CS_YARD;
+                //int updateId;
+                //string updateQuery = "UPDATE REDEX.dbo.TB_CARGA_SOLTA_YARD SET QUANTIDADE=0 WHERE AUTONUM=" + marcanteByQuery.AUTONUM_CS_YARD;
 
-                // Captura o ID gerado após a inserção
-                updateId = await connection.ExecuteScalarAsync<int>(updateQuery, transaction);
+                //// Captura o ID gerado após a inserção
+                //updateId = await connection.ExecuteScalarAsync<int>(updateQuery, transaction);
 
-                if (updateId == 0)
-                    throw new Exception("Falha ao atualizar local.");
+                //if (updateId == 0)
+                //    throw new Exception("Falha ao atualizar local.");
 
-                var nextIdYard = await ObterProximoIdAsync("SGIPA.dbo.SEQ_CARGA_SOLTA_YARD");
-                string insertTipoQuery = SqlQueries.InsertCargaSoltaYard;
+                //var nextIdYard = await ObterProximoIdAsync("REDEX.dbo.SEQ_CARGA_SOLTA_YARD");
+                //string insertTipoQuery = SqlQueries.InsertCargaSoltaYard;
 
-                await connection.ExecuteAsync(insertTipoQuery, new
-                {
-                    nextIdYard = nextIdYard,
-                    autonumCs = marcanteByQuery.AUTONUMCS,
-                    armazem =marcanteByQuery.AUTONUM_ARMAZEM,
-                    qtd = itensCarregados
-                });
+                //await connection.ExecuteAsync(insertTipoQuery, new
+                //{
+                //    nextIdYard = nextIdYard,
+                //    autonumCs = marcanteByQuery.AUTONUMCS,
+                //    armazem = marcanteByQuery.AUTONUM_ARMAZEM,
+                //    qtd = itensCarregados
+                //});
 
-                var updateQury = @"UPDATE SGIPA.TB_MARCANTES 
-                                    SET 
-                                        AUTONUM_CS_YARD = @autonumCsYard,               -- Substitua pelo valor de AutonumCSYard
-                                        PLACA_C = @placa                    -- Substitua pela placa do veículo
-                                    WHERE 
-                                        AUTONUM = @numQuery;";
+                //var updateQury = @"UPDATE SGIPA.TB_MARCANTES 
+                //                    SET 
+                //                        AUTONUM_CS_YARD = @autonumCsYard,               -- Substitua pelo valor de AutonumCSYard
+                //                        PLACA_C = @placa                    -- Substitua pela placa do veículo
+                //                    WHERE 
+                //                        AUTONUM = @numQuery;";
 
-                await connection.ExecuteAsync(updateQury, new
-                {
-                    autonumCsYard = nextIdYard,
-                    placa = placa,
-                    numQuery = marcante
-                }, transaction);
+                //await connection.ExecuteAsync(updateQury, new
+                //{
+                //    autonumCsYard = nextIdYard,
+                //    placa = placa,
+                //    numQuery = marcante
+                //}, transaction);
 
                 await transaction.CommitAsync();
             }
@@ -192,6 +193,179 @@ public async Task<int> ObterProximoIdAsync(string databaseName)
             {
                 await connection.CloseAsync();
             }
+        }
+
+        public async Task<IEnumerable<int>?> GetCarregamentoId(string placa)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                string query = SqlQueries.GetCargaPorPlaca;
+
+                var result = await connection.QueryAsync<int>(query, new { placa = placa });
+
+                return result;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                throw;
+            }
+
+        }
+
+        public async Task<bool> FinalizarRedexCargaSolta(string placa, DateTime? inicio, int conferenteEquipeId, int equipe)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
+            if (connection.State == System.Data.ConnectionState.Closed)
+                await connection.OpenAsync();
+
+            using var transaction = await connection.BeginTransactionAsync();
+
+            try
+            {
+                var carregamentoQuery = SqlQueries.GetCargaPorPlaca;
+
+                var itensByQuery = await connection.QueryAsync<int>(carregamentoQuery, new { placa = placa }, transaction: transaction);
+                if (itensByQuery == null || !itensByQuery.Any()) return false;
+
+                var retiradasMinutasCountQuery = SqlQueries.GetMinutasCount;
+                foreach (var item in itensByQuery)
+                {
+                    var count = await connection.ExecuteScalarAsync<int>(retiradasMinutasCountQuery, new { itemId = item }, transaction);
+
+                    if (count == 0) throw new Exception("Não consta emissao de minuta de retira desta carga - Saida não permitida");
+                }
+
+                var getRomaneioAndTalieQuery = SqlQueries.GetRomaneioAndTalieQuery;
+                foreach (var item in itensByQuery)
+                {
+                    var resultRomaneioTalie = await connection.QueryAsync<RomaneioTalieModel>(getRomaneioAndTalieQuery, new { itemId = item }, transaction);
+
+                    if (resultRomaneioTalie == null || !resultRomaneioTalie.Any()) throw new Exception("Romaneio Talie nao encontrado");
+
+                    foreach (var talieRomaneio in resultRomaneioTalie)
+                    {
+                        var autoNumActual = talieRomaneio.AutonumTalie;
+                        if (autoNumActual == 0)
+                        {
+                            var nextIdRegistro = await ObterProximoIdAsync("redex.dbo.seq_tb_talie");
+                            var insertQuery = SqlQueries.InsertTalie;
+
+
+                            var insertedId = await connection.ExecuteScalarAsync<int>(insertQuery, new
+                            {
+                                //autonum_talie = nextIdRegistro,
+                                inicio_descarga = inicio,
+                                boo_ro = talieRomaneio.BooRo,
+                                conferente = conferenteEquipeId,
+                                equipe = equipe,
+                                autonum_ro = talieRomaneio.RomaneioId,
+                                autonum_gate = talieRomaneio.GateSaidaID,
+                                placa = placa
+
+                            }, transaction);
+
+                            autoNumActual = insertedId;
+                        }
+                        else
+                        {
+                            var updateQuery = @"UPDATE REDEX.dbo.TB_TALIE 
+                                                SET FLAG_FECHADO = 1 
+                                                WHERE autonum_ro = @itemId";
+
+                            await connection.ExecuteAsync(updateQuery, new
+                            {
+                                itemId = autoNumActual
+
+                            }, transaction);
+                        }
+
+                        var updateQueryRomaneio = @"UPDATE REDEX.dbo.TB_romaneio 
+                                                    SET 
+                                                        FLAG_historico = 1,
+                                                        autonum_talie = @talieId
+                                                    WHERE 
+                                                        autonum_ro = @itemId";
+
+                        await connection.ExecuteAsync(updateQueryRomaneio, new
+                        {
+                            talieId = autoNumActual,
+                            itemId = item
+
+                        }, transaction);
+
+                        var updateQuerySaida = @"UPDATE REDEX.dbo.TB_SAIDA_CARGA 
+                                                 SET 
+                                                    FLAG_saida = 1,
+                                                    autonum_talie = @talieId
+                                                  WHERE 
+                                                    autonum_ro = @itemId";
+
+                        await connection.ExecuteAsync(updateQuerySaida, new
+                        {
+                            talieId = autoNumActual,
+                            itemId = item
+
+                        }, transaction);
+                    }
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception($"Erro ao processar AvariaConferencia: {ex.Message}", ex);
+            }
+            finally
+            {
+                await connection.CloseAsync();
+            }
+
+            return true;
+        }
+
+        public async Task<DateTime?> IniciarCarregamento(string veiculo)
+        {
+            using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
+            if (connection.State == System.Data.ConnectionState.Closed)
+                await connection.OpenAsync();
+
+            using var transaction = await connection.BeginTransactionAsync();
+            DateTime? resultDate = null;
+            try
+            {
+                var carregamentoQuery = @"UPDATE SGIPA.dbo.TB_ORDEM_CARREGAMENTO 
+                                            SET DT_CARREGAMENTO_INICIO = GETDATE() 
+                                            WHERE AUTONUM IN (
+                                                SELECT ORDEM_CARREG 
+                                                FROM SGIPA.dbo.VW_COL_CAM_CARREGAMENTO 
+                                                WHERE PLACA_C = @placa
+                                            ) 
+                                            AND DT_CARREGAMENTO_INICIO IS NULL";
+
+                var resultQuery = await connection.ExecuteAsync(carregamentoQuery, new
+                {
+                    placa = veiculo
+
+                }, transaction);
+
+                resultDate = resultQuery > 0 ? DateTime.Now : null;
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception($"Erro ao processar AvariaConferencia: {ex.Message}", ex);
+            }
+            finally
+            {
+                await connection.CloseAsync();
+            }
+
+            return resultDate;
         }
     }
 }

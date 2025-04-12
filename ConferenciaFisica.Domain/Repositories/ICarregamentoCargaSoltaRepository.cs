@@ -11,5 +11,9 @@ namespace ConferenciaFisica.Domain.Repositories
         Task<int?> GetAutonumCs(int aUTONUMCS, string placa);
         Task<QuantidadeCarregamentoModel?> GetQuantidadeCarregamento(int aUTONUMCS, string placa);
         Task UpdateMarcanteAndCargaSolta(int marcante, int? patio, string local, string placa, MarcantePatioModel marcanteByQuery, int? itensCarregados);
+        Task<bool> FinalizarRedexCargaSolta(string placa, DateTime? inicio, int conferenteEquipeId, int equipe);
+
+        Task<IEnumerable<int>?> GetCarregamentoId(string placa);
+        Task<DateTime?> IniciarCarregamento(string veiculo);
     }
 }
