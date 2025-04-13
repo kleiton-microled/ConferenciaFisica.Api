@@ -336,22 +336,23 @@ namespace ConferenciaFisica.Infra.Repositories
             DateTime? resultDate = null;
             try
             {
-                var carregamentoQuery = @"UPDATE SGIPA.dbo.TB_ORDEM_CARREGAMENTO 
-                                            SET DT_CARREGAMENTO_INICIO = GETDATE() 
-                                            WHERE AUTONUM IN (
-                                                SELECT ORDEM_CARREG 
-                                                FROM SGIPA.dbo.VW_COL_CAM_CARREGAMENTO 
-                                                WHERE PLACA_C = @placa
-                                            ) 
-                                            AND DT_CARREGAMENTO_INICIO IS NULL";
+                var inputDate = DateTime.Now;
+                var carregamentoQuery = @"UPDATE redex.dbo.tb_romaneio 
+                                        SET inicio_coletor = @inicio
+                                        WHERE autonum_ro IN (
+                                            SELECT DISTINCT item 
+                                            FROM redex.dbo.VW_COL_CAM_CARREGAMENTO 
+                                            WHERE PLACA_C = @placa
+                                        )";
 
                 var resultQuery = await connection.ExecuteAsync(carregamentoQuery, new
                 {
-                    placa = veiculo
+                    placa = veiculo,
+                    inicio = inputDate
 
                 }, transaction);
 
-                resultDate = resultQuery > 0 ? DateTime.Now : null;
+                resultDate = resultQuery > 0 ? inputDate : null;
 
                 await transaction.CommitAsync();
             }
