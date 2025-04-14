@@ -1471,7 +1471,7 @@
                                                                 WHERE 
                                                                     M.VOLUMES > 0 
                                                                     AND Y.YARD = 'CAM' 
-                                                                    AND (M.PLACA_C IS NULL OR M.PLACA_C = 'ABC1234')  -- Substitua pela placa desejada
+                                                                    AND (M.PLACA_C IS NULL OR M.PLACA_C = @placa)  -- Substitua pela placa desejada
                                                                 GROUP BY 
                                                                     M.AUTONUM_CARGA
                                                             ) B ON A.AUTONUMCS = B.AUTONUMCS 
@@ -1479,7 +1479,7 @@
                                                                 A.PLACA_C = @placa  -- Substitua pela placa desejada
                                                                 AND A.AUTONUMCS = @autonum";
 
-        public const string InsertCargaSoltaYard = @"INSERT INTO SGIPA.TB_CARGA_SOLTA_YARD 
+        public const string InsertCargaSoltaYard = @"INSERT INTO redex.dbo.TB_CARGA_SOLTA_YARD  
                                                     (
                                                         AUTONUM,
                                                         AUTONUM_CS,
@@ -1502,7 +1502,7 @@
                                                         @numUsuario             -- Substitua pelo valor de Session(""AUTONUMUSUARIO"")
                                                     )";
 
-        public const string InsertCarregamento = @"INSERT INTO SGIPA.TB_CARGA_SOLTA_YARD 
+        public const string InsertCarregamento = @"INSERT INTO redex.dbo.TB_CARGA_SOLTA_YARD 
                                                     (
                                                         AUTONUM,
                                                         AUTONUM_CS,
