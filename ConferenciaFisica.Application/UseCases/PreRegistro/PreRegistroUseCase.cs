@@ -54,7 +54,7 @@ namespace ConferenciaFisica.Application.UseCases.PreRegistro
             }
         }
 
-        public async Task<ServiceResult<DadosAgendamentoModel>> GetDadosAgendamento(PreRegistroInput input)
+        public async Task<ServiceResult<DadosAgendamentoModel?>> GetDadosAgendamento(PreRegistroInput input)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace ConferenciaFisica.Application.UseCases.PreRegistro
                 var dadosAgendamento = await _agendamentoRepository.GetDadosAgendamento(input.Sistema, input.Placa, input.PlacaCarreta);
 
 
-                return ServiceResult<DadosAgendamentoModel>.Success(dadosAgendamento);
+                return ServiceResult<DadosAgendamentoModel?>.Success(dadosAgendamento);
             }
             catch (Exception exception)
             {

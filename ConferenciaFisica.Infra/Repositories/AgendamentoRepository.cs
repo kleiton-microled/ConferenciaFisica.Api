@@ -87,7 +87,7 @@ namespace ConferenciaFisica.Infra.Repositories
                 query += " AND PLACA_CAVALO = @placa";
             }
 
-            if (!string.IsNullOrWhiteSpace(placa))
+            if (!string.IsNullOrWhiteSpace(placaCarreta))
             {
                 query += " AND PLACA_CARRETA = @placaCarreta";
             }

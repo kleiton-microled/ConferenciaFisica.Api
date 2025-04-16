@@ -23,13 +23,15 @@ namespace ConferenciaFisica.Api.Controllers
         {
             var resultado = await _preRegistroUseCase.GetDadosAgendamento(input);
 
-            return resultado.Status ? Ok(resultado) : BadRequest(resultado);
+            if (!resultado.Status && (resultado?.Error?.Any() ?? false)) return Ok(resultado);
+
+            return resultado.Result != null ? Ok(resultado) : NoContent();
         }
 
         [HttpPost("registrar")]
         public async Task<IActionResult> PostRegistrar(SaidaCaminhaoViewModel input)
         {
-           var resultado = await _preRegistroUseCase.Cadastrar(input);
+            var resultado = await _preRegistroUseCase.Cadastrar(input);
 
             return resultado.Status ? Ok(resultado) : BadRequest(resultado);
         }
