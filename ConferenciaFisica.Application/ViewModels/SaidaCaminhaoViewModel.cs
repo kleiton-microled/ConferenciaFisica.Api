@@ -38,6 +38,12 @@ namespace ConferenciaFisica.Application.ViewModels
         public bool? GateOut { get; set; }
         public int? Patio { get; set; } = 1;
 
+
+
+        [Display(Name = "Finalidade")]
+        public string? FinalidadeId { get; set; }
+
+        public int? PatioDestinoId { get; set; }
     }
 
 }

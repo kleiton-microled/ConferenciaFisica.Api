@@ -1600,6 +1600,98 @@ INSERT INTO REDEX.dbo.tb_talie (
 
         #endregion
 
+        #region PRE_REGISTRO
+        public const string GetPendenciaSaidaRedex = @"  SELECT top 1 
+                                                      ID_AGENDAMENTO as AgendamentoId, 
+                                                      PROTOCOLO as Protocolo,  
+                                                      PERIODO as Periodo, 
+                                                      MOTORISTA as Motorista,  
+                                                      CNH,  
+                                                      PLACA_CAVALO as Placa, 
+                                                      PLACA_CARRETA as PlacaCarreta, 
+                                                      PERIODO_INICIAL as Periodo_Inicial,   
+                                                      PERIODO_FINAL as Periodo_Final, 
+                                                      TIPO as Tipo 
+                                                      FROM  
+                                                      REDEX..VW_AGENDAMENTOS_REDEX 
+                                                      WHERE  
+                                                       1=1  
+                                                      AND  
+                                                      PERIODO_INICIAL >= DATEADD(d,-150,GETDATE()) 
+                                                    ";
 
+        public const string GetPendenciaEntradaRedex = @"  SELECT top 1 
+                                                      ID_AGENDAMENTO as AgendamentoId, 
+                                                      PROTOCOLO as Protocolo,  
+                                                      PERIODO as Periodo, 
+                                                      MOTORISTA as Motorista,  
+                                                      CNH,  
+                                                      PLACA_CAVALO as Placa, 
+                                                      PLACA_CARRETA as PlacaCarreta, 
+                                                      PERIODO_INICIAL as Periodo_Inicial,   
+                                                      PERIODO_FINAL as Periodo_Final, 
+                                                      TIPO as Tipo 
+                                                      FROM  
+                                                      REDEX..VW_AGENDAMENTOS_REDEX 
+                                                      WHERE  
+                                                       1=1  
+                                                      AND  
+                                                      PERIODO_INICIAL >= DATEADD(d,-150,GETDATE()) 
+                                                    ";
+
+        public const string GetPendenciaSaidaPatioRedex = @"  SELECT 
+	                                                            TOP 1 
+		                                                            DATA_CHEGADA_DEIC_PATIO As DataChegadaDeicPatio,
+		                                                            Saida_Deic_Patio As DataSaidaDeicPatio,
+		                                                            DATA_CHEGADA As DataChegadaPatio,
+		                                                            Saida_Patio As DataSaidaPatio ,Ticket
+                                                            FROM 
+	                                                            REDEX..TB_PRE_REGISTRO 
+                                                            WHERE 
+	                                                            PLACA = @placa
+                                                            AND 
+	                                                            (Data_Saida IS NULL AND DATA_CHEGADA IS NOT NULL) 
+                                                            ORDER BY 
+	                                                            AUTONUM DESC";
+
+        public const string GetDadosAgendamentoRedex = @"SELECT top 1 
+                                                              ID_AGENDAMENTO as AgendamentoId, 
+                                                              PROTOCOLO as Protocolo,  
+                                                              PERIODO as Periodo, 
+                                                              MOTORISTA as Motorista,  
+                                                              CNH,  
+                                                              PLACA_CAVALO as Placa, 
+                                                              PLACA_CARRETA as PlacaCarreta, 
+                                                              PERIODO_INICIAL as Periodo_Inicial,   
+                                                              PERIODO_FINAL as Periodo_Final, 
+                                                              TIPO as Tipo 
+                                                            FROM  
+                                                              REDEX..VW_AGENDAMENTOS_REDEX 
+                                                            WHERE  
+                                                              1=1  
+                                                            AND  
+                                                              PERIODO_INICIAL >= DATEADD(d,-80,GETDATE())";
+
+        public const string InsertPreRegistro = @"INSERT INTO
+	                                                REDEX..TB_PRE_REGISTRO
+                                                        (
+		                                                    PROTOCOLO,
+		                                                    PLACA,
+		                                                    CARRETA,
+                                                            Ticket,  
+		                                                    DATA_CHEGADA,
+                                                            LOCAL,
+                                                            DATA_CHEGADA_DEIC_PATIO,
+                                                            FLAG_DEIC_PATIO
+                                                        ) VALUES (
+                                                            @Protocolo,
+                                                            @Placa,
+                                                            @Carreta,
+                                                            @Ticket,  
+                                                            @DataChegada,
+                                                            @LocalPatio,
+                                                            @DataChegadaDeicPatio,
+                                                            @FlagDeicPatio);  SELECT CAST(SCOPE_IDENTITY() AS INT)";
+        #endregion
     }
 }
