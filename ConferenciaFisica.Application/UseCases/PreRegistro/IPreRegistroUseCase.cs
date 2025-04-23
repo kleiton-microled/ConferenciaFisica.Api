@@ -7,6 +7,7 @@ namespace ConferenciaFisica.Application.UseCases.PreRegistro
     public interface IPreRegistroUseCase
     {
         Task<ServiceResult<bool>> Cadastrar(SaidaCaminhaoViewModel input);
+        Task<ServiceResult<bool>> CadastrarSemAgendamento(SaidaCaminhaoViewModel input);
         Task<ServiceResult<DadosAgendamentoModel?>> GetDadosAgendamento(PreRegistroInput input);
     }
 }

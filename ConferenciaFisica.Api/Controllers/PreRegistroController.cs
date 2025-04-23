@@ -36,6 +36,14 @@ namespace ConferenciaFisica.Api.Controllers
             return resultado.Status ? Ok(resultado) : BadRequest(resultado);
         }
 
+        [HttpPost("registrar-sem-agendamento")]
+        public async Task<IActionResult> PostRegistrarSemAgendamento(SaidaCaminhaoViewModel input)
+        {
+            ServiceResult<bool> resultado = await _preRegistroUseCase.CadastrarSemAgendamento(input);
+
+            return resultado.Status ? Ok(resultado) : BadRequest(resultado);
+        }
+
         //[HttpPost]
         //public async Task<IActionResult> PostEntradaSemAgendamento(string placaCavalo, string placaCarreta, string Ticketent, string finalidadeId, int patioId)
         //{

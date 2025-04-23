@@ -25,7 +25,7 @@ namespace ConferenciaFisica.Application.UseCases.PreRegistro
             {
                 var hasPendenciaEntrada = await _agendamentoRepository.GetPendenciaEntrada(input.Placa, input.PlacaCarreta);
 
-                if(hasPendenciaEntrada > 0)
+                if (hasPendenciaEntrada > 0)
                 {
                     result = await _preRegistroRepository.AtualizarDataChegada(hasPendenciaEntrada);
                 }
@@ -43,7 +43,43 @@ namespace ConferenciaFisica.Application.UseCases.PreRegistro
                                                                             input.PatioDestinoId
                                                                             );
                 }
-                  
+
+
+                return ServiceResult<bool>.Success(result);
+            }
+            catch (Exception exception)
+            {
+
+                return ServiceResult<bool>.Failure(exception.Message);
+            }
+        }
+
+        public async Task<ServiceResult<bool>> CadastrarSemAgendamento(SaidaCaminhaoViewModel input)
+        {
+            var result = false;
+            try
+            {
+                var pendenciaSaidaEstacionamento = await _agendamentoRepository.PendenciaDeSaidaEstacionamento(input.Placa, input.PlacaCarreta);
+
+                if (await _agendamentoRepository.PendenciaDeSaidaEstacionamento(input.Placa, input.PlacaCarreta) != null) 
+                    return ServiceResult<bool>.Failure("Existe pendência de saída no Estacionamento");
+                
+                if (await _agendamentoRepository.PendenciaDeSaidaPatio(input.Placa) != null)
+                    return ServiceResult<bool>.Failure("Existe pendência de saída no Patio");
+
+                result = await _preRegistroRepository.Cadastrar(input.Protocolo,
+                                                                        input.PlacaCarreta,
+                                                                        input.PlacaCarreta,
+                                                                        input.Ticket,
+                                                                        input.Patio.HasValue ? LocalPatio.Patio : LocalPatio.Estacionamento,
+                                                                        DateTime.Now,
+                                                                        (DateTime?)DateTime.Now,
+                                                                        !input.Patio.HasValue,
+                                                                        input.FinalidadeId,
+                                                                        input.PatioDestinoId
+                                                                        );
+
+
 
                 return ServiceResult<bool>.Success(result);
             }
@@ -58,6 +94,7 @@ namespace ConferenciaFisica.Application.UseCases.PreRegistro
         {
             try
             {
+#if !DEBUG
                 if (input.LocalPatio == LocalPatio.Patio)
                 {
                     var pendenciaSaida = await _agendamentoRepository.PendenciaDeSaidaEstacionamento(input.Placa, input.PlacaCarreta);
@@ -72,7 +109,7 @@ namespace ConferenciaFisica.Application.UseCases.PreRegistro
                         return ServiceResult<DadosAgendamentoModel>.Failure($"Existe pendência de saída no Pátio para a placa {input.Placa}");
                     }
                 }
-
+#endif
                 var dadosAgendamento = await _agendamentoRepository.GetDadosAgendamento(input.Sistema, input.Placa, input.PlacaCarreta);
 
 
