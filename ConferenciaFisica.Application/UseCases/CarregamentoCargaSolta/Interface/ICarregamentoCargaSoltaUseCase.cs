@@ -11,5 +11,7 @@ namespace ConferenciaFisica.Application.UseCases.CarregamentoCargaSolta.Interfac
         public Task<ServiceResult<CarregamentoOrdem>> GetOrdens(int? patio, string? veiculo, string? local, int? quantidade, DateTime? inicio, string tipo = "I");
         Task<ServiceResult<object>> BuscarMacantes(int marcante, int? patio);
         Task<ServiceResult<object>> SalvarMacantes(int marcante, int? patio, string local, string placa);
+        Task<ServiceResult<object>> Finalizar(string placa, int usuarioId, DateTime? inicio);
+        Task<ServiceResult<DateTime?>> Iniciar(string veiculo);
     }
 }

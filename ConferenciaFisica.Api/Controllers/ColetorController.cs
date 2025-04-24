@@ -15,6 +15,7 @@ namespace ConferenciaFisica.Api.Controllers
         private readonly IConferentesUseCase _conferenteUseCase;
         private readonly IEquipesUseCase _equipesUseCase;
         private readonly IPatiosUseCase _patiosUseCase;
+        //private readonly IVeiculoUseCase _veiculoUseCase;
 
         public ColetorController(IMarcantesUseCase marcantesUseCase, 
                                  IConferentesUseCase conferenteUseCase, 
@@ -58,6 +59,15 @@ namespace ConferenciaFisica.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("veiculos")]
+        public async Task<IActionResult> ListarPatios(DateTime? dataChegada)
+        {
+            var result = await _patiosUseCase.ListarPatios();
+
+            return Ok(result);
+        }
+
 
     }
 }

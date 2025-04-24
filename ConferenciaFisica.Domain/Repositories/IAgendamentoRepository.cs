@@ -1,4 +1,5 @@
 ﻿using ConferenciaFisica.Contracts.DTOs;
+using ConferenciaFisica.Domain.Entities.PreRegistro;
 
 namespace ConferenciaFisica.Domain.Repositories
 {
@@ -6,6 +7,9 @@ namespace ConferenciaFisica.Domain.Repositories
     {
         Task<IEnumerable<LoteAgendamentoDto>> CarregarLotesAgendamentoAsync(string filtro, List<int> patiosPermitidos);
         Task<IEnumerable<ConteinerAgendamentoDto>> CarregarCntrAgendamentoAsync(string filtro, List<int> patiospermitidos);
-
+        Task<DadosAgendamentoModel?> PendenciaDeSaidaEstacionamento(string placa, string placaCarreta);
+        Task<DadosAgendamentoModel?> PendenciaDeSaidaPatio(string placa);
+        Task<DadosAgendamentoModel?> GetDadosAgendamento(string sistema, string placa, string placaCarreta);
+        Task<int> GetPendenciaEntrada(string? placa, string? placaCarreta);
     }
 }

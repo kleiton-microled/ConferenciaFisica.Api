@@ -1362,15 +1362,10 @@
 
         #region CARREGAMENTO_CARGA_SOLTA
         public const string GetVeiculos = @"SELECT 
-                                            '[' + tipo + '] ' + 
-                                            CASE MIN(ISNULL(DT_CARREGAMENTO, GETDATE()-365)) 
-                                                WHEN GETDATE()-365 THEN '( )' 
-                                                ELSE '(x)' 
-                                            END + 
                                             MAX(ISNULL(PLACA_C,'')) + ' ' + 
                                             MAX(ISNULL(PLACA_CARRETA, '')) + ' ' + 
                                             MAX(ISNULL(MODELO,'')) AS DISPLAY 
-                                        FROM  SGIPA.dbo.VW_COL_CAM_CARREGAMENTO 
+                                        FROM  REDEX.dbo.VW_COL_CAM_CARREGAMENTO 
                                         WHERE PATIO = @patioId
                                         GROUP BY tipo, PLACA_C, PLACA_CARRETA;";
 
@@ -1387,7 +1382,7 @@
                                                         A.EMBALAGEM AS Embalagem, 
                                                         ISNULL(B.QTDE_CARREGADA, 0) AS QtdeCarregada 
                                                     FROM 
-                                                        SGIPA.dbo.VW_COL_CAM_CARREGAMENTO A 
+                                                        REDEX.dbo.VW_COL_CAM_CARREGAMENTO A 
                                                     LEFT JOIN (
                                                         SELECT  
                                                             SUM(volumes) AS QTDE_CARREGADA, 
@@ -1450,36 +1445,14 @@
                                                     GROUP BY 
                                                         A.lote;";
 
-        public const string GeMarcantePatio = @"SELECT
-                                                    M.AUTONUM AS MARCANTE,
-                                                    S.AUTONUM AS AUTONUMCS,
-                                                    S.BL AS LOTE,
-                                                    S.ITEM,
-                                                    M.VOLUMES AS QUANTIDADE,
-                                                    E.DESCR AS EMBALAGEM,
-                                                    S.MERCADORIA,
-                                                    S.MARCA,
-                                                    ISNULL(A.AUTONUM, 0) AS AUTONUM_ARMAZEM,
-                                                    A.DESCR AS DESCR_ARMAZEM,
-                                                    S.CNTR AS AUTONUMCNTR,
-                                                    C.Id_Conteiner,
-                                                    Y.YARD AS POSICAO,
-                                                    M.AUTONUM_CS_YARD
-                                                FROM
-                                                    SGIPA.dbo.TB_CARGA_SOLTA S
-                                                LEFT JOIN
-                                                    SGIPA.dbo.DTE_TB_EMBALAGENS E ON S.EMBALAGEM = E.CODE
-                                                LEFT JOIN
-                                                    SGIPA.dbo.TB_CNTR_BL C ON S.CNTR = C.AUTONUM
-                                                INNER JOIN
-                                                    SGIPA.dbo.TB_MARCANTES M ON S.AUTONUM = M.AUTONUM_CARGA
-                                                LEFT JOIN
-                                                    SGIPA.dbo.TB_CARGA_SOLTA_YARD Y ON M.AUTONUM_CS_YARD = Y.AUTONUM
-                                                LEFT JOIN
-                                                    SGIPA.dbo.TB_ARMAZENS_IPA A ON Y.ARMAZEM = A.AUTONUM
-                                                WHERE
-                                                    M.AUTONUM = @marcante
-                                                    AND S.PATIO = @patio ";
+            public const string GeMarcantePatio = @"SELECT 
+                                                            a.volumes AS Volumes, 
+                                                            b.os AS Os
+                                                        FROM 
+                                                            REDEX.dbo.tb_marcantes_rdx a
+                                                            INNER JOIN REDEX.dbo.tb_booking b ON a.autonum_boo = b.autonum_boo
+                                                        WHERE 
+                                                            a.autonum = @marcanteId";
 
         public const string getCarregamento = @" SELECT AUTONUMCS FROM SGIPA.dbo.VW_COL_CAM_CARREGAMENTO WHERE AUTONUMCS=@autonumCargaSolta AND PLACA_C=@placa";
 
@@ -1499,7 +1472,7 @@
                                                                 WHERE 
                                                                     M.VOLUMES > 0 
                                                                     AND Y.YARD = 'CAM' 
-                                                                    AND (M.PLACA_C IS NULL OR M.PLACA_C = 'ABC1234')  -- Substitua pela placa desejada
+                                                                    AND (M.PLACA_C IS NULL OR M.PLACA_C = @placa)  -- Substitua pela placa desejada
                                                                 GROUP BY 
                                                                     M.AUTONUM_CARGA
                                                             ) B ON A.AUTONUMCS = B.AUTONUMCS 
@@ -1507,7 +1480,7 @@
                                                                 A.PLACA_C = @placa  -- Substitua pela placa desejada
                                                                 AND A.AUTONUMCS = @autonum";
 
-        public const string InsertCargaSoltaYard = @"INSERT INTO SGIPA.TB_CARGA_SOLTA_YARD 
+        public const string InsertCargaSoltaYard = @"INSERT INTO redex.dbo.TB_CARGA_SOLTA_YARD  
                                                     (
                                                         AUTONUM,
                                                         AUTONUM_CS,
@@ -1530,7 +1503,7 @@
                                                         @numUsuario             -- Substitua pelo valor de Session(""AUTONUMUSUARIO"")
                                                     )";
 
-        public const string InsertCarregamento = @"INSERT INTO SGIPA.TB_CARGA_SOLTA_YARD 
+        public const string InsertCarregamento = @"INSERT INTO redex.dbo.TB_CARGA_SOLTA_YARD 
                                                     (
                                                         AUTONUM,
                                                         AUTONUM_CS,
@@ -1553,6 +1526,173 @@
                                                         @numUsuario             -- Substitua pelo valor de Session(""AUTONUMUSUARIO"")
                                                     )";
 
+        public const string GetCargaPorPlaca = @"SELECT DISTINCT a.ITEM 
+                                        FROM REDEX.dbo.VW_COL_CAM_CARREGAMENTO A
+                                        INNER JOIN REDEX.dbo.tb_saida_carga sc ON a.NUM_OC = sc.autonum_rcs
+                                        WHERE a.PLACA_C = @placa";
+
+        public const string GetMinutasCount = @"SELECT COUNT(*) 
+                                                    FROM REDEX.dbo.TB_registro reg
+                                                    INNER JOIN REDEX.dbo.TB_minutas mn ON reg.autonum_reg = mn.autonum_reg
+                                                    WHERE reg.autonum_ro = @itemId
+                                                    AND mn.flag_ef = 'F'";
+
+        public const string GetRomaneioAndTalieQuery = @"SELECT 
+                                                            ro.autonum_gate_saida AS GateSaidaID, 
+                                                            ro.crossdocking AS CrossDock, 
+                                                            ro.autonum_ro AS RomaneioId, 
+                                                            ISNULL(ro.autonum_talie, 0) AS autonum_talie,
+                                                            t.autonum_talie AS talie, 
+                                                            T.AUTONUM_PATIO AS CNTR_TALIE,
+                                                            RO.AUTONUM_BOO AS BOO_RO, 
+                                                            T.AUTONUM_BOO AS BOO_TALIE
+                                                        FROM 
+                                                            REDEX.dbo.TB_romaneio ro
+                                                        LEFT JOIN 
+                                                            REDEX.dbo.TB_talie t ON ro.autonum_talie = t.autonum_talie
+                                                        WHERE 
+                                                            ro.autonum_ro = @itemId";
+
+        public const string InsertTalie = @"
+DECLARE @InsertedIDs TABLE (ID INT);
+INSERT INTO REDEX.dbo.tb_talie (
+                                                inicio,
+                                                termino,
+                                                flag_estufagem,
+                                                crossdocking,
+                                                autonum_boo,
+                                                forma_operacao,
+                                                conferente,
+                                                equipe,
+                                                flag_descarga,
+                                                flag_carregamento,
+                                                obs,
+                                                autonum_ro,
+                                                autonum_gate,
+                                                flag_fechado,
+                                                flag_pacotes,
+                                                placa
+                                            ) 
+                                            OUTPUT INSERTED.autonum_talie INTO @InsertedIDs
+                                            VALUES (
+                                                
+                                                @inicio_descarga,
+                                                GETDATE(),
+                                                0,
+                                                0,
+                                                @boo_ro,
+                                                'A',
+                                                @conferente,
+                                                @equipe,
+                                                0,
+                                                1,
+                                                '',
+                                                @autonum_ro,
+                                                @autonum_gate,
+                                                1,
+                                                1,
+                                                @placa
+                                            )
+                                            SELECT ID FROM @InsertedIDs;";
+        #endregion
+
+
+        #region VEICULOS
+
+        #endregion
+
+        #region PRE_REGISTRO
+        public const string GetPendenciaSaidaRedex = @"  SELECT top 1 
+                                                      ID_AGENDAMENTO as AgendamentoId, 
+                                                      PROTOCOLO as Protocolo,  
+                                                      PERIODO as Periodo, 
+                                                      MOTORISTA as Motorista,  
+                                                      CNH,  
+                                                      PLACA_CAVALO as Placa, 
+                                                      PLACA_CARRETA as PlacaCarreta, 
+                                                      PERIODO_INICIAL as Periodo_Inicial,   
+                                                      PERIODO_FINAL as Periodo_Final, 
+                                                      TIPO as Tipo 
+                                                      FROM  
+                                                      REDEX..VW_AGENDAMENTOS_REDEX 
+                                                      WHERE  
+                                                       1=1  
+                                                      AND  
+                                                      PERIODO_INICIAL >= DATEADD(d,-150,GETDATE()) 
+                                                    ";
+
+        public const string GetPendenciaEntradaRedex = @"  SELECT top 1 
+                                                      ID_AGENDAMENTO as AgendamentoId, 
+                                                      PROTOCOLO as Protocolo,  
+                                                      PERIODO as Periodo, 
+                                                      MOTORISTA as Motorista,  
+                                                      CNH,  
+                                                      PLACA_CAVALO as Placa, 
+                                                      PLACA_CARRETA as PlacaCarreta, 
+                                                      PERIODO_INICIAL as Periodo_Inicial,   
+                                                      PERIODO_FINAL as Periodo_Final, 
+                                                      TIPO as Tipo 
+                                                      FROM  
+                                                      REDEX..VW_AGENDAMENTOS_REDEX 
+                                                      WHERE  
+                                                       1=1  
+                                                      AND  
+                                                      PERIODO_INICIAL >= DATEADD(d,-150,GETDATE()) 
+                                                    ";
+
+        public const string GetPendenciaSaidaPatioRedex = @"  SELECT 
+	                                                            TOP 1 
+		                                                            DATA_CHEGADA_DEIC_PATIO As DataChegadaDeicPatio,
+		                                                            Saida_Deic_Patio As DataSaidaDeicPatio,
+		                                                            DATA_CHEGADA As DataChegadaPatio,
+		                                                            Saida_Patio As DataSaidaPatio ,Ticket
+                                                            FROM 
+	                                                            REDEX..TB_PRE_REGISTRO 
+                                                            WHERE 
+	                                                            PLACA = @placa
+                                                            AND 
+	                                                            (Data_Saida IS NULL AND DATA_CHEGADA IS NOT NULL) 
+                                                            ORDER BY 
+	                                                            AUTONUM DESC";
+
+        public const string GetDadosAgendamentoRedex = @"SELECT top 1 
+                                                              ID_AGENDAMENTO as AgendamentoId, 
+                                                              PROTOCOLO as Protocolo,  
+                                                              PERIODO as Periodo, 
+                                                              MOTORISTA as Motorista,  
+                                                              CNH,  
+                                                              PLACA_CAVALO as Placa, 
+                                                              PLACA_CARRETA as PlacaCarreta, 
+                                                              PERIODO_INICIAL as Periodo_Inicial,   
+                                                              PERIODO_FINAL as Periodo_Final, 
+                                                              TIPO as Tipo 
+                                                            FROM  
+                                                              REDEX..VW_AGENDAMENTOS_REDEX 
+                                                            WHERE  
+                                                              1=1  
+                                                            AND  
+                                                              PERIODO_INICIAL >= DATEADD(d,-80,GETDATE())";
+
+        public const string InsertPreRegistro = @"INSERT INTO
+	                                                REDEX..TB_PRE_REGISTRO
+                                                        (
+		                                                    PROTOCOLO,
+		                                                    PLACA,
+		                                                    CARRETA,
+                                                            Ticket,  
+		                                                    DATA_CHEGADA,
+                                                            LOCAL,
+                                                            DATA_CHEGADA_DEIC_PATIO,
+                                                            FLAG_DEIC_PATIO
+                                                        ) VALUES (
+                                                            @Protocolo,
+                                                            @Placa,
+                                                            @Carreta,
+                                                            @Ticket,  
+                                                            @DataChegada,
+                                                            @LocalPatio,
+                                                            @DataChegadaDeicPatio,
+                                                            @FlagDeicPatio);  SELECT CAST(SCOPE_IDENTITY() AS INT)";
         #endregion
     }
 }
