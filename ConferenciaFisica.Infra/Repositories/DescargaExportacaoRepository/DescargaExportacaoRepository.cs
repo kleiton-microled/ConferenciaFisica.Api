@@ -1,4 +1,5 @@
 ﻿using ConferenciaFisica.Contracts.Commands;
+using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Contracts.DTOs.FinalizarProcesso;
 using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Entities.DescargaExportacao;
@@ -8,6 +9,7 @@ using ConferenciaFisica.Infra.Sql;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using System.ComponentModel;
+using System.Data;
 using System.IO;
 using System.Text.RegularExpressions;
 using static Dapper.SqlMapper;
@@ -75,25 +77,6 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             return ret;
         }
 
-        public async Task<int?> CrossDockGetNumeroReservaContainer(int id)
-        {
-            try
-            {
-                using var connection = _connectionFactory.CreateConnection();
-
-                var query = SqlQueries.CrossDockBuscarInfoTalie;
-
-                var ret = await connection.QuerySingleAsync<int?>(query, new { talieId = id });
-
-                return ret;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return null;
-            }
-        }
-
         public async Task<int?> GetCrossDockRomaneioId(int idQuery)
         {
             try
@@ -113,7 +96,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             }
         }
 
-        public async Task<bool> CrossDockUpdatePatioF(int id)
+        public async Task<bool> CrossDockUpdatePatioF(string conteiner)
         {
             try
             {
@@ -121,7 +104,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
                 var query = SqlQueries.CrossDockSetPatioToF;
 
-                var result = await connection.ExecuteAsync(query, new { id = id });
+                var result = await connection.ExecuteAsync(query, conteiner);
 
                 return result > 0;
             }
@@ -153,7 +136,8 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                     Equipe = command.Equipe,
                     Operacao = command.Operacao,
                     CodigoRegistro = command.Registro,
-                    Termino = command.Talie.Termino
+                    Termino = command.Talie.Termino,
+                    CrossDocking = command.IsCrossDocking
                 });
 
 
@@ -173,6 +157,8 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                     Equipe = command.Equipe,
                     CodigoRegistro = command.Registro,
                     IdReserva = 365016,
+                    Operacao = command.Operacao,
+                    CrossDocking = command.IsCrossDocking
                 });
 
                 return talieId;
@@ -333,8 +319,8 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             parameters.Add("@QtdDescarga", item.QtdDescarga);
             parameters.Add("@IdEmbalagem", item.CodigoEmbalagem);
             parameters.Add("@Comprimento", item.Comprimento);
-            parameters.Add("@Altura", item.Altura); 
-            parameters.Add("@Largura", item.Largura); 
+            parameters.Add("@Altura", item.Altura);
+            parameters.Add("@Largura", item.Largura);
             parameters.Add("@Peso", item.Peso);
             parameters.Add("@Imo", item.IMO);
             parameters.Add("@Imo2", item.IMO2);
@@ -932,45 +918,6 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
         //    }
         //}
 
-        public async Task<int> InserirRomaneio(int romaneioId, string usuario, int container, int reservaContainer)
-        {
-            try
-            {
-                using var connection = _connectionFactory.CreateConnection();
-              
-
-                var nextId = await ObterProximoIdAsync("seq_tb_romaneio");
-                var query = SqlQueries.CrossDockInserirRomaneio;
-
-                var ret = await connection.ExecuteAsync(query, new { Id = nextId, nUser = usuario, mskConteinerTag = container, Reserva_CC = reservaContainer });
-               
-                return nextId;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return 0;
-            }
-        }
-
-        public async Task InserirRomaneioCs(int romaneioId, int autonumPcs, decimal qtdeEntrada)
-        {
-            try
-            {
-                using var connection = _connectionFactory.CreateConnection();
-               
-                var nextId = await ObterProximoIdAsync("seq_tb_romaneio_cs");
-
-                var query = SqlQueries.CrossDockInserirRomaneioCs;
-
-                var ret = await connection.ExecuteAsync(query, new { nextId = nextId, autonumRo = romaneioId, autonumPcs = autonumPcs, qtdeEntrada = qtdeEntrada });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
         public async Task<int?> CrossDockBuscarTaliePorContainer(int patioContainers)
         {
             try
@@ -1050,23 +997,6 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
                 var result = await connection.ExecuteAsync(query, new { inicio = dataInicioEstufagem, termino = dataFimEstufagem, autonumPatio = patioContainer });
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-        public async Task UpdateRomaneio(int talieCarregamento, int idRomaneio)
-        {
-            try
-            {
-                using var connection = _connectionFactory.CreateConnection();
-                var query = @"UPDATE REDEX.dbo.tb_romaneio
-                                    SET autonum_talie = @talieCarregamento
-                                    WHERE autonum_ro = @idRomaneio";
-
-                var result = await connection.ExecuteAsync(query, new { talieCarregamento = talieCarregamento, idRomaneio = idRomaneio });
             }
             catch (Exception ex)
             {
@@ -1235,6 +1165,327 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             return await connection.ExecuteScalarAsync<int>(sql);
         }
 
+        #region PROCESSO DE CROSSDOCKING
+        public async Task<bool> FinalizarProcessoCrossDocking(int talieId, string conteiner)
+        {
+            var itensNoTalie = await BuscarTalieCrossDock(talieId);
+            var autonumConteiner = BuscarAutonumConteiner(conteiner);
+            if (itensNoTalie.Any())
+            {
+                if (autonumConteiner > 0)
+                {
+                    MarcarPatioComoFinalizado(autonumConteiner);
+                }
+            }
+
+            var reserva = await ObterReservaDoPatioAsync(autonumConteiner); //autonum_boo
+
+            //GERAR PLANEJAMENTO AUTOMATICO
+            var id_romaneio = await ObterRomaneioPorPatioAsync(autonumConteiner);
+
+            if (id_romaneio == 0)
+            {
+                id_romaneio = await InserirRomaneio("", autonumConteiner, reserva);
+
+                foreach (var item in itensNoTalie)
+                {
+                    await InserirRomaneioCargaSolta(id_romaneio, item.AutonumPcs, item.QtdeEntrada);
+                }
+
+                //GERAR TALIE AUTOMATICO
+                var periodo = await ObterPeriodoEstufagemAsync(autonumConteiner);
+
+                //Esse valor representa o Talie de Carregamento ativo ou mais recente, utilizado para identificar movimentações de carregamento.
+                var talieCarregamentoId = await ObterTalieDeCarregamentoAsync(autonumConteiner);
+                var talieCarregamentoInput = new TalieCarregamentoInput()
+                {
+                    AutonumPatio = autonumConteiner,
+                    DtInicioEstuf = periodo.DtInicioEstuf,
+                    DtTerminoEstuf = periodo.DtTerminoEstuf,
+                    AutonumBoo = reserva,
+                    FormaOperacao = "",
+                    AutonumRomaneio = id_romaneio
+                };
+
+                //Executa a criacao ou atualizacao do Talie de Carregamento
+                var resultado = await CriarOuAtualizarTalieDeCarregamentoAsync(talieCarregamentoInput, talieCarregamentoId);
+
+                foreach (var item in itensNoTalie)
+                {
+                    var input = EstufagemNotaFiscalDto.New(autonumConteiner, item.AutonumNf, item.QtdeEstufagem);
+
+                    await InserirEstufagemNotaFiscalAsync(input);
+                    //
+                    await AtualizarQtdeEstufadaNotaItemAsync(item.QtdeEstufagem, item.AutonumNf);
+
+                    await CrossDockInserirSaidaCarga(item.AutonumPcs, 
+                                                     item.QtdeEntrada, 
+                                                     item.AutonumEmb, 
+                                                     item.Bruto, 
+                                                     item.Altura,
+                                                     item.Comprimento,
+                                                     item.Largura, 
+                                                     item.VolumeDeclarado,
+                                                     autonumConteiner,
+                                                     "",
+                                                     item.AutonumNf,
+                                                     talieCarregamentoId,
+                                                     (int)id_romaneio);
+
+                    await VerificarEFecharPatioSeTotalSaidaCompletaAsync(item.AutonumPcs, item.QtdeEntrada);
+
+                }
+            }
+
+            return true;
+
+        }
+
+        public async Task<int?> CrossDockGetNumeroReservaContainer(string id)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var query = SqlQueries.CrossDockBuscarInfoTalie;
+
+                var ret = await connection.QuerySingleAsync<int?>(query, new { talieId = id });
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        private void MarcarPatioComoFinalizado(long autonumPatio)
+        {
+            var sql = @"UPDATE redex.dbo.tb_patio
+                        SET ef = 'F'
+                        WHERE autonum_patio = @AutonumPatio";
+
+            using var connection = _connectionFactory.CreateConnection();
+            connection.Execute(sql, new { AutonumPatio = autonumPatio });
+        }
+
+        private int BuscarAutonumConteiner(string conteiner)
+        {
+            var sql = @"SELECT tp.AUTONUM_PATIO FROM REDEX.dbo.TB_PATIO tp WHERE tp.ID_CONTEINER = @conteiner";
+
+            using var connection = _connectionFactory.CreateConnection();
+            return connection.QueryFirstOrDefault<int>(sql, conteiner);
+        }
+
+        private async Task<int> ObterReservaDoPatioAsync(long autonumPatio)
+        {
+            const string sql = @"SELECT bcg.autonum_boo
+                                 FROM redex.dbo.tb_patio cc
+                                 INNER JOIN redex.dbo.tb_booking_carga bcg ON cc.autonum_bcg = bcg.autonum_bcg
+                                 WHERE cc.autonum_patio = @AutonumPatio";
+
+            using var connection = _connectionFactory.CreateConnection();
+            var result = await connection.ExecuteScalarAsync<int>(sql, new { AutonumPatio = autonumPatio });
+
+            return result;
+        }
+
+        private async Task<long> ObterRomaneioPorPatioAsync(long autonumPatio)
+        {
+            const string sql = @"SELECT autonum_ro
+                                 FROM redex.dbo.tb_romaneio
+                                 WHERE autonum_patio = @AutonumPatio";
+
+            using var connection = _connectionFactory.CreateConnection();
+            var result = await connection.ExecuteScalarAsync<long>(sql, new { AutonumPatio = autonumPatio });
+
+            return result;
+        }
+
+        private async Task<int> InserirRomaneio(string usuario, int container, int reservaContainer)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+
+                var nextId = await ObterProximoIdAsync("seq_tb_romaneio");
+                var query = SqlQueries.CrossDockInserirRomaneio;
+
+                var ret = await connection.ExecuteAsync(query, new { Id = nextId, nUser = usuario, mskConteinerTag = container, Reserva_CC = reservaContainer });
+
+                return nextId;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return 0;
+            }
+        }
+
+        private async Task InserirRomaneioCargaSolta(long romaneioId, int autonumPcs, decimal qtdeEntrada)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                var nextId = await ObterProximoIdAsync("seq_tb_romaneio_cs");
+
+                var query = SqlQueries.CrossDockInserirRomaneioCs;
+
+                var ret = await connection.ExecuteAsync(query, new { nextId = nextId, autonumRo = romaneioId, autonumPcs = autonumPcs, qtdeEntrada = qtdeEntrada });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private async Task<PeriodoEstufagemDto> ObterPeriodoEstufagemAsync(long autonumPatio)
+        {
+            const string sql = @"SELECT 
+                                     MIN(inicio) AS DtInicioEstuf,
+                                     MAX(termino) AS DtTerminoEstuf
+                                 FROM redex.dbo.tb_talie
+                                 WHERE autonum_patio = @AutonumPatio
+                                   AND flag_descarga = 1";
+
+            using var connection = _connectionFactory.CreateConnection();
+            var result = await connection.QueryFirstOrDefaultAsync<PeriodoEstufagemDto>(sql, new { AutonumPatio = autonumPatio });
+
+            return result ?? new PeriodoEstufagemDto(); // retorna DTO vazio se não houver resultado
+        }
+
+        private async Task<int> ObterTalieDeCarregamentoAsync(long autonumPatio)
+        {
+            const string sql = @"SELECT autonum_talie
+                                 FROM redex.dbo.tb_talie
+                                 WHERE autonum_patio = @AutonumPatio
+                                   AND flag_carregamento = 1";
+
+            using var connection = _connectionFactory.CreateConnection();
+            var talieId = await connection.ExecuteScalarAsync<int>(sql, new { AutonumPatio = autonumPatio });
+
+            return talieId;
+        }
+
+        private async Task UpdateRomaneio(int talieCarregamento, int idRomaneio)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                var query = @"UPDATE REDEX.dbo.tb_romaneio
+                                    SET autonum_talie = @talieCarregamento
+                                    WHERE autonum_ro = @idRomaneio";
+
+                var result = await connection.ExecuteAsync(query, new { talieCarregamento = talieCarregamento, idRomaneio = idRomaneio });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private async Task<long> CriarOuAtualizarTalieDeCarregamentoAsync(TalieCarregamentoInput input, int talieExistente)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            using var transaction = connection.BeginTransaction();
+
+            try
+            {
+                if (talieExistente == 0)
+                {
+                    var newTalieId = await InserirTalieDeCarregamentoAsync(connection, transaction, input);
+                    await AtualizarRomaneioComTalieAsync(connection, transaction, input.AutonumRomaneio, newTalieId);
+                    transaction.Commit();
+                    return newTalieId;
+                }
+                else
+                {
+                    await AtualizarPeriodoTalieCarregamentoAsync(connection, transaction, input.AutonumPatio, input.DtInicioEstuf, input.DtTerminoEstuf);
+                    transaction.Commit();
+                    return talieExistente;
+                }
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        private async Task<long> InserirTalieDeCarregamentoAsync(IDbConnection connection, IDbTransaction transaction, TalieCarregamentoInput input)
+        {
+            const string sql = @"INSERT INTO redex.dbo.tb_talie (
+                                     autonum_patio, inicio, termino, flag_estufagem, crossdocking,
+                                     autonum_boo, forma_operacao, conferente, equipe, flag_descarga,
+                                     flag_carregamento, obs, autonum_ro, autonum_gate, flag_fechado
+                                 )
+                                 VALUES (
+                                     @AutonumPatio, @DtInicio, @DtTermino, 1, 1,
+                                     @AutonumBoo, @FormaOperacao, NULL, NULL, 0,
+                                     1, '', @AutonumRomaneio, 0, 1
+                                 );
+                                 
+                                 SELECT CAST(SCOPE_IDENTITY() AS BIGINT);";
+
+            return await connection.ExecuteScalarAsync<long>(sql, new
+            {
+                input.AutonumPatio,
+                DtInicio = input.DtInicioEstuf,
+                DtTermino = input.DtTerminoEstuf,
+                input.AutonumBoo,
+                FormaOperacao = input.FormaOperacao ?? "",
+                input.AutonumRomaneio
+            }, transaction);
+        }
+
+        private async Task AtualizarRomaneioComTalieAsync(IDbConnection connection, IDbTransaction transaction, long romaneioId, long talieId)
+        {
+            const string sql = @"UPDATE redex.dbo.tb_romaneio 
+                                 SET autonum_talie = @TalieId 
+                                 WHERE autonum_ro = @RomaneioId";
+
+            await connection.ExecuteAsync(sql, new { TalieId = talieId, RomaneioId = romaneioId }, transaction);
+        }
+
+        private async Task AtualizarPeriodoTalieCarregamentoAsync(IDbConnection connection, IDbTransaction transaction, long autonumPatio, DateTime? inicio, DateTime? termino)
+        {
+            const string sql = @"UPDATE redex.dbo.tb_talie 
+                                 SET inicio = @Inicio, termino = @Termino
+                                 WHERE autonum_patio = @AutonumPatio AND flag_carregamento = 1";
+
+            await connection.ExecuteAsync(sql, new { AutonumPatio = autonumPatio, Inicio = inicio, Termino = termino }, transaction);
+        }
+
+        private async Task InserirEstufagemNotaFiscalAsync(EstufagemNotaFiscalDto input)
+        {
+            const string sql = @"INSERT INTO redex.dbo.TB_AMR_NF_SAIDA (
+                                     AUTONUM_PATIO,
+                                     AUTONUM_NFI,
+                                     QTDE_ESTUFADA
+                                 )
+                                 VALUES (
+                                     @AutonumPatio,
+                                     @AutonumNfi,
+                                     @QtdeEstufada
+                                 )";
+
+            using var connection = _connectionFactory.CreateConnection();
+            await connection.ExecuteAsync(sql, input);
+        }
+
+        private async Task AtualizarQtdeEstufadaNotaItemAsync(int quantidadeEstufada, long autonumNotaFiscalItem)
+        {
+            const string sql = @"UPDATE redex.dbo.TB_NOTAS_ITENS
+                                 SET QTDE_ESTUFADA = @quantidadeEstufada
+                                 WHERE AUTONUM_NFI = @autonumNotaFiscalItem;";
+
+            using var connection = _connectionFactory.CreateConnection();
+            await connection.ExecuteAsync(sql, new {quantidadeEstufada, autonumNotaFiscalItem});
+        }
+
         public async Task CrossDockInserirSaidaCarga(int autonumPcs, decimal qtdeEntrada, int autonumEmb, decimal bruto, decimal altura, decimal comprimento, decimal largura, decimal volumeDeclarado, int patioContainer, string v, int autonumNf, int? talieByContainer, int romaneioId)
         {
             try
@@ -1256,15 +1507,17 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                                     @id_conteiner, @mercadoria, @data_estufagem, @autonum_nfi, @autonum_talie, @autonum_ro
                                 )";
 
-                var result = await connection.ExecuteAsync(query, new { id_sc = nextId,
+                var result = await connection.ExecuteAsync(query, new
+                {
+                    id_sc = nextId,
                     autonum_pcs = autonumPcs,
                     qtde_saida = qtdeEntrada,
-                    autonum_emb= autonumEmb,
-                    peso_bruto= bruto,
+                    autonum_emb = autonumEmb,
+                    peso_bruto = bruto,
                     altura = altura,
                     comprimento = comprimento,
                     largura = largura,
-                    volume =volumeDeclarado,
+                    volume = volumeDeclarado,
                     autonum_patio = patioContainer,
                     id_conteiner = v,
                     mercadoria = autonumNf,
@@ -1280,5 +1533,29 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 Console.WriteLine(ex.Message);
             }
         }
+
+        private async Task VerificarEFecharPatioSeTotalSaidaCompletaAsync(long autonumPcs, int qtdeEntrada)
+        {
+            const string sqlSoma = @"SELECT SUM(qtde_saida) 
+                                     FROM redex.dbo.tb_saida_carga 
+                                     WHERE autonum_pcs = @AutonumPcs;";
+
+            using var connection = _connectionFactory.CreateConnection();
+
+            var qtdeSaida = await connection.ExecuteScalarAsync<int?>(sqlSoma, new { AutonumPcs = autonumPcs });
+            var totalSaida = qtdeSaida ?? 0;
+
+            if (totalSaida >= qtdeEntrada)
+            {
+                const string sqlUpdate = @"UPDATE redex.dbo.tb_patio_cs
+                                           SET flag_historico = 1
+                                           WHERE autonum_pcs = @AutonumPcs;";
+
+                await connection.ExecuteAsync(sqlUpdate, new { AutonumPcs = autonumPcs });
+            }
+        }
+
+
+        #endregion
     }
 }

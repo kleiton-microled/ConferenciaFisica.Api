@@ -4,12 +4,14 @@
     {
         public int Registro { get; set; }
         public TalieViewModel? Talie { get; set; }
-        public string Placa { get; set; }
-        public string Reserva { get; set; }
-        public string Cliente { get; set; }
+        public string Placa { get; set; } = string.Empty;
+        public string Reserva { get; set; } = string.Empty;
+        public string Cliente { get; set; } = string.Empty;
         public int IdReserva { get; set; }
         public int IdConferente { get; set; }
         public int Equipe { get; set; }
         public int Operacao { get; set; }
+        public bool IsCrossDocking { get; set; }
+        public string? Conteiner { get; set; } = string.Empty;
     }
 }

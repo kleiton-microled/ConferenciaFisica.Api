@@ -430,6 +430,7 @@
                                                     	tt.EQUIPE as Equipe,
                                                     	tt.FORMA_OPERACAO as Operacao,
                                                     	tt.OBS as Observacao,
+                                                        tt.CROSSDOCKING as IsCrossDocking,
                                                     	--TALIE ITEM
                                                     	tti.AUTONUM_TI as Id,
                                                         tti.NF as NotaFiscal,
@@ -489,7 +490,7 @@
                                                     flag_descarga = 1,
                                                     flag_estufagem = 0,
                                                     flag_carregamento = 0,
-                                                    crossdocking = 0,
+                                                    crossdocking = @CrossDocking,
                                                     conferente = @conferente,
                                                     equipe = @equipe,
                                                     forma_operacao = @Operacao,
@@ -518,12 +519,12 @@
                                             1,--FLAG DESCARGA 
                                             0,--FLAG ESTUFAGEM
                                             0,--FLAG CARREGAMENTO 
-                                            0,--CROSDOCKING 
+                                            @CrossDocking,--CROSDOCKING 
                                             @conferente, --ID 
                                             @equipe, --ID
                                             @idReserva,
                                             --autonum_boo
-                                            @operacao
+                                            @operacao,
                                             --autonum_gate
                                             @CodigoRegistro --AutonumRegistro
                                         );
@@ -961,7 +962,7 @@
 
         public const string CrossDockSetPatioToF = @"UPDATE REDEX.dbo.tb_patio 
                                                         SET ef = 'F' 
-                                                     WHERE autonum_patio = @id";
+                                                     WHERE id_conteiner = @conteiner";
 
 
 

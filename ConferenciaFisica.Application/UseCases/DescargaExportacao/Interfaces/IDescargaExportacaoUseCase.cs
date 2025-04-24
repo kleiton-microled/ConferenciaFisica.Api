@@ -17,7 +17,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces
         Task<ServiceResult<bool>> GravarMarcante(MarcanteInput input);
         Task<ServiceResult<bool>> ExcluirTalieItem(int registroId, int talieId, string notaFiscal);
         Task<ServiceResult<bool>> ExcluirMarcanteTalieItem(int id);
-        Task<ServiceResult<bool>> FinalizarProcesso(int talie, bool crossdock, string usuario, int patioContainer = 0);
+        Task<ServiceResult<bool>> FinalizarProcesso(int talie, bool crossdock, string usuario, string conteiner);
         Task<IEnumerable<LocaisYardViewModel>> BuscarYard(string search);
 
 

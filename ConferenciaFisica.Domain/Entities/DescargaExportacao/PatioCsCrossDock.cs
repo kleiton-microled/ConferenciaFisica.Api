@@ -4,7 +4,7 @@
     {
         public int AutonumPcs { get; set; }
         public int AutonumBcg { get; set; }
-        public decimal QtdeEntrada { get; set; }
+        public int QtdeEntrada { get; set; }
         public int AutonumEmb { get; set; }
         public int AutonumPro { get; set; }
         public string Marca { get; set; }
