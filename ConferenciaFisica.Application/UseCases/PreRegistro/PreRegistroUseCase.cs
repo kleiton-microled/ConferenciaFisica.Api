@@ -60,11 +60,11 @@ namespace ConferenciaFisica.Application.UseCases.PreRegistro
             try
             {
                 var pendenciaSaidaEstacionamento = await _agendamentoRepository.PendenciaDeSaidaEstacionamento(input.Placa, input.PlacaCarreta);
-
-                if (await _agendamentoRepository.PendenciaDeSaidaEstacionamento(input.Placa, input.PlacaCarreta) != null) 
+                if (pendenciaSaidaEstacionamento != null) 
                     return ServiceResult<bool>.Failure("Existe pendência de saída no Estacionamento");
-                
-                if (await _agendamentoRepository.PendenciaDeSaidaPatio(input.Placa) != null)
+
+                var pendenciaSaidaPatio = await _agendamentoRepository.PendenciaDeSaidaPatio(input.Placa);
+                if (pendenciaSaidaPatio  != null)
                     return ServiceResult<bool>.Failure("Existe pendência de saída no Patio");
 
                 result = await _preRegistroRepository.Cadastrar(input.Protocolo,

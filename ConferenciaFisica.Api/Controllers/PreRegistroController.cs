@@ -41,7 +41,9 @@ namespace ConferenciaFisica.Api.Controllers
         {
             ServiceResult<bool> resultado = await _preRegistroUseCase.CadastrarSemAgendamento(input);
 
-            return resultado.Status ? Ok(resultado) : BadRequest(resultado);
+            if (!resultado.Status && (resultado?.Error?.Any() ?? false)) return Ok(resultado);
+
+            return resultado.Status ? Ok(resultado) : NoContent();
         }
 
         //[HttpPost]
