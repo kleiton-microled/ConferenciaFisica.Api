@@ -7,6 +7,7 @@
                                                                     CONF.ID AS ID,
                                                                     CONF.TIPO_CONFERENCIA as Tipo,
                                                                     CONF.EMBALAGEM,
+                                                                    C.QUANTIDADE,
                                                                     CONF.BL,
                                                                     BL.VIAGEM,
                                                                     CONF.CNTR,
@@ -43,6 +44,7 @@
                                                                 
                                                                 FROM dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
                                                                 LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.ID_CONTEINER
+                                                                LEFT JOIN dbo.TB_CARGA_CNTR C ON CONF.CNTR = C.ID_CONTEINER
                                                                 WHERE BL.ID_CONTEINER = @idConteiner
                                                                 ORDER BY CONF.ID DESC;
 
@@ -141,11 +143,11 @@
                                                                      --B.NUMERO,
                                                                      B.VIAGEM as Viagem,
                                                                      D.EMBALAGEM as Embalagem,
-                                                                     D.QUANTIDADE as Quantidade,
+                                                                     --D.QUANTIDADE as Quantidade,
                                                                      C.ID_CONTEINER as Cntr,
                                                                      P.DT_PREVISTA as DataPrevista,
                                                                      T.DESCR AS MotivoAbertura,
-                                                                     --G.QUANTIDADE AS QUANTIDADE_CNTR,
+                                                                     G.QUANTIDADE AS QUANTIDADE,
                                                                      G.EMBALAGEM AS EMBALAGEM_CNTR,
                                                                      'CONTEINER' AS TIPO_CARGA,
                                                                      C.LACRE_ORIGEM,
