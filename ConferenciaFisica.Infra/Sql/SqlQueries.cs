@@ -11,6 +11,7 @@
                                                                     CONF.BL,
                                                                     BL.VIAGEM,
                                                                     CONF.CNTR,
+                                                                    BL.ID_CONTEINER as NumeroConteiner,
                                                                     CONF.INICIO,
                                                                     CONF.TERMINO,
                                                                     CONF.NOME_CLIENTE as NomeCliente,
@@ -38,14 +39,14 @@
                                                                 
                                                                     CASE 
                                                                         WHEN ISNULL(CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
-                                                                        WHEN ISNULL(CONF.CNTR, '') <> '' THEN 'CONTEINER'
+                                                                        WHEN ISNULL(CONF.CNTR, 0) <> 0 THEN 'CONTEINER'
                                                                         ELSE 'REDEX'
                                                                     END AS TipoCarga
                                                                 
                                                                 FROM dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
-                                                                LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.ID_CONTEINER
-                                                                LEFT JOIN dbo.TB_CARGA_CNTR C ON CONF.CNTR = C.ID_CONTEINER
-                                                                WHERE BL.ID_CONTEINER = @idConteiner
+                                                                LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.AUTONUM
+                                                                LEFT JOIN dbo.TB_CARGA_CNTR C ON BL.ID_CONTEINER = C.ID_CONTEINER
+                                                                WHERE BL.AUTONUM = @idConteiner
                                                                 ORDER BY CONF.ID DESC;
 
                                                                   ";
@@ -83,13 +84,13 @@
                                                         		WHEN ISNULL(CONF.BL,
                                                         		0) <> 0 THEN 'CARGA SOLTA'
                                                         		WHEN ISNULL(CONF.CNTR,
-                                                        		'') <> '' THEN 'CONTEINER'
+                                                        		0) <> 0 THEN 'CONTEINER'
                                                         		ELSE 'REDEX'
                                                         	END AS TipoCarga
                                                         FROM
                                                         	dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
                                                         LEFT JOIN dbo.TB_CNTR_BL BL ON
-                                                        	CONF.CNTR = BL.ID_CONTEINER
+                                                        	CONF.CNTR = BL.AUTONUM
                                                         WHERE
                                                         	CONF.ID = @id";
         public const string BUscarConferenciaPorLote = @"SELECT
@@ -139,12 +140,12 @@
                                                         	CONF.ID DESC";
         public const string BuscarConferenciaPorAgendamento = @"SELECT DISTINCT 
                                                                      '' AS NumeroBl,
-                                                                     --C.AUTONUM AS CNTR,
                                                                      --B.NUMERO,
                                                                      B.VIAGEM as Viagem,
                                                                      D.EMBALAGEM as Embalagem,
                                                                      --D.QUANTIDADE as Quantidade,
-                                                                     C.ID_CONTEINER as Cntr,
+                                                                     C.AUTONUM as Cntr,
+                                                                     C.ID_CONTEINER as NumeroConteiner,
                                                                      P.DT_PREVISTA as DataPrevista,
                                                                      T.DESCR AS MotivoAbertura,
                                                                      G.QUANTIDADE AS QUANTIDADE,
@@ -164,7 +165,7 @@
                                                                 LEFT JOIN dbo.TB_AGENDA_POSICAO_MOTIVO M ON M.AUTONUM_AGENDA_POSICAO = P.AUTONUM
                                                                 LEFT JOIN dbo.TB_MOTIVO_POSICAO T ON T.CODE = M.MOTIVO_POSICAO
                                                                 WHERE P.DATA_CANCELAMENTO IS NULL 
-                                                                AND C.ID_CONTEINER = @idConteiner --'AMFU315608-0'
+                                                                AND C.AUTONUM = @idConteiner --'AMFU315608-0'
                                                                 ORDER BY P.DT_PREVISTA DESC";
         public const string BuscarLotePorAgendamento = @"SELECT DISTINCT 
                                                                      B.AUTONUM AS Bl,
@@ -238,8 +239,8 @@
                                                             LEFT JOIN SGIPA.dbo.TB_LACRES_CONFERENCIA tplc ON tplc.ID_CONFERENCIA = CONF.ID 
                                                             WHERE A.REFERENCE = @LotePesquisa --RESERVA '241ISZ1203091'";
         public const string CarregarConteinerAgendamento = @"SELECT 
-															     ID_CONTEINER AS Display, 
-															     ID_CONTEINER AS Autonum
+															     C.ID_CONTEINER AS Display, 
+															     C.AUTONUM AS Autonum
 															 FROM TB_AGENDAMENTO_POSICAO A
 															 INNER JOIN TB_AGENDA_POSICAO_MOTIVO B ON A.AUTONUM = B.AUTONUM_AGENDA_POSICAO
 															 INNER JOIN SGIPA.dbo.TB_CNTR_BL C ON A.CNTR = C.AUTONUM
@@ -516,19 +517,17 @@
                                         ) 
                                         VALUES 
                                         (
-                                            @Placa,
-                                            @Inicio, 
-                                            1,--FLAG DESCARGA 
-                                            0,--FLAG ESTUFAGEM
-                                            0,--FLAG CARREGAMENTO 
-                                            @CrossDocking,--CROSDOCKING 
-                                            @conferente, --ID 
-                                            @equipe, --ID
-                                            @idReserva,
-                                            --autonum_boo
-                                            @operacao,
-                                            --autonum_gate
-                                            @CodigoRegistro --AutonumRegistro
+                                        @Placa,
+                                        @Inicio, 
+                                        1,--FLAG DESCARGA 
+                                        0,--FLAG ESTUFAGEM
+                                        0,--FLAG CARREGAMENTO 
+                                        @CrossDocking,
+                                        @conferente, --ID 
+                                        @equipe, --ID
+                                        @operacao,
+                                        @idReserva,
+                                        @CodigoRegistro
                                         );
                                         
                                         SELECT CAST(SCOPE_IDENTITY() as int)";
@@ -562,6 +561,8 @@
                                             INNER JOIN REDEX.dbo.TB_REGISTRO_CS trc ON
 	                                                    trc.AUTONUM_REGCS = tti.AUTONUM_REGCS 
                                             WHERE tti.AUTONUM_TALIE = @TalieId";
+
+        public const string BuscarIdReserva = @"SELECT tb.AUTONUM_BOO FROM REDEX.dbo.TB_BOOKING tb where tb.REFERENCE = @Reserva";
 
         public const string Descarga = @"SELECT 
                                             rcs.*, 

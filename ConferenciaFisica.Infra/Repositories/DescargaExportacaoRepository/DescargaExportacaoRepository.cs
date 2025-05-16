@@ -126,6 +126,10 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
             int count = connection.ExecuteScalar<int>(verificaTalieSql, new { CodigoRegistro = command.Registro });
 
+            var idReserva = SqlQueries.BuscarIdReserva;
+
+            var autonum_boo = connection.ExecuteScalar<int>(idReserva, new { Reserva = command.Reserva });
+
             if (count > 0)
             {
                 string updateSql = SqlQueries.AtualizarTalie;
@@ -156,8 +160,8 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                     Conferente = 1,
                     Equipe = command.Equipe,
                     CodigoRegistro = command.Registro,
-                    IdReserva = 365016,
                     Operacao = command.Operacao,
+                    IdReserva = autonum_boo,
                     CrossDocking = command.IsCrossDocking
                 });
 
@@ -1218,13 +1222,13 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                     //
                     await AtualizarQtdeEstufadaNotaItemAsync(item.QtdeEstufagem, item.AutonumNf);
 
-                    await CrossDockInserirSaidaCarga(item.AutonumPcs, 
-                                                     item.QtdeEntrada, 
-                                                     item.AutonumEmb, 
-                                                     item.Bruto, 
+                    await CrossDockInserirSaidaCarga(item.AutonumPcs,
+                                                     item.QtdeEntrada,
+                                                     item.AutonumEmb,
+                                                     item.Bruto,
                                                      item.Altura,
                                                      item.Comprimento,
-                                                     item.Largura, 
+                                                     item.Largura,
                                                      item.VolumeDeclarado,
                                                      autonumConteiner,
                                                      "",
@@ -1483,7 +1487,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                                  WHERE AUTONUM_NFI = @autonumNotaFiscalItem;";
 
             using var connection = _connectionFactory.CreateConnection();
-            await connection.ExecuteAsync(sql, new {quantidadeEstufada, autonumNotaFiscalItem});
+            await connection.ExecuteAsync(sql, new { quantidadeEstufada, autonumNotaFiscalItem });
         }
 
         public async Task CrossDockInserirSaidaCarga(int autonumPcs, decimal qtdeEntrada, int autonumEmb, decimal bruto, decimal altura, decimal comprimento, decimal largura, decimal volumeDeclarado, int patioContainer, string v, int autonumNf, int? talieByContainer, int romaneioId)

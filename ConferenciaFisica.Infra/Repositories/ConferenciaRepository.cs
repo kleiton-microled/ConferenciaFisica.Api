@@ -81,6 +81,9 @@ namespace ConferenciaFisica.Infra.Repositories
             using var connection = _connectionFactory.CreateConnection();
             string query = SqlQueries.InsertConferenciaFisica;
 
+            //var autonumCntr = BuscarAutonumCntr(command.Cntr);
+            //command.Cntr = autonumCntr.ToString();
+
             var ret = await connection.ExecuteAsync(query, command);
             if (ret > 0)
             {
@@ -395,6 +398,24 @@ namespace ConferenciaFisica.Infra.Repositories
 
                 throw;
             }
+        }
+
+        private int BuscarAutonumCntr(string idConteiner)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+                string query = @"SELECT AUTONUM FROM SGIPA.dbo.TB_CNTR_BL tcb WHERE tcb.ID_CONTEINER = @idConteiner";
+
+                return connection.QueryFirstOrDefault<int>(query, new { idConteiner = idConteiner });
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+
         }
     }
 }

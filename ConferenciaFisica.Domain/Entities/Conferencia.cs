@@ -10,7 +10,8 @@
         public string MotivoAbertura { get; set; }
         public string Embalagem { get; set; }
         public int Quantidade { get; set; }
-        public string Cntr { get; set; } //IdConteiner
+        public int Cntr { get; set; } //IdConteiner
+        public string NumeroConteiner { get; set; } //NumeroConteiner
         public DateTime? Inicio { get; set; }
         public DateTime? Termino { get; set; }
         public string NomeCliente { get; set; }

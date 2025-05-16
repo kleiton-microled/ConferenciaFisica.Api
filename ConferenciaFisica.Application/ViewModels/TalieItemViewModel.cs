@@ -18,7 +18,7 @@ namespace ConferenciaFisica.Application.ViewModels
         public decimal? Comprimento { get; set; }
         public decimal? Largura { get; set; }
         public decimal? Altura { get; set; }
-        public decimal? Peso { get; set; }
+        public decimal? Peso { get; set; } = 0;
         public bool Fragil { get; set; } = false;
         public bool Madeira { get; set; } = false;
         public bool? Avariado { get; set; } = false;

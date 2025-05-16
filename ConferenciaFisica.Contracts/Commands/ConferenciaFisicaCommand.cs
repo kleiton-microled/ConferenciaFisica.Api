@@ -2,7 +2,7 @@
 {
     public class ConferenciaFisicaCommand
     {
-        public ConferenciaFisicaCommand(int? id, int? tipo, string? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, 
+        public ConferenciaFisicaCommand(int? id, int? tipo, int? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, 
             string? nomeConferente, string? cpfCliente, string? nomeCliente, int? qtdeDivergente, bool divergenciaQualificacao, 
             string? observacaoDivergencia, int? retiradaAmostra, int? embalagem, bool? conferenciaRemota, string? operacao, 
             int? qtdeVolumesDivergentes, int? qtdeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 
@@ -35,7 +35,7 @@
         }
         public int? Id { get; set; }
         public int? Tipo { get; set; }
-        public string? Cntr { get; set; }
+        public int? Cntr { get; set; }
         public string? Bl { get; set; }
         public DateTime? Inicio { get; set; }
         public DateTime? Termino { get; set; }
@@ -60,7 +60,7 @@
         public int? Desunitizacao { get; set; }
         public int? QuantidadeDocumentos { get; set; }
 
-        public static ConferenciaFisicaCommand New(int? id, int? tipo, string? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, string? nomeConferente, 
+        public static ConferenciaFisicaCommand New(int? id, int? tipo, int? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, string? nomeConferente, 
                                                    string? cpfCliente, string? nomeCliente, int? qtdeDivergente, bool divergenciaQualificacao, 
                                                    string? observacaoDivergencia, int? retiradaAmostra, int? embalagem, bool? conferenciaRemota, string    ? operacao, 
                                                    int? qtdeVolumesDivergentes, int? qtdeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 

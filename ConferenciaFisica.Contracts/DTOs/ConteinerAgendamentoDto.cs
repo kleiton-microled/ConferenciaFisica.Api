@@ -3,6 +3,6 @@
     public class ConteinerAgendamentoDto
     {
         public string Display { get; set; }
-        public string Autonum { get; set; }
+        public int Autonum { get; set; }
     }
 }
