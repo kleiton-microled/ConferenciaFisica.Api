@@ -20,9 +20,7 @@ namespace ConferenciaFisica.Api.Controllers
         public async Task<IActionResult> BuscarCargaParaMovimentacao([FromQuery] int idMarcante)
         {
             var resultado = await _useCase.BuscarCargaParaMovimentar(idMarcante);
-            if (!resultado.Status)
-                return BadRequest(resultado);
-
+            
             return Ok(resultado);
         }
 

@@ -1,9 +1,7 @@
 ﻿using ConferenciaFisica.Application.Common.Models;
 using ConferenciaFisica.Application.ViewModels;
-using ConferenciaFisica.Contracts.Commands;
 using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Domain.Repositories;
-using Microsoft.Win32;
 
 namespace ConferenciaFisica.Application.UseCases.MovimentacaoCargaSolta
 {
@@ -24,7 +22,7 @@ namespace ConferenciaFisica.Application.UseCases.MovimentacaoCargaSolta
 
             if (carga == null)
             {
-                return ServiceResult<MovimentacaoCargaDTO>.Failure("Registro não encontrado.");
+                return ServiceResult<MovimentacaoCargaDTO>.Success(carga, "Registro não encontrado.");
             }
 
             return ServiceResult<MovimentacaoCargaDTO>.Success(carga, "Registro localizada com sucesso.");
