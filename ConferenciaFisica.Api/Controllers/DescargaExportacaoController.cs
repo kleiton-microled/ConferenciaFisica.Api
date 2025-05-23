@@ -14,10 +14,15 @@ namespace ConferenciaFisica.Api.Controllers
         private readonly IDescargaExportacaoUseCase _descargaExportacaoUseCase;
         private readonly ITipoFotoUseCase _processoUseCase;
 
-        public DescargaExportacaoController(IDescargaExportacaoUseCase descargaExportacaoUseCase, ITipoFotoUseCase imagensUseCaseUseCase)
+        private readonly IConfiguration _configuration;
+
+        public DescargaExportacaoController(IDescargaExportacaoUseCase descargaExportacaoUseCase, 
+            ITipoFotoUseCase imagensUseCaseUseCase,
+            IConfiguration configuration)
         {
             _descargaExportacaoUseCase = descargaExportacaoUseCase;
             _processoUseCase = imagensUseCaseUseCase;
+            _configuration = configuration;
         }
 
         [HttpGet("{id}")]
@@ -258,7 +263,11 @@ namespace ConferenciaFisica.Api.Controllers
                 return NotFound("Nenhuma imagem encontrada para esse processo.");
 
             var imagens = result.Result;
-            var basePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"); // ou outro caminho raiz das imagens
+
+            // Obtém o caminho do appsettings
+            var basePath = _configuration["Images:Path"];
+            if (string.IsNullOrEmpty(basePath))
+                return StatusCode(500, "Caminho das imagens não configurado.");
 
             using var memoryStream = new MemoryStream();
             using (var zip = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
@@ -284,6 +293,7 @@ namespace ConferenciaFisica.Api.Controllers
 
             return File(memoryStream.ToArray(), "application/zip", zipFileName);
         }
+
 
         #endregion
     }

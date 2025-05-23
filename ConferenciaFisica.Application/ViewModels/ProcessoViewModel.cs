@@ -13,6 +13,7 @@
         public int Type { get; set; }
         public string TypeDescription { get; set; }
         public string ImagemBase64 { get; set; }
-       
+        public string NomeProcesso { get; set; }
+
     }
 }

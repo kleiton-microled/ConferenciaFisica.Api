@@ -5,16 +5,19 @@ using ConferenciaFisica.Contracts.Commands;
 using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Entities.DescargaExportacao;
 using ConferenciaFisica.Domain.Repositories;
+using Microsoft.Extensions.Configuration;
 
 namespace ConferenciaFisica.Application.UseCases.Imagens
 {
     public class ProcessoUseCase : ITipoFotoUseCase
     {
         private IImagemRepository _imagemRepository;
+        private readonly IConfiguration _configuration;
 
-        public ProcessoUseCase(IImagemRepository imagemRepository)
+        public ProcessoUseCase(IImagemRepository imagemRepository, IConfiguration configuration)
         {
             _imagemRepository = imagemRepository;
+            _configuration = configuration;
         }
 
         public async Task<ServiceResult<bool>> CreateTipoFoto(TipoFotoViewModel input)
@@ -119,22 +122,34 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
 
         public async Task<string> SalvarArquivo(ProcessoViewModel processoViewModel)
         {
-            string pastaFotos = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "fotos-processos", processoViewModel.TalieId.ToString());
+            // Obtém o caminho base do appsettings
+            var basePath = _configuration["Images:Path"];
+            if (string.IsNullOrEmpty(basePath))
+                throw new InvalidOperationException("Caminho das imagens não configurado.");
 
+            // Define a pasta completa do processo (usando NomeProcesso)
+            string pastaFotos = Path.Combine(basePath, processoViewModel.NomeProcesso, processoViewModel.TalieId.ToString());
+
+            // Cria o diretório se não existir
             if (!Directory.Exists(pastaFotos))
             {
                 Directory.CreateDirectory(pastaFotos);
             }
 
-            string nomeArquivo = $"talie_{processoViewModel.TalieId}_{processoViewModel.Type}_{Guid.NewGuid().ToString()}.png";
+            // Nome do arquivo
+            string nomeArquivo = $"talie_{processoViewModel.TalieId}_{processoViewModel.Type}_{Guid.NewGuid()}.png";
+
+            // Caminho completo
             string caminhoCompleto = Path.Combine(pastaFotos, nomeArquivo);
 
+            // Decodifica a imagem base64 e salva
             byte[] bytesArquivo = Convert.FromBase64String(processoViewModel.ImagemBase64.Split(',').LastOrDefault());
-
             await File.WriteAllBytesAsync(caminhoCompleto, bytesArquivo);
 
-            return $"fotos-processos/{processoViewModel.TalieId.ToString()}/{nomeArquivo}";
+            // Retorna o caminho relativo usado para leitura posterior
+            return $"{processoViewModel.NomeProcesso}/{processoViewModel.TalieId}/{nomeArquivo}";
         }
+
 
         public async Task<ServiceResult<IEnumerable<TipoFotoModel>>> GetAllTipoFoto()
         {

@@ -7,7 +7,7 @@ namespace ConferenciaFisica.Application.Commands
         public int Id { get; set; }
 
         [JsonPropertyName("cntr")]
-        public int? Conteiner { get; set; }
+        public int? Conteiner { get; set; } = 0;
 
         [JsonPropertyName("tipoConferencia")]
         public int Tipo { get; set; }
