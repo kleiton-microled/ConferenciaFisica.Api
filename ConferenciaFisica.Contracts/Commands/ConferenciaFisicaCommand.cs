@@ -3,7 +3,7 @@
     public class ConferenciaFisicaCommand
     {
         public ConferenciaFisicaCommand(int? id, int? tipo, int? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, 
-            string? nomeConferente, string? cpfCliente, string? nomeCliente, int? qtdeDivergente, bool divergenciaQualificacao, 
+            string? nomeConferente, string? telefoneConferente, string? cpfCliente, string? nomeCliente, int? qtdeDivergente, bool divergenciaQualificacao, 
             string? observacaoDivergencia, int? retiradaAmostra, int? embalagem, bool? conferenciaRemota, string? operacao, 
             int? qtdeVolumesDivergentes, int? qtdeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 
             int? movimentacao, int? desuniticacao, int? quantidadeDocumentos)
@@ -16,6 +16,7 @@
             Termino = termino;
             CpfConferente = cpfConferente;
             NomeConferente = nomeConferente;
+            TelefoneConferente = telefoneConferente;
             CpfCliente = cpfCliente;
             NomeCliente = nomeCliente;
             QuantidadeDivergente = qtdeDivergente;
@@ -41,6 +42,7 @@
         public DateTime? Termino { get; set; }
         public string? CpfConferente { get; set; }
         public string? NomeConferente { get; set; }
+        public string? TelefoneConferente { get; set; }
         public string? CpfCliente { get; set; }
         public string? NomeCliente { get; set; }
         public int? QuantidadeDivergente { get; set; }
@@ -61,12 +63,12 @@
         public int? QuantidadeDocumentos { get; set; }
 
         public static ConferenciaFisicaCommand New(int? id, int? tipo, int? cntr, string? bl, DateTime inicio, DateTime termino, string? cpfConferente, string? nomeConferente, 
-                                                   string? cpfCliente, string? nomeCliente, int? qtdeDivergente, bool divergenciaQualificacao, 
+                                                   string? telefoneConferente, string? cpfCliente, string? nomeCliente, int? qtdeDivergente, bool divergenciaQualificacao, 
                                                    string? observacaoDivergencia, int? retiradaAmostra, int? embalagem, bool? conferenciaRemota, string    ? operacao, 
                                                    int? qtdeVolumesDivergentes, int? qtdeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 
                                                    int? movimentacao, int? desuniticacao, int? quantidadeDocumentos)
         {
-            return new ConferenciaFisicaCommand(id,tipo,cntr, bl, inicio, termino, cpfConferente, nomeConferente, 
+            return new ConferenciaFisicaCommand(id,tipo,cntr, bl, inicio, termino, cpfConferente, nomeConferente, telefoneConferente, 
                                                 cpfCliente, nomeCliente, qtdeDivergente, divergenciaQualificacao, 
                                                 observacaoDivergencia, retiradaAmostra, embalagem, conferenciaRemota, operacao, 
                                                 qtdeVolumesDivergentes, qtdeRepresentantes, quantidadeAjudantes, quantidadeOperadores,

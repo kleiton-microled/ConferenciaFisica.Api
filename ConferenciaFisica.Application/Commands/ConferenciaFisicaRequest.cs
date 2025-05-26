@@ -30,6 +30,8 @@ namespace ConferenciaFisica.Application.Commands
         [JsonPropertyName("nomeConferente")]
         public string? NomeConferente { get; set; }
 
+        [JsonPropertyName("telefoneConferente")]
+        public string? TelefoneConferente { get; set; }
         [JsonPropertyName("cpfCliente")]
         public string? CpfCliente { get; set; }
 

@@ -16,6 +16,7 @@
         public DateTime? Termino { get; set; }
         public string NomeCliente { get; set; }
         public string CpfCliente { get; set; }
+        public string TelefoneConferente { get; set; }
         public int? QtdeAvariada { get; set; }
         public string ObsAvaria { get; set; }
         public int? QuantidadeDivergente { get; set; }

@@ -24,6 +24,7 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
                                                        request.Termino, 
                                                        request.CpfConferente, 
                                                        request.NomeConferente,
+                                                       request.TelefoneConferente,
                                                        request.CpfCliente, 
                                                        request.NomeCliente, 
                                                        request.QtdeDivergente, 
