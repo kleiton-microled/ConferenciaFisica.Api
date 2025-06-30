@@ -3,6 +3,8 @@
     public class ConteinerAgendamentoDto
     {
         public string Display { get; set; }
-        public int Autonum { get; set; }
+        public string Autonum { get; set; }
+        public int FlagLocalConferencia { get; set; }
+        public int AutonumAgendaPosicao { get; set; }
     }
 }

@@ -48,5 +48,6 @@ namespace ConferenciaFisica.Domain.Repositories.DescargaExportacaoReporitory
         Task UpdatepatioCsFlag(int autonumPcs);
         Task<int?> CrossDockGetLastTalie();
         Task CrossDockInserirSaidaCarga(int autonumPcs, decimal qtdeEntrada, int autonumEmb, decimal bruto, decimal altura, decimal comprimento, decimal largura, decimal volumeDeclarado, int patioContainer, string v, int autonumNf, int? talieByContainer, int romaneioId);
+        Task<int> BuscarIdConferente(string conferente);
     }
 }

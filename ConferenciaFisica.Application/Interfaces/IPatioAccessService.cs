@@ -4,6 +4,6 @@ namespace ConferenciaFisica.Application.Interfaces
 {
     public interface IPatioAccessService
     {
-        Task<List<int>> GetPatiosPermitidos(ClaimsPrincipal user);
+        Task<List<string>> GetPatiosPermitidos(ClaimsPrincipal user);
     }
 }

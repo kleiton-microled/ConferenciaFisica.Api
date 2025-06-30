@@ -157,7 +157,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                 {
                     Placa = command.Placa,
                     Inicio = DateTime.Now,
-                    Conferente = 1,
+                    Conferente = command.IdConferente,
                     Equipe = command.Equipe,
                     CodigoRegistro = command.Registro,
                     Operacao = command.Operacao,
@@ -258,7 +258,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
         public async Task<int> CadastrarAvaria(CadastroAvariaCommand command)
         {
             using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
-
+            //
             await using var transaction = await connection.BeginTransactionAsync();
             try
             {
@@ -484,8 +484,8 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
             try
             {
                 using var connection = _connectionFactory.CreateConnection();
-
                 string query = SqlQueries.GravarMarcante;
+
                 DynamicParameters param = new DynamicParameters();
                 param.Add("armazem", command.Armazem);
                 param.Add("yard", command.Local);
@@ -636,7 +636,7 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
                     await connection.ExecuteAsync(sqlInsertAmrGate, param, transaction);
 
                     // 🔹 Atualizando TB_PATIO_CS
-                    string sqlUpdatePatio = "UPDATE REDEX.dbo.TB_PATIO_CS SET pcs_pai = @Id WHERE autonum_pcs = @Id";
+                    string sqlUpdatePatio = "UPDATE REDEX.dbo.TB_PATIO_CS SET pcs_pai = @Id, DT_PRIM_ENTRADA = GETDATE() WHERE autonum_pcs = @Id";
                     await connection.ExecuteAsync(sqlUpdatePatio, new { Id = novoId }, transaction);
 
                     //TOUpdate TB_MARCANTE_RDX set Autonum_pcs where autonum_ti = @Id
@@ -1557,6 +1557,14 @@ namespace ConferenciaFisica.Infra.Repositories.DescargaExportacaoRepository
 
                 await connection.ExecuteAsync(sqlUpdate, new { AutonumPcs = autonumPcs });
             }
+        }
+
+        public async Task<int> BuscarIdConferente(string conferente)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+
+            var sql = SqlQueries.BuscarIdConferentePeloNome;
+            return await connection.QueryFirstAsync<int>(sql, new { usuario = conferente });
         }
 
 

@@ -8,6 +8,6 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
     {
         Task<ServiceResult<bool>> ExecuteAsync(CadastroAdicionalInput request);
         Task<ServiceResult<IEnumerable<CadastrosAdicionaisDTO>>> GetAllAsync(int idConferencia);
-        Task<ServiceResult<bool>> DeleteAsync(int id);
+        Task<ServiceResult<bool>> DeleteAsync(int id, int? idConferencia = 0, string? tipo = "");
     }
 }

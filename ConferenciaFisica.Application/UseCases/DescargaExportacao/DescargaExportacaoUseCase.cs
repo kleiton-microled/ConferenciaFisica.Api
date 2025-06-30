@@ -77,13 +77,15 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
 
             var talie = _mapper.Map<TalieDTO>(request.Talie);
 
+            var idConferente = await _repository.BuscarIdConferente(request.NomeConferente);
+
             var command = DescargaExportacaoCommand.CreateNew(request.Registro,
                                                              talie,
                                                              request.Placa,
                                                              request.Reserva,
                                                              request.Cliente,
                                                              request.IdReserva,
-                                                             request.IdConferente,
+                                                             idConferente,
                                                              request.Equipe,
                                                              request.Operacao,
                                                              request.IsCrossDocking,

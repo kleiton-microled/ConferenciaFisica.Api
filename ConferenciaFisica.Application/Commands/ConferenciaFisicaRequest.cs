@@ -79,6 +79,9 @@ namespace ConferenciaFisica.Application.Commands
         [JsonPropertyName("qtdDocumento")]
         public int? QuantidadeDocumentos { get; set; }
 
+        [JsonPropertyName("autonumAgendaPosicao")]
+        public int? AutonumAgendaPosicao { get; set; }
+
 
     }
 }

@@ -40,7 +40,8 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
                                                        request.QuantidadeOperadores,
                                                        request.Movimentacao, 
                                                        request.Desuniticacao, 
-                                                       request.QuantidadeDocumentos);
+                                                       request.QuantidadeDocumentos,
+                                                       request.AutonumAgendaPosicao);
 
             var ret = await _conferenciaRepository.AtualizarConferencia(command);
 

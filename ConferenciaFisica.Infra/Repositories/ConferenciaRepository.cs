@@ -5,6 +5,7 @@ using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Infra.Data;
 using ConferenciaFisica.Infra.Sql;
 using Dapper;
+using Microsoft.Data.SqlClient;
 using System.ComponentModel;
 
 namespace ConferenciaFisica.Infra.Repositories
@@ -81,9 +82,6 @@ namespace ConferenciaFisica.Infra.Repositories
             using var connection = _connectionFactory.CreateConnection();
             string query = SqlQueries.InsertConferenciaFisica;
 
-            //var autonumCntr = BuscarAutonumCntr(command.Cntr);
-            //command.Cntr = autonumCntr.ToString();
-
             var ret = await connection.ExecuteAsync(query, command);
             if (ret > 0)
             {
@@ -113,17 +111,49 @@ namespace ConferenciaFisica.Infra.Repositories
 
         public async Task<bool> CadastroAdicional(CadastroAdicionalCommand command)
         {
-            using var connection = _connectionFactory.CreateConnection();
-            string query = SqlQueries.CadastroAdicional;
+            using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
+            await using var transaction = await connection.BeginTransactionAsync();
 
-            var ret = await connection.ExecuteAsync(query, command);
-            if (ret > 0)
+            try
             {
+                string query = SqlQueries.CadastroAdicional;
+                var ret = await connection.ExecuteAsync(query, command, transaction);
+
+                DynamicParameters parameters = new DynamicParameters();
+                parameters.Add("tipo", command.Tipo);
+                parameters.Add("idConferencia", command.IdConferencia);
+
+                //buscar total cadastrado
+                var countTipo = await connection.ExecuteScalarAsync<int>(@"SELECT COUNT(*) 
+                                                                FROM TB_EFETIVACAO_CONF_FISICA_ADC 
+                                                                WHERE ID_CONFERENCIA = @idConferencia
+                                                                AND TIPO = @tipo", parameters, transaction);
+
+                parameters.Add("countTipo", countTipo);
+
+                if (command.Tipo == "Representantes")
+                {
+                    await connection.ExecuteAsync("UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET QTD_REPRESENTANTES = @countTipo WHERE ID = @idConferencia", parameters, transaction);
+                }
+
+                if (command.Tipo == "Ajudantes")
+                {
+                    await connection.ExecuteAsync("UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET QTD_AJUDANTES = @countTipo WHERE ID = @idConferencia", parameters, transaction);
+                }
+
+                if (command.Tipo == "Operador")
+                {
+                    await connection.ExecuteAsync("UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET QTD_OPERADORES = @countTipo WHERE ID = @idConferencia", parameters, transaction);
+                }
+
+                await transaction.CommitAsync();
                 return true;
+
             }
-            else
+            catch (Exception ex)
             {
-                return false;
+                await transaction.RollbackAsync();
+                throw new Exception($"Erro ao processar Cadastro: {ex.Message}", ex);
             }
         }
 
@@ -167,29 +197,42 @@ namespace ConferenciaFisica.Infra.Repositories
             }
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id, int? idConferencia, string? tipo)
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
+            await using var transaction = await connection.BeginTransactionAsync();
+
             try
             {
-                using var connection = _connectionFactory.CreateConnection();
-
                 string query = SqlQueries.ExlcuirCadastroAdicional;
+                var ret = await connection.ExecuteAsync(query, new { id }, transaction);
 
-                var ret = await connection.ExecuteAsync(query, new { id });
-                if (ret > 0)
+                DynamicParameters parameters = new DynamicParameters();
+                parameters.Add("idConferencia", idConferencia);
+
+                if (tipo == "Representantes")
                 {
-                    return true;
+                    await connection.ExecuteAsync("UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET QTD_REPRESENTANTES = QTD_REPRESENTANTES -1 WHERE ID = @idConferencia", parameters, transaction);
                 }
-                else
+
+                if (tipo == "Ajudantes")
                 {
-                    return false;
+                    await connection.ExecuteAsync("UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET QTD_AJUDANTES = QTD_AJUDANTES -1 WHERE ID = @idConferencia", parameters, transaction);
                 }
+
+                if (tipo == "Operador")
+                {
+                    await connection.ExecuteAsync("UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET QTD_OPERADORES = QTD_OPERADORES -1 WHERE ID = @idConferencia", parameters, transaction);
+                }
+
+                await transaction.CommitAsync();
+                return true;
 
             }
             catch (Exception ex)
             {
-
-                throw;
+                await transaction.RollbackAsync();
+                throw new Exception($"Erro ao deletar Cadastro: {ex.Message}", ex);
             }
         }
 
@@ -293,17 +336,33 @@ namespace ConferenciaFisica.Infra.Repositories
 
         public async Task<bool> CadastroDocumentosConferencia(DocumentoConferenciaCommand command)
         {
-            using var connection = _connectionFactory.CreateConnection();
-            string query = SqlQueries.CadastrarDocumentosConferencia;
+            using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
+            await using var transaction = await connection.BeginTransactionAsync();
 
-            var ret = await connection.ExecuteAsync(query, command);
-            if (ret > 0)
+            try
             {
+                string query = SqlQueries.CadastrarDocumentosConferencia;
+                var countDocumentos = await connection.ExecuteScalarAsync<int>(query, command, transaction);
+
+                DynamicParameters parameters = new DynamicParameters();
+                parameters.Add("qtdDocumentos", countDocumentos);
+                parameters.Add("idConferenciaFisica", command.IdConferencia);
+                if (countDocumentos > 0)
+                {
+                    //atualizar documentos na tb efetivacao
+                    string update = @"UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET QTD_DOCUMENTOS = @qtdDocumentos WHERE ID = @idConferenciaFisica";
+                    await connection.ExecuteAsync(update, parameters, transaction);
+
+                    await transaction.CommitAsync();
+                }
+
                 return true;
+
             }
-            else
+            catch (Exception ex)
             {
-                return false;
+                await transaction.RollbackAsync();
+                throw new Exception($"Erro ao processar Documentos: {ex.Message}", ex);
             }
         }
 
@@ -323,29 +382,36 @@ namespace ConferenciaFisica.Infra.Repositories
             }
         }
 
-        public async Task<bool> ExcluirDocumentosConferencia(int id)
+        public async Task<bool> ExcluirDocumentosConferencia(int id, int? idConferencia)
         {
+            using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
+            await using var transaction = await connection.BeginTransactionAsync();
+
             try
             {
-                using var connection = _connectionFactory.CreateConnection();
-
                 string query = SqlQueries.ExcluirDocumentosConferencia;
+                var ret = await connection.ExecuteAsync(query, new { id }, transaction);
 
-                var ret = await connection.ExecuteAsync(query, new { id });
+
                 if (ret > 0)
                 {
-                    return true;
-                }
-                else
-                {
-                    return false;
+                    DynamicParameters parameters = new DynamicParameters();
+
+                    parameters.Add("idConferenciaFisica", idConferencia);
+
+                    //atualizar documentos na tb efetivacao
+                    string update = @"UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET QTD_DOCUMENTOS = QTD_DOCUMENTOS -1 WHERE ID = @idConferenciaFisica";
+                    await connection.ExecuteAsync(update, parameters, transaction);
+
+                    await transaction.CommitAsync();
                 }
 
+                return true;
             }
             catch (Exception ex)
             {
-
-                throw;
+                await transaction.RollbackAsync();
+                throw new Exception($"Erro ao excluir Documentos: {ex.Message}", ex);
             }
         }
 

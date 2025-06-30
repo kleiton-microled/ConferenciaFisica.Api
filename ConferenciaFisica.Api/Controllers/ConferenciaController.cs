@@ -57,7 +57,7 @@ namespace ConferenciaFisica.Api.Controllers
 
         [HttpGet("buscar")]
         public async Task<IActionResult> BuscarConferencia([FromQuery] string cntr = "", [FromQuery] string lote = "")
-        {
+         {
             var resultado = await _buscarConferenciaUseCase.ExecuteAsync(cntr, lote);
 
             if (!resultado.Status)
@@ -150,9 +150,9 @@ namespace ConferenciaFisica.Api.Controllers
         }
 
         [HttpDelete("excluir-cadastro-adicional")]
-        public async Task<IActionResult> ExcluirCadastroAdicional([FromQuery] int id)
+        public async Task<IActionResult> ExcluirCadastroAdicional([FromQuery] int id, int idConferencia, string tipo)
         {
-            var result = await _cadastrosAdicionaisUseCase.DeleteAsync(id);
+            var result = await _cadastrosAdicionaisUseCase.DeleteAsync(id, idConferencia, tipo);
 
             if (!result.Status && !string.IsNullOrEmpty(result.Error))
                 return NotFound(result);
@@ -255,9 +255,9 @@ namespace ConferenciaFisica.Api.Controllers
         }
 
         [HttpDelete("excluir-documento-conferencia")]
-        public async Task<IActionResult> ExcluirDocumentoConferencia([FromQuery] int id)
+        public async Task<IActionResult> ExcluirDocumentoConferencia([FromQuery] int id, int idConferencia)
         {
-            var result = await _documentosUseCase.DeleteAsync(id);
+            var result = await _documentosUseCase.DeleteAsync(id, idConferencia);
 
             if (!result.Status && !string.IsNullOrEmpty(result.Error))
                 return NotFound(result);

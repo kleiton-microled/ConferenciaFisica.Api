@@ -6,7 +6,7 @@ namespace ConferenciaFisica.Application.ViewModels
     {
         public int Id { get; set; }
         public string? NotaFiscal { get; set; }
-        public string? Embalagem { get; set; }
+        //public string? Embalagem { get; set; }
         public int? QuantidadeNf { get; set; }
         public int QuantidadeDescarga { get; set; }
         public bool Remonte { get; set; } = false;

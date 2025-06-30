@@ -16,6 +16,7 @@
         public string? Uno { get; set; }
         public string? Anvisa { get; set; }
         public string? Reserva { get; set; }
+        public int? Motivo { get; set; }
 
     }
 }

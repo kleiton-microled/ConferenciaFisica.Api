@@ -13,7 +13,7 @@ namespace ConferenciaFisica.Domain.Repositories
         Task<bool> IniciarConferencia(ConferenciaFisicaCommand command);
         Task<bool> AtualizarConferencia(ConferenciaFisicaCommand command);
         Task<bool> CadastroAdicional(CadastroAdicionalCommand command);
-        Task<bool> Delete(int id);
+        Task<bool> Delete(int id, int? idConferencia = 0, string? Tipo = "");
         Task<IEnumerable<CadastrosAdicionaisDTO>> CarregarCadastrosAdicionais(int idReferencia);
         Task<IEnumerable<TipoLacre>> CarregarTiposLacres();
         Task<IEnumerable<Lacre>> CarregarLacresConferencia(int idConferencia);
@@ -24,7 +24,7 @@ namespace ConferenciaFisica.Domain.Repositories
         Task<IEnumerable<DocumentosConferencia>> CarregarDocumentosConferencia(int idConferencia);
         Task<bool> CadastroDocumentosConferencia(DocumentoConferenciaCommand command);
         Task<bool> AtualizarDocumentosConferencia(DocumentoConferenciaCommand command);
-        Task<bool> ExcluirDocumentosConferencia(int id);
+        Task<bool> ExcluirDocumentosConferencia(int id, int? idConferencia);
         Task<bool> FinalizarConferencia(int idConferencia);
 
     }

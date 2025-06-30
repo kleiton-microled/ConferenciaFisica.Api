@@ -75,11 +75,11 @@ namespace ConferenciaFisica.Application.UseCases.Documentos
             return _serviceResult;
         }
 
-        public async Task<ServiceResult<bool>> DeleteAsync(int id)
+        public async Task<ServiceResult<bool>> DeleteAsync(int id, int? idConferencia)
         {
             var _serviceResult = new ServiceResult<bool>();
 
-            var result = await _conferenciaRepository.ExcluirDocumentosConferencia(id);
+            var result = await _conferenciaRepository.ExcluirDocumentosConferencia(id, idConferencia);
             if (result)
             {
                 _serviceResult.Result = result;

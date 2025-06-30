@@ -5,12 +5,12 @@ namespace ConferenciaFisica.Application.Services
 {
     public class PatioAccessService : IPatioAccessService
     {
-        public async Task<List<int>> GetPatiosPermitidos(ClaimsPrincipal user)
+        public async Task<List<string>> GetPatiosPermitidos(ClaimsPrincipal user)
         {
-            var permissionToPatioIdMap = new Dictionary<string, int>
+            var permissionToPatioIdMap = new Dictionary<string, string>
             {
-                { "PATIO_CLIA", 3 },
-                { "PATIO_IPA", 7 } // Adicione outros conforme necessário
+                { "PATIO_CLIA", "3" },
+                { "PATIO_IPA", "7" } // Adicione outros conforme necessário
             };
 
             var permissions = user?.Claims
@@ -19,17 +19,17 @@ namespace ConferenciaFisica.Application.Services
                 .ToList();
 
             if (permissions == null || !permissions.Any())
-                return new List<int>();
+                return new List<string>();
 
             // 🔓 Se for Admin, retorna todos os pátios
             if (permissions.Contains("Admin"))
                 return permissionToPatioIdMap.Values.Distinct().ToList();
 
-            var patios = new List<int>();
+            var patios = new List<string>();
 
             foreach (var permission in permissions)
             {
-                if (permissionToPatioIdMap.TryGetValue(permission, out int patioId))
+                if (permissionToPatioIdMap.TryGetValue(permission, out string patioId))
                 {
                     patios.Add(patioId);
                 }
