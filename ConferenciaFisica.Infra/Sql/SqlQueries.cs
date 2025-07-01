@@ -333,7 +333,7 @@
                                                         )
                                                         VALUES (
                                                         	@Cntr,
-                                                            @Bl,@Inicio,@CpfConferente,@NomeConferente,@telefoneConferente,@CpfCliente,
+                                                            @Bl,GETDATE(),@CpfConferente,@NomeConferente,@telefoneConferente,@CpfCliente,
                                                         	@NomeCliente, @QuantidadeDivergente,@DivergenciaQualificacao,@ObservacaoDivergencia,
                                                         	@RetiradaAmostra,
                                                             @ConferenciaRemota,'I','C',
