@@ -21,7 +21,7 @@
         public string ObsAvaria { get; set; }
         public int? QuantidadeDivergente { get; set; }
         public bool DivergenciaQualificacao { get; set; }
-        public string ObsDivergencia { get; set; }
+        public string ObservacaoDivergencias { get; set; }
         public int RetiradaAmostra { get; set; }
         public List<Lacre> Lacres { get; set; } = new();
         public string TipoCarga { get; set; }

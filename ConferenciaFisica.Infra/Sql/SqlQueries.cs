@@ -109,6 +109,7 @@
                                                         	CONF.CPF_CLIENTE as CpfCliente,
                                                         	CONF.QTDE_AVARIADA as QuantidadeAvariada,
                                                         	CONF.OBS_AVARIA as ObservacaoAvaria,
+                                                            CONF.OBS_DIVERGENCIA as ObservacaoDivergencias,
                                                         	CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
                                                         	-- 🔄 Aqui convertemos 2 -> TRUE e qualquer outro valor -> FALSE
                                                         	CASE
@@ -334,7 +335,7 @@
                                                         VALUES (
                                                         	@Cntr,
                                                             @Bl,GETDATE(),@CpfConferente,@NomeConferente,@telefoneConferente,@CpfCliente,
-                                                        	@NomeCliente, @QuantidadeDivergente,@DivergenciaQualificacao,@ObservacaoDivergencia,
+                                                        	@NomeCliente, @QuantidadeDivergente,@DivergenciaQualificacao,@ObservacaoDivergencias,
                                                         	@RetiradaAmostra,
                                                             @ConferenciaRemota,'I','C',
                                                             @QuantidadeVolumesDivergentes,
@@ -356,7 +357,7 @@
 	                                                    --OBS_AVARIA = @observacaoAvariada,
 	                                                    DIVERGENCIA_QTDE = @quantidadeDivergente,
 	                                                    DIVERGENCIA_QUALIFICACAO = @divergenciaQualificacao,
-	                                                    OBS_DIVERGENCIA = @observacaoDivergencia,
+	                                                    OBS_DIVERGENCIA = @observacaoDivergencias,
 	                                                    CONFREMOTA = @conferenciaRemota,
 	                                                    EMBALAGEM = @embalagem,
 	                                                    --PESO_AVARIADO = @pesoAvariado,

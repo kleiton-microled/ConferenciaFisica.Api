@@ -29,7 +29,7 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
                                                        request.NomeCliente, 
                                                        request.QtdeDivergente, 
                                                        request.DivergenciaQualificacao, 
-                                                       request.ObservacaoDivergencia, 
+                                                       request.ObservacaoDivergencias, 
                                                        request.RetiradaAmostra,
                                                        request.Embalagem,
                                                        request.ConferenciaRemota, 

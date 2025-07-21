@@ -44,8 +44,8 @@ namespace ConferenciaFisica.Application.Commands
         [JsonPropertyName("divergenciaQualificacao")]
         public bool DivergenciaQualificacao { get; set; }
 
-        [JsonPropertyName("observacaoDivergencia")]
-        public string? ObservacaoDivergencia { get; set; }
+        [JsonPropertyName("observacaoDivergencias")]
+        public string? ObservacaoDivergencias { get; set; }
 
         [JsonPropertyName("retiradaAmostra")]
         public int? RetiradaAmostra { get; set; }
