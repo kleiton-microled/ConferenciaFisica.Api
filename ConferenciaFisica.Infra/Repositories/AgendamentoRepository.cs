@@ -22,13 +22,13 @@ namespace ConferenciaFisica.Infra.Repositories
 
             var sql = SqlQueries.CarregarLotesAgendamentos_v2;
 
-            if (!string.IsNullOrEmpty(filtro))
-            {
-                sql += " AND LOTE = @Filtro";
-            }
-            var patiosParam = string.Join(",", patiosPermitidos);
+            //if (!string.IsNullOrEmpty(filtro))
+            //{
+            //    sql += " AND LOTE = @Filtro";
+            //}
+            var patiosParam = filtro;//string.Join(",", patiosPermitidos);
 
-            return await connection.QueryAsync<LoteAgendamentoDto>(sql, new { Filtro = filtro, patiosPermitidos = patiosParam });
+            return await connection.QueryAsync<LoteAgendamentoDto>(sql, new { patiosPermitidos = patiosParam });
         }
 
         public async Task<IEnumerable<ConteinerAgendamentoDto>> CarregarCntrAgendamentoAsync(string filtro, List<string> patiospermitidos)
@@ -37,10 +37,10 @@ namespace ConferenciaFisica.Infra.Repositories
 
             var sql = SqlQueries.CarregarConteinerAgendamento_v3;
 
-            if (!string.IsNullOrEmpty(filtro))
-            {
-                sql += " AND ID_CONTEINER = @Filtro";
-            }
+            //if (!string.IsNullOrEmpty(filtro))
+            //{
+            //    sql += " AND ID_CONTEINER = @Filtro";
+            //}
 
             //sql += SqlQueries.CarregarConteinerAgendamentoUnion;
 
@@ -48,7 +48,7 @@ namespace ConferenciaFisica.Infra.Repositories
             //{
             //    sql += " AND ID_CONTEINER = @Filtro";
             //}
-            var patiosParam = string.Join(",", patiospermitidos);
+            var patiosParam = filtro; //string.Join(",", patiospermitidos);
 
 
             return await connection.QueryAsync<ConteinerAgendamentoDto>(sql, new { Filtro = filtro, patiospermitidos = patiosParam });
