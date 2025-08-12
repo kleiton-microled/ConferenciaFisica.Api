@@ -40,12 +40,12 @@
                                                                 
                                                                     CASE 
                                                                         WHEN ISNULL(CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
-                                                                        WHEN ISNULL(CONF.CNTR, 0) <> 0 THEN 'CONTEINER'
+                                                                        WHEN ISNULL(CONF.CNTR, '') <> '' THEN 'CONTEINER'
                                                                         ELSE 'REDEX'
                                                                     END AS TipoCarga
                                                                 
                                                                 FROM dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
-                                                                LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.AUTONUM
+                                                                LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.ID_CONTEINER
                                                                 LEFT JOIN dbo.TB_CARGA_CNTR C ON BL.ID_CONTEINER = C.ID_CONTEINER
                                                                 WHERE BL.AUTONUM = @idConteiner
                                                                 ORDER BY CONF.ID DESC;
@@ -1004,7 +1004,7 @@
                                                    FROM
                                                    	SGIPA.dbo.TB_YARD_CS tyc
                                                    WHERE
-                                                   	tyc.ARMAZEM  = 4152
+                                                   	tyc.ARMAZEM  = 4152
                                                    	AND tyc.YARD LIKE @term";
 
         public const string CrossDockBuscarInfoTalie = @"select pcs.* 
@@ -1082,7 +1082,7 @@
                                                 FROM
                                                 	REDEX.dbo.TB_MARCANTES_RDX tm
                                                 WHERE
-                                                	--tm.ARMAZEM  = 4152
+                                                	--tm.ARMAZEM  = 4152
                                                 	tm.STR_CODE128 LIKE @term";
         public const string BuscarCargaParaMovimentar = @"SELECT 
 	                                                    	tmr.AUTONUM as IdMarcante,
@@ -1766,6 +1766,56 @@ INSERT INTO REDEX.dbo.tb_talie (
                                                             @LocalPatio,
                                                             @DataChegadaDeicPatio,
                                                             @FlagDeicPatio);  SELECT CAST(SCOPE_IDENTITY() AS INT)";
+        #endregion
+
+        #region PIX MONITORING
+        public const string ListarTodosPix = @"SELECT 
+            tpb.AUTONUM as Id,
+            tpb.Autonum_Empresa as Cliente,
+            tpb.DATA_CADASTRO as DataCriacao,
+            tpb.VALOR_PIX as Valor,
+            tpb.FLAG_PAGO as Status,
+            'Baixa realizada' as StatusBaixa,
+            '24H' as Validade,
+            tpb.DT_PAGAMENTO as DataPagamento
+        FROM TB_PIX_BL tpb";
+
+        public const string ContarTotalPix = @"SELECT COUNT(*) FROM TB_PIX_BL tpb";
+
+        public const string GetTotalPixAtivos = @"SELECT COUNT(*) 
+        FROM TB_PIX_BL tpb
+        WHERE (tpb.SEQ_GR = 0 OR tpb.SEQ_GR IS NULL)
+        AND tpb.DATA_CADASTRO >= DATEADD(HOUR, -24, GETDATE())";
+
+        public const string GetTotalPixPagos = @"SELECT COUNT(*) 
+        FROM TB_PIX_BL tpb
+        WHERE tpb.SEQ_GR > 0";
+
+        public const string GetTotalPixCancelados = @"SELECT COUNT(*) 
+        FROM TB_PIX_BL tpb
+        WHERE (tpb.SEQ_GR = 0 OR tpb.SEQ_GR IS NULL)
+        AND tpb.DATA_CADASTRO < DATEADD(HOUR, -24, GETDATE())";
+
+        public const string ListarPixComPaginacao = @"SELECT 
+            tpb.NUM_PIX as Id,
+            tcp.RAZAO as CLiente,
+            tpb.DATA_CADASTRO as DataCriacao,
+            tpb.VALOR_PIX as Valor,
+            CASE 
+                WHEN tpb.SEQ_GR > 0 THEN 'true'
+                ELSE 'false'
+            END as Status,
+            CASE 
+                WHEN tpb.SEQ_GR > 0 THEN 'Baixa realizada'
+                ELSE 'Pendente'
+            END as StatusBaixa,
+            '24H' as Validade,
+            tpb.DT_PAGAMENTO as DataPagamento
+        FROM TB_PIX_BL tpb
+            INNER JOIN TB_CAD_PARCEIROS tcp ON tpb.Autonum_Empresa = tcp.AUTONUM 
+        ORDER BY tpb.DATA_CADASTRO DESC
+        OFFSET @Skip ROWS
+        FETCH NEXT @Take ROWS ONLY";
         #endregion
     }
 }

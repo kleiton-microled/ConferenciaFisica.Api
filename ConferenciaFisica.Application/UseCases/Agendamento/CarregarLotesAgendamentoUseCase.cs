@@ -24,10 +24,10 @@ namespace ConferenciaFisica.Application.UseCases.Agendamento
         public async Task<ServiceResult<IEnumerable<LoteAgendamentoDto>>> ExecuteAsync(string filtro)
         {
             var user = _httpContextAccessor.HttpContext?.User;
-            var patiosPermitidos = await _patioAccessService.GetPatiosPermitidos(user);
+            var patiosPermitidos = new List<string>(); //await _patioAccessService.GetPatiosPermitidos(user);
 
-            if (patiosPermitidos == null || !patiosPermitidos.Any())
-                return ServiceResult<IEnumerable<LoteAgendamentoDto>>.Failure("Usuário sem permissão de acesso a nenhum pátio.");
+            //if (patiosPermitidos == null || !patiosPermitidos.Any())
+            //    return ServiceResult<IEnumerable<LoteAgendamentoDto>>.Failure("Usuário sem permissão de acesso a nenhum pátio.");
 
             var lotes = await _agendamentoRepository.CarregarLotesAgendamentoAsync(filtro, patiosPermitidos);
 
