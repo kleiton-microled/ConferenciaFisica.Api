@@ -5,6 +5,7 @@ using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Infra.Sql;
 using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Contracts.Commands;
+using ConferenciaFisica.Application.Interfaces;
 using Microsoft.Data.SqlClient;
 
 namespace ConferenciaFisica.Infra.Repositories
@@ -12,10 +13,12 @@ namespace ConferenciaFisica.Infra.Repositories
     public class AvariasRepository : IAvariasRepository
     {
         private readonly SqlServerConnectionFactory _connectionFactory;
+        private readonly ISchemaService _schemaService;
 
-        public AvariasRepository(SqlServerConnectionFactory connectionFactory)
+        public AvariasRepository(SqlServerConnectionFactory connectionFactory, ISchemaService schemaService)
         {
             _connectionFactory = connectionFactory;
+            _schemaService = schemaService;
         }
 
         public async Task<AvariasConferencia> BuscarAvariasConferencia(int idConferencia)
@@ -24,7 +27,7 @@ namespace ConferenciaFisica.Infra.Repositories
             {
                 using var connection = await _connectionFactory.CreateConnectionAsync();
 
-                var sql = SqlQueries.BuscarAvariasConferencia;
+                var sql = SqlSchemaHelper.ReplaceSchema(SqlQueries.BuscarAvariasConferencia, _schemaService);
 
                 var avariaDictionary = new Dictionary<int, AvariasConferencia>();
 
@@ -70,7 +73,7 @@ namespace ConferenciaFisica.Infra.Repositories
             try
             {
                 int avariaConferenciaId;
-                string insertQuery = SqlQueries.CadastrarAvariaConferencia + " SELECT SCOPE_IDENTITY();";
+                string insertQuery = SqlSchemaHelper.ReplaceSchema(SqlQueries.CadastrarAvariaConferencia, _schemaService) + " SELECT SCOPE_IDENTITY();";
 
                 // Captura o ID gerado após a inserção
                 avariaConferenciaId = await connection.ExecuteScalarAsync<int>(insertQuery, command, transaction);
@@ -81,7 +84,7 @@ namespace ConferenciaFisica.Infra.Repositories
                 // Insere os novos TiposAvarias
                 if (command.TiposAvarias != null && command.TiposAvarias.Count > 0)
                 {
-                    string insertTipoQuery = SqlQueries.CadastrarTiposAvariaConferencia;
+                    string insertTipoQuery = SqlSchemaHelper.ReplaceSchema(SqlQueries.CadastrarTiposAvariaConferencia, _schemaService);
 
                     foreach (var tipoAvaria in command.TiposAvarias)
                     {
@@ -116,7 +119,7 @@ namespace ConferenciaFisica.Infra.Repositories
             await using var transaction = await connection.BeginTransactionAsync();
             try
             {
-                string query = SqlQueries.AtualizarAvariaConferencia;
+                string query = SqlSchemaHelper.ReplaceSchema(SqlQueries.AtualizarAvariaConferencia, _schemaService);
 
                 // Criamos um objeto anônimo com apenas os campos necessários (sem a lista `TiposAvarias`)
                 var parametros = new
@@ -136,13 +139,13 @@ namespace ConferenciaFisica.Infra.Repositories
                     throw new Exception("Falha ao atualizar AvariaConferencia.");
 
                 // Exclui os tipos de avaria associados antes de inserir os novos
-                string queryDelete = SqlQueries.ExcluirTiposAvariasConferencia;
+                string queryDelete = SqlSchemaHelper.ReplaceSchema(SqlQueries.ExcluirTiposAvariasConferencia, _schemaService);
                 await connection.ExecuteAsync(queryDelete, new { IdAvariaConferencia = command.Id }, transaction);
 
                 // Insere os novos TiposAvarias
                 if (command.TiposAvarias != null && command.TiposAvarias.Count > 0)
                 {
-                    string insertTipoQuery = SqlQueries.CadastrarTiposAvariaConferencia;
+                    string insertTipoQuery = SqlSchemaHelper.ReplaceSchema(SqlQueries.CadastrarTiposAvariaConferencia, _schemaService);
 
                     foreach (var tipoAvaria in command.TiposAvarias)
                     {
@@ -176,7 +179,7 @@ namespace ConferenciaFisica.Infra.Repositories
             {
                 using var connection = _connectionFactory.CreateConnection();
 
-                var sql = SqlQueries.CarregarTiposAvarias;
+                var sql = SqlSchemaHelper.ReplaceSchema(SqlQueries.CarregarTiposAvarias, _schemaService);
                 return await connection.QueryAsync<TiposAvarias>(sql);
 
             }

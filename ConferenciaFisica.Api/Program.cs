@@ -5,6 +5,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ConferenciaFisica.Infra.Extensions;
+using ConferenciaFisica.Infra.Middleware;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
@@ -98,6 +99,9 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Adiciona o middleware de ambiente
+app.UseMiddleware<EnvironmentMiddleware>();
 
 
 app.UseHttpsRedirection();

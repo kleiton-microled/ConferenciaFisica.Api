@@ -17,11 +17,15 @@ namespace ConferenciaFisica.Application.Mapping
             CreateMap<TalieItem, TalieItemViewModel>();
             CreateMap<TalieItemViewModel, TalieItem>();
 
-            CreateMap<TalieViewModel, TalieDTO>();
+            CreateMap<TalieViewModel, TalieDTO>()
+                .ForMember(dest => dest.Conferente, opt => opt.Ignore()); // Ignora o campo Conferente no mapeamento
             CreateMap<TalieDTO, TalieViewModel>();
 
-            CreateMap<TalieItemViewModel, TalieItemDTO>();
-            CreateMap<TalieItemDTO, TalieItemViewModel>();
+            CreateMap<TalieItemViewModel, TalieItemDTO>()
+                .ForMember(dest => dest.Remonte, opt => opt.MapFrom(src => src.Remonte ? "S" : "N")) // Converte bool para string
+                .ForMember(dest => dest.Embalagem, opt => opt.MapFrom(src => src.EmbalagemSigla ?? "")); // Mapeia EmbalagemSigla para Embalagem
+            CreateMap<TalieItemDTO, TalieItemViewModel>()
+                .ForMember(dest => dest.Remonte, opt => opt.MapFrom(src => src.Remonte == "S")); // Converte string para bool
 
             CreateMap<DescargaExportacaoViewModel, DescargaExportacao>();
 

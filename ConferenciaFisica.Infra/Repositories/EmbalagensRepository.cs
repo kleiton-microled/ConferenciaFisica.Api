@@ -4,6 +4,7 @@ using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Infra.Sql;
 using ConferenciaFisica.Domain.Entities;
+using ConferenciaFisica.Application.Interfaces;
 using System.Linq;
 
 namespace ConferenciaFisica.Infra.Repositories
@@ -11,10 +12,12 @@ namespace ConferenciaFisica.Infra.Repositories
     public class EmbalagensRepository : IEmbalagensRepository
     {
         private readonly SqlServerConnectionFactory _connectionFactory;
+        private readonly ISchemaService _schemaService;
 
-        public EmbalagensRepository(SqlServerConnectionFactory connectionFactory)
+        public EmbalagensRepository(SqlServerConnectionFactory connectionFactory, ISchemaService schemaService)
         {
             _connectionFactory = connectionFactory;
+            _schemaService = schemaService;
         }
 
         public async Task<IEnumerable<TiposEmbalagens>> GetAll()
@@ -23,7 +26,7 @@ namespace ConferenciaFisica.Infra.Repositories
             {
                 using var connection = _connectionFactory.CreateConnection();
 
-                var sql = SqlQueries.CarregarTiposEmbalages;
+                var sql = SqlSchemaHelper.ReplaceSchema(SqlQueries.CarregarTiposEmbalages, _schemaService);
                 var result = await connection.QueryAsync<TiposEmbalagens>(sql);
 
                 var codigosPermitidos = new HashSet<int>

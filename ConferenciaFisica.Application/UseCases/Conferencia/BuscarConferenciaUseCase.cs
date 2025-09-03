@@ -2,6 +2,7 @@
 using ConferenciaFisica.Application.UseCases.Conferencia.Interfaces;
 using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Repositories;
+using ConferenciaFisica.Application.Interfaces;
 using System.ComponentModel;
 
 namespace ConferenciaFisica.Application.UseCases.Conferencia
@@ -9,10 +10,12 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
     public class BuscarConferenciaUseCase : IBuscarConferenciaUseCase
     {
         private readonly IConferenciaRepository _conferenciaRepository;
+        private readonly ISchemaService _schemaService;
 
-        public BuscarConferenciaUseCase(IConferenciaRepository conferenciaRepository)
+        public BuscarConferenciaUseCase(IConferenciaRepository conferenciaRepository, ISchemaService schemaService)
         {
             _conferenciaRepository = conferenciaRepository;
+            _schemaService = schemaService;
         }
 
         public async Task<ServiceResult<Domain.Entities.Conferencia>> BuscarPorId(int id)
@@ -38,16 +41,21 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
 
             if (!string.IsNullOrEmpty(idConteiner) && idConteiner != "0")
             {
-                conferencia = await _conferenciaRepository.BuscarPorConteinerAsync(idConteiner);
+                // Verifica se o schema é REDEX para chamar o método apropriado
+                var currentSchema = _schemaService.GetCurrentSchema();
+                if (currentSchema == "REDEX")
+                {
+                    conferencia = await _conferenciaRepository.BuscarPorConteinerRedexAsync(idConteiner);
+                }
+                else
+                {
+                    conferencia = await _conferenciaRepository.BuscarPorConteinerAsync(idConteiner);
+                }
                
             }
             else if (!string.IsNullOrEmpty(idLote))
             {
                 conferencia = await _conferenciaRepository.BuscarPorLoteAsync(idLote);
-                //if (conferencia is null)
-                //{
-                //    conferencia = await _conferenciaRepository.BuscarPorReservaAsync(idLote);
-                //}
             }
 
             if (conferencia == null)

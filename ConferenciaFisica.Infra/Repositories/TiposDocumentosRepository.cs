@@ -4,16 +4,19 @@ using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Infra.Sql;
 using ConferenciaFisica.Domain.Entities;
+using ConferenciaFisica.Application.Interfaces;
 
 namespace ConferenciaFisica.Infra.Repositories
 {
     public class TiposDocumentosRepository : ITiposDocumentosRepository
     {
         private readonly SqlServerConnectionFactory _connectionFactory;
+        private readonly ISchemaService _schemaService;
 
-        public TiposDocumentosRepository(SqlServerConnectionFactory connectionFactory)
+        public TiposDocumentosRepository(SqlServerConnectionFactory connectionFactory, ISchemaService schemaService)
         {
             _connectionFactory = connectionFactory;
+            _schemaService = schemaService;
         }
 
         public async Task<IEnumerable<LoteAgendamentoDto>> CarregarLotesAgendamentoAsync(string filtro)
@@ -42,7 +45,7 @@ namespace ConferenciaFisica.Infra.Repositories
         {
             using var connection = _connectionFactory.CreateConnection();
 
-            var sql = SqlQueries.CarregarConteinerAgendamento;
+            var sql = SqlSchemaHelper.ReplaceSchema(SqlQueries.CarregarConteinerAgendamento, _schemaService);
 
             if (!string.IsNullOrEmpty(filtro))
             {
@@ -65,7 +68,7 @@ namespace ConferenciaFisica.Infra.Repositories
             {
                 using var connection = _connectionFactory.CreateConnection();
 
-                var sql = SqlQueries.CarregarTiposDocumentos;
+                var sql = SqlSchemaHelper.ReplaceSchema(SqlQueries.CarregarTiposDocumentos, _schemaService);
                 return await connection.QueryAsync<TipoDocumentos>(sql);
 
             }

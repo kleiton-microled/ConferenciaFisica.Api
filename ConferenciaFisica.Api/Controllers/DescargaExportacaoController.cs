@@ -129,7 +129,7 @@ namespace ConferenciaFisica.Api.Controllers
         public async Task<IActionResult> DeletarProcesso(int id)
         {
             var result = await _processoUseCase.DeleteProcesso(id);
-
+                
             if (!result.Status)
                 return BadRequest(result.Mensagens);
 
@@ -148,7 +148,6 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(result);
 
         }
-
 
         [HttpGet("processo/{talieId}")]
         public async Task<IActionResult> ListarProcessos(int talieId)
@@ -208,7 +207,6 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(resultado);
         }
 
-
         [HttpPost("gravar-marcante")]
         public async Task<IActionResult> GravarMarcante([FromBody] MarcanteInput input)
         {
@@ -249,6 +247,17 @@ namespace ConferenciaFisica.Api.Controllers
             var result = await _descargaExportacaoUseCase.FinalizarProcesso(id, crossdock, user, container);
             if (!result.Status && !string.IsNullOrEmpty(result.Error))
                 return NotFound(result);
+
+            return Ok(result);
+        }
+
+        [HttpPost("replicar-valores-primeiro-item/{registro}")]
+        public async Task<IActionResult> ReplicarValoresPrimeiroTalieItem(int registro)
+        {
+            var result = await _descargaExportacaoUseCase.ReplicarValoresPrimeiroTalieItem(registro);
+
+            if (!result.Status)
+                return BadRequest(result);
 
             return Ok(result);
         }

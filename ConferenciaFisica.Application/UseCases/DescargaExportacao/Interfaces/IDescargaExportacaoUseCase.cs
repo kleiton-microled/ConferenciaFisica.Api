@@ -19,6 +19,7 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao.Interfaces
         Task<ServiceResult<bool>> ExcluirMarcanteTalieItem(int id);
         Task<ServiceResult<bool>> FinalizarProcesso(int talie, bool crossdock, string usuario, string conteiner);
         Task<IEnumerable<LocaisYardViewModel>> BuscarYard(string search);
+        Task<ServiceResult<bool>> ReplicarValoresPrimeiroTalieItem(int registro);
 
 
     }

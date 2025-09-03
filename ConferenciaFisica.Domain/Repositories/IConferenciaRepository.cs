@@ -7,10 +7,18 @@ namespace ConferenciaFisica.Domain.Repositories
     public interface IConferenciaRepository
     {
         Task<Conferencia> BuscarPorConteinerAsync(string idConteiner);
+        Task<Conferencia> BuscarPorConteinerRedexAsync(string idConteiner);
         Task<Conferencia> BuscarPorLoteAsync(string idLote);
         Task<Conferencia> BuscarPorPorId(int id);
         Task<Conferencia> BuscarPorReservaAsync(string idLote);
         Task<bool> IniciarConferencia(ConferenciaFisicaCommand command);
+        Task<bool> IniciarConferencia(
+            string? cntr, string? bl, string? cpfConferente, string? nomeConferente, 
+            string? telefoneConferente, string? cpfCliente, string? nomeCliente, 
+            int? quantidadeDivergente, bool divergenciaQualificacao, string? observacaoDivergencias, 
+            int? retiradaAmostra, bool? conferenciaRemota, int? quantidadeVolumesDivergentes, 
+            int? quantidadeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 
+            int? movimentacao, int? desunitizacao, int? quantidadeDocumentos, int? autonumAgendaPosicao);
         Task<bool> AtualizarConferencia(ConferenciaFisicaCommand command);
         Task<bool> CadastroAdicional(CadastroAdicionalCommand command);
         Task<bool> Delete(int id, int? idConferencia = 0, string? Tipo = "");

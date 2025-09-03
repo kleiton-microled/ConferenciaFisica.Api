@@ -53,7 +53,8 @@ namespace ConferenciaFisica.Infra.Extensions
     {
         public static IServiceCollection AddExtensionServices(this IServiceCollection services)
         {
-            services.AddSingleton<SqlServerConnectionFactory>();
+            services.AddScoped<ISchemaService, SchemaService>();
+            services.AddScoped<SqlServerConnectionFactory>();
             services.AddScoped<IPatioAccessService, PatioAccessService>();
             
             services.AddScoped<IBuscarConferenciaUseCase, BuscarConferenciaUseCase>();

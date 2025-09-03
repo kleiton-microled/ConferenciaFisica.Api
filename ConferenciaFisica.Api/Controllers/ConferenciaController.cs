@@ -71,13 +71,13 @@ namespace ConferenciaFisica.Api.Controllers
         {
             var resultado = await _buscarConferenciaUseCase.BuscarPorId(id);
 
-            if (!resultado.Status)
-                return BadRequest(resultado);
+            //if (!resultado.Status)
+            //    return BadRequest(resultado);
 
             return Ok(resultado);
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpGet("lotes")]
         public async Task<IActionResult> CarregarLotesAgendamento([FromQuery] string filtro = "")
         {

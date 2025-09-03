@@ -74,10 +74,14 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
         public async Task<ServiceResult<bool>> GravarOuAtualizarTalie(DescargaExportacaoViewModel request)
         {
             var _serviceResult = new ServiceResult<bool>();
-
-            var talie = _mapper.Map<TalieDTO>(request.Talie);
-
             var idConferente = await _repository.BuscarIdConferente(request.NomeConferente);
+            var talie = _mapper.Map<TalieDTO>(request.Talie);
+            if(talie is null)
+                talie = new TalieDTO();
+            // Define o ID do conferente após o mapeamento
+            talie.Conferente = idConferente;
+
+            
 
             var command = DescargaExportacaoCommand.CreateNew(request.Registro,
                                                              talie,
@@ -527,6 +531,89 @@ namespace ConferenciaFisica.Application.UseCases.DescargaExportacao
         public Task<ServiceResult<bool>> FinalizarProcesso(int id, bool crossdock)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<ServiceResult<bool>> ReplicarValoresPrimeiroTalieItem(int registro)
+        {
+            var serviceResult = new ServiceResult<bool>();
+
+            try
+            {
+                // 1. Buscar o registro completo
+                var registroCompleto = await _repository.BuscarRegistroAsync(registro);
+                if (registroCompleto?.Talie?.TalieItem == null || !registroCompleto.Talie.TalieItem.Any())
+                {
+                    serviceResult.Mensagens.Add("Nenhum TalieItem encontrado para este registro.");
+                    return serviceResult;
+                }
+
+                // 2. Obter o primeiro TalieItem como template
+                var primeiroItem = registroCompleto.Talie.TalieItem.First();
+
+                // 3. Buscar todos os TalieItems do registro
+                var todosItens = await _repository.BuscarTaliItens(registroCompleto.Talie.Id);
+                var itensParaAtualizar = todosItens.Where(item => item.Id != primeiroItem.Id).ToList();
+
+                if (!itensParaAtualizar.Any())
+                {
+                    serviceResult.Mensagens.Add("Apenas um TalieItem encontrado. Não há itens para replicar.");
+                    serviceResult.Result = true;
+                    return serviceResult;
+                }
+
+                // 4. Replicar os valores definidos para cada item
+                int itensAtualizados = 0;
+                foreach (var item in itensParaAtualizar)
+                {
+                    // Valores a serem replicados conforme especificação
+                    item.Remonte = primeiroItem.Remonte;
+                    item.Fumigacao = primeiroItem.Fumigacao;
+                    item.Comprimento = primeiroItem.Comprimento;
+                    item.Largura = primeiroItem.Largura;
+                    item.Altura = primeiroItem.Altura;
+                    item.Peso = primeiroItem.Peso;
+                    item.Fragil = primeiroItem.Fragil;
+                    item.Madeira = primeiroItem.Madeira;
+                    item.Avariado = primeiroItem.Avariado;
+                    item.IMO = primeiroItem.IMO;
+                    item.IMO2 = primeiroItem.IMO2;
+                    item.IMO3 = primeiroItem.IMO3;
+                    item.IMO4 = primeiroItem.IMO4;
+                    item.UNO = primeiroItem.UNO;
+                    item.UNO2 = primeiroItem.UNO2;
+                    item.UNO3 = primeiroItem.UNO3;
+                    item.UNO4 = primeiroItem.UNO4;
+                    item.EmbalagemSigla = primeiroItem.EmbalagemSigla;
+                    item.CodigoEmbalagem = primeiroItem.CodigoEmbalagem;
+                    item.Observacao = primeiroItem.Observacao;
+                    item.Carimbo = primeiroItem.Carimbo;
+                    item.CargaNumerada = primeiroItem.CargaNumerada;
+
+                    // 5. Atualizar cada item no banco
+                    var atualizouItem = await _repository.UpdateTalieItem(item);
+                    if (atualizouItem)
+                    {
+                        itensAtualizados++;
+                    }
+                }
+
+                if (itensAtualizados > 0)
+                {
+                    serviceResult.Result = true;
+                    serviceResult.Mensagens.Add($"Valores replicados com sucesso para {itensAtualizados} itens.");
+                }
+                else
+                {
+                    serviceResult.Mensagens.Add("Nenhum item foi atualizado.");
+                }
+            }
+            catch (Exception ex)
+            {
+                serviceResult.Error = ex.Message;
+                serviceResult.Mensagens.Add($"Erro ao replicar valores: {ex.Message}");
+            }
+
+            return serviceResult;
         }
     }
 }

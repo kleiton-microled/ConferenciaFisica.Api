@@ -4,29 +4,28 @@ using ConferenciaFisica.Domain.Repositories;
 using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Infra.Sql;
 using ConferenciaFisica.Domain.Entities.PreRegistro;
+using ConferenciaFisica.Application.Interfaces;
 
 namespace ConferenciaFisica.Infra.Repositories
 {
     public class AgendamentoRepository : IAgendamentoRepository
     {
         private readonly SqlServerConnectionFactory _connectionFactory;
+        private readonly ISchemaService _schemaService;
 
-        public AgendamentoRepository(SqlServerConnectionFactory connectionFactory)
+        public AgendamentoRepository(SqlServerConnectionFactory connectionFactory, ISchemaService schemaService)
         {
             _connectionFactory = connectionFactory;
+            _schemaService = schemaService;
         }
 
         public async Task<IEnumerable<LoteAgendamentoDto>> CarregarLotesAgendamentoAsync(string filtro, List<string> patiosPermitidos)
         {
-            using var connection = _connectionFactory.CreateConnection();
+            // Lotes sempre usam SGIPA, independente do ambiente
+            using var connection = _connectionFactory.CreateLotesConnection();
 
             var sql = SqlQueries.CarregarLotesAgendamentos_v2;
-
-            //if (!string.IsNullOrEmpty(filtro))
-            //{
-            //    sql += " AND LOTE = @Filtro";
-            //}
-            var patiosParam = filtro;//string.Join(",", patiosPermitidos);
+            var patiosParam = filtro;
 
             return await connection.QueryAsync<LoteAgendamentoDto>(sql, new { patiosPermitidos = patiosParam });
         }
@@ -37,20 +36,7 @@ namespace ConferenciaFisica.Infra.Repositories
 
             var sql = SqlQueries.CarregarConteinerAgendamento_v3;
 
-            //if (!string.IsNullOrEmpty(filtro))
-            //{
-            //    sql += " AND ID_CONTEINER = @Filtro";
-            //}
-
-            //sql += SqlQueries.CarregarConteinerAgendamentoUnion;
-
-            //if (!string.IsNullOrEmpty(filtro))
-            //{
-            //    sql += " AND ID_CONTEINER = @Filtro";
-            //}
-            var patiosParam = filtro; //string.Join(",", patiospermitidos);
-
-
+            var patiosParam = filtro;
             return await connection.QueryAsync<ConteinerAgendamentoDto>(sql, new { Filtro = filtro, patiospermitidos = patiosParam });
         }
 

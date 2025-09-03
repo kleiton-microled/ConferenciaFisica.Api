@@ -72,17 +72,64 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             {
                 var tipoProcesso = await _imagemRepository.ListProcessoByTalieId(talieId);
 
-                return ServiceResult<IEnumerable<ProcessoViewModel>>.Success(tipoProcesso.Select(x => new ProcessoViewModel()
-                {
-                    TalieId = x.IdTalie,
-                    Descricao = x.Descricao,
-                    Observacao = x.Observacao,
-                    Type = x.IdTipoProcesso,
-                    TypeDescription = x.DescricaoTipoProcesso,
-                    ImagemPath = x.ImagemPath,
-                    Id = x.Id
+                // Obtém o caminho base das imagens
+                var basePath = _configuration["Images:Path"];
+                if (string.IsNullOrEmpty(basePath))
+                    throw new InvalidOperationException("Caminho das imagens não configurado.");
 
-                }));
+                var processos = new List<ProcessoViewModel>();
+
+                foreach (var x in tipoProcesso)
+                {
+                    var processo = new ProcessoViewModel()
+                    {
+                        TalieId = x.IdTalie,
+                        Descricao = x.Descricao,
+                        Observacao = x.Observacao,
+                        Type = x.IdTipoProcesso,
+                        TypeDescription = x.DescricaoTipoProcesso,
+                        ImagemPath = x.ImagemPath,
+                        Id = x.Id
+                    };
+
+                    // Converte a imagem para base64 se o arquivo existir
+                    if (!string.IsNullOrEmpty(x.ImagemPath))
+                    {
+                        var fullImagePath = Path.Combine(basePath, x.ImagemPath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+                        
+                        if (File.Exists(fullImagePath))
+                        {
+                            try
+                            {
+                                var imageBytes = await File.ReadAllBytesAsync(fullImagePath);
+                                var base64String = Convert.ToBase64String(imageBytes);
+                                
+                                // Detecta o tipo de arquivo pela extensão
+                                var extension = Path.GetExtension(fullImagePath).ToLower();
+                                var mimeType = extension switch
+                                {
+                                    ".png" => "image/png",
+                                    ".jpg" or ".jpeg" => "image/jpeg",
+                                    ".gif" => "image/gif",
+                                    ".bmp" => "image/bmp",
+                                    _ => "image/png" // default para PNG
+                                };
+                                
+                                processo.ImagemBase64 = $"data:{mimeType};base64,{base64String}";
+                            }
+                            catch (Exception ex)
+                            {
+                                // Log do erro mas continua sem a imagem
+                                Console.WriteLine($"Erro ao converter imagem {fullImagePath} para base64: {ex.Message}");
+                                processo.ImagemBase64 = null;
+                            }
+                        }
+                    }
+
+                    processos.Add(processo);
+                }
+
+                return ServiceResult<IEnumerable<ProcessoViewModel>>.Success(processos);
             }
             catch (Exception exception)
             {
@@ -241,18 +288,65 @@ namespace ConferenciaFisica.Application.UseCases.Imagens
             {
                 var tipoProcesso = await _imagemRepository.ListProcessoByContainer(container);
 
-                return ServiceResult<IEnumerable<ProcessoViewModel>>.Success(tipoProcesso.Select(x => new ProcessoViewModel()
-                {
-                    TalieId = x.IdTalie,
-                    Descricao = x.Descricao,
-                    Observacao = x.Observacao,
-                    Type = x.IdTipoProcesso,
-                    TypeDescription = x.DescricaoTipoProcesso,
-                    ImagemPath = x.ImagemPath,
-                    Id = x.Id,
-                    ContainerId = x.IdContainer
+                // Obtém o caminho base das imagens
+                var basePath = _configuration["Images:Path"];
+                if (string.IsNullOrEmpty(basePath))
+                    throw new InvalidOperationException("Caminho das imagens não configurado.");
 
-                }));
+                var processos = new List<ProcessoViewModel>();
+
+                foreach (var x in tipoProcesso)
+                {
+                    var processo = new ProcessoViewModel()
+                    {
+                        TalieId = x.IdTalie,
+                        Descricao = x.Descricao,
+                        Observacao = x.Observacao,
+                        Type = x.IdTipoProcesso,
+                        TypeDescription = x.DescricaoTipoProcesso,
+                        ImagemPath = x.ImagemPath,
+                        Id = x.Id,
+                        ContainerId = x.IdContainer
+                    };
+
+                    // Converte a imagem para base64 se o arquivo existir
+                    if (!string.IsNullOrEmpty(x.ImagemPath))
+                    {
+                        var fullImagePath = Path.Combine(basePath, x.ImagemPath.Replace("/", Path.DirectorySeparatorChar.ToString()));
+                        
+                        if (File.Exists(fullImagePath))
+                        {
+                            try
+                            {
+                                var imageBytes = await File.ReadAllBytesAsync(fullImagePath);
+                                var base64String = Convert.ToBase64String(imageBytes);
+                                
+                                // Detecta o tipo de arquivo pela extensão
+                                var extension = Path.GetExtension(fullImagePath).ToLower();
+                                var mimeType = extension switch
+                                {
+                                    ".png" => "image/png",
+                                    ".jpg" or ".jpeg" => "image/jpeg",
+                                    ".gif" => "image/gif",
+                                    ".bmp" => "image/bmp",
+                                    _ => "image/png" // default para PNG
+                                };
+                                
+                                processo.ImagemBase64 = $"data:{mimeType};base64,{base64String}";
+                            }
+                            catch (Exception ex)
+                            {
+                                // Log do erro mas continua sem a imagem
+                                Console.WriteLine($"Erro ao converter imagem {fullImagePath} para base64: {ex.Message}");
+                                processo.ImagemBase64 = null;
+                            }
+                        }
+                    }
+
+                    processos.Add(processo);
+                }
+
+                return ServiceResult<IEnumerable<ProcessoViewModel>>.Success(processos);
             }
             catch (Exception exception)
             {

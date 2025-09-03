@@ -51,6 +51,7 @@
                                                                 ORDER BY CONF.ID DESC;
 
                                                                   ";
+
         public const string BuscarConferenciaPorId = @"SELECT
                                                         	DISTINCT 
                                                             CONF.ID AS ID,
@@ -90,11 +91,57 @@
                                                         		ELSE 'REDEX'
                                                         	END AS TipoCarga
                                                         FROM
-                                                        	dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
-                                                        LEFT JOIN dbo.TB_CNTR_BL BL ON
+                                                        	TB_EFETIVACAO_CONF_FISICA AS CONF
+                                                        LEFT JOIN TB_CNTR_BL BL ON
                                                         	CONF.CNTR = BL.AUTONUM
                                                         WHERE
                                                         	CONF.ID = @id";
+
+        public const string BuscarConferenciaRedexPorId = @"SELECT
+ 	DISTINCT 
+     CONF.ID AS ID,
+ 	CONF.TIPO_CONFERENCIA as Tipo,
+ 	CONF.EMBALAGEM,
+ 	CONF.BL as Lote,
+ 	--P.VIAGEM,
+ 	CONF.autonum_patio as CNTR,
+ 	CONF.INICIO,
+ 	CONF.TERMINO,
+ 	CONF.NOME_CLIENTE as NomeCliente,
+     CONF.TELEFONE_CONFERENTE as TelefoneConferente,
+ 	CONF.CPF_CLIENTE as CpfCliente,
+ 	CONF.QTDE_AVARIADA as QuantidadeAvariada,
+ 	CONF.OBS_AVARIA as ObservacaoAvaria,
+ 	CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
+ 	-- 🔄 Aqui convertemos 2 -> TRUE e qualquer outro valor -> FALSE
+                                                                     CASE
+ 		WHEN CONF.DIVERGENCIA_QUALIFICACAO = 2 THEN CAST(1 AS BIT)
+ 		ELSE CAST(0 AS BIT)
+ 	END as DivergenciaQualificacao,
+ 	CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
+ 	CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
+ 	CONF.CONFREMOTA as ConferenciaRemota,
+ 	CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
+ 	CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
+ 	CONF.QTD_AJUDANTES as QuantidadeAjudantes,
+ 	CONF.QTD_OPERADORES as QuantidadeOperadores,
+ 	CONF.MOVIMENTACAO as Movimentacao,
+ 	CONF.DESUNITIZACAO as Desunitizacao,
+ 	CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
+ 	CASE
+ 		WHEN ISNULL(CONF.BL,
+ 		0) <> 0 THEN 'CARGA SOLTA'
+ 		WHEN ISNULL(CONF.autonum_patio,
+ 		0) <> 0 THEN 'CONTEINER'
+ 		ELSE 'REDEX'
+ 	END AS TipoCarga
+ FROM
+ 	TB_EFETIVACAO_CONF_FISICA AS CONF
+ LEFT JOIN TB_PATIO P ON
+ 	CONF.autonum_patio = P.AUTONUM_PATIO 
+ WHERE
+ 	CONF.ID = @id";
+
         public const string BUscarConferenciaPorLote = @"SELECT DISTINCT
                                                         	CONF.ID AS ID,
                                                         	CONF.TIPO_CONFERENCIA as Tipo,
@@ -138,6 +185,7 @@
                                                         	CONF.BL = @idLote --1601734
                                                         ORDER BY
                                                         	CONF.ID DESC";
+
         public const string BuscarConferenciaPorAgendamento = @"SELECT DISTINCT 
                                                                      '' AS NumeroBl,
                                                                      --B.NUMERO,
@@ -167,6 +215,7 @@
                                                                 WHERE P.DATA_CANCELAMENTO IS NULL 
                                                                 AND C.AUTONUM = @idConteiner --'AMFU315608-0'
                                                                 ORDER BY P.DT_PREVISTA DESC";
+
         public const string BuscarLotePorAgendamento = @"SELECT DISTINCT 
                                                                      B.AUTONUM AS Bl,
                                                                      --C.AUTONUM AS CNTR,
@@ -197,6 +246,7 @@
                                                                 WHERE P.DATA_CANCELAMENTO IS NULL 
                                                                 AND B.AUTONUM = @idLote
                                                                 ORDER BY P.DT_PREVISTA DESC";
+
         public const string BuscarConferenciaPorReserva = @"SELECT DISTINCT 
                                                                 CONF.ID,
                                                                 CONF.BL,
@@ -240,6 +290,7 @@
                                                             LEFT JOIN TB_EFETIVACAO_CONF_FISICA CONF ON CONF.AUTONUM_BOO = A.AUTONUM_BOO
                                                             LEFT JOIN SGIPA.dbo.TB_LACRES_CONFERENCIA tplc ON tplc.ID_CONFERENCIA = CONF.ID 
                                                             WHERE A.REFERENCE = @LotePesquisa --RESERVA '241ISZ1203091'";
+
         public const string CarregarConteinerAgendamento = @"SELECT 
 															     C.ID_CONTEINER AS Display, 
 															     C.AUTONUM AS Autonum
@@ -250,6 +301,7 @@
 															 AND ID_STATUS_AGENDAMENTO = 0 
 															 AND CNTR IS NOT NULL 
                                                              AND PATIO IN @patiosPermitidos";
+
         public const string CarregarConteinerAgendamento_v2 = @"SELECT
                                                                     tcb.ID_CONTEINER as Display,
                                                                     tcb.autonum as Autonum,
@@ -263,6 +315,7 @@
                                                                     CONVERT(VARCHAR, DT_PREVISTA, 112) >= CONVERT(VARCHAR, GETDATE (), 112)
                                                                     AND ID_STATUS_AGENDAMENTO = 0
                                                                     AND PATIO IN @patiosPermitidos";
+
         public const string CarregarConteinerAgendamento_v3 = @"SELECT 
                                                                 	Display,
                                                                     Cntr as Autonum,
@@ -270,7 +323,8 @@
                                                                     Flag_Local_Conferencia as FlagLocalConferencia,
                                                                     Autonum_Agenda_Posicao as AutonumAgendaPosicao
                                                                 FROM
-                                                                    SGIPA.dbo.FN_CONF_FISICA_SELECAO_CNTR (@patiosPermitidos)";
+                                                                    FN_CONF_FISICA_SELECAO_CNTR (@patiosPermitidos) order by Display asc";
+
         public const string CarregarLotesAgendamentos = @"SELECT DISTINCT
                                                         	A.LOTE AS Display,
                                                         	A.LOTE AS Autonum
@@ -278,7 +332,7 @@
                                                         	TB_AGENDAMENTO_POSICAO A
                                                         INNER JOIN TB_AGENDA_POSICAO_MOTIVO B ON
                                                         	A.AUTONUM = B.AUTONUM_AGENDA_POSICAO
-                                                        INNER JOIN SGIPA.dbo.TB_BL tb ON A.LOTE = tb.AUTONUM 
+                                                        INNER JOIN dbo.TB_BL tb ON A.LOTE = tb.AUTONUM 
                                                         WHERE
                                                         	CONVERT(VARCHAR,
                                                         	A.DT_PREVISTA,
@@ -288,13 +342,15 @@
                                                         	AND A.ID_STATUS_AGENDAMENTO = 0
                                                         	AND ISNULL(A.CNTR,0) = 0
                                                         	AND tb.PATIO IN @patiosPermitidos";
+
         public const string CarregarLotesAgendamentos_v2 = @"SELECT 
                                                                     Display,
                                                                     Lote as Autonum,
                                                                     Patio,
                                                                     Flag_Local_Conferencia as FlagLocalConferencia,
                                                                     Autonum_Agenda_Posicao as AutonumAgendaPosicao
-                                                                FROM SGIPA.dbo.FN_CONF_FISICA_SELECAO_BL(@patiosPermitidos)";
+                                                                FROM FN_CONF_FISICA_SELECAO_BL(@patiosPermitidos) order by Display asc";
+
         public const string CarregarConteinerAgendamentoUnion = @"	UNION
 																  SELECT 
 																      ID_CONTEINER AS Display, 
@@ -306,7 +362,8 @@
 
         public const string InsertConferenciaFisica = @"INSERT
                                                         	INTO
-                                                        	SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA (
+                                                        	TB_EFETIVACAO_CONF_FISICA (
+                                                            TIPO_CONFERENCIA,
                                                         	CNTR,
                                                         	BL,
                                                         	INICIO,
@@ -333,6 +390,7 @@
                                                             AUTONUM_AGENDA_POSICAO
                                                         )
                                                         VALUES (
+                                                            null,
                                                         	@Cntr,
                                                             @Bl,GETDATE(),@CpfConferente,@NomeConferente,@telefoneConferente,@CpfCliente,
                                                         	@NomeCliente, @QuantidadeDivergente,@DivergenciaQualificacao,@ObservacaoDivergencias,
@@ -344,6 +402,7 @@
                                                             @QuantidadeOperadores,
                                                             @Movimentacao,@Desunitizacao,@QuantidadeDocumentos, @autonumAgendaPosicao
                                                         )";
+
         public const string AtualizarConferencia = @"UPDATE TB_EFETIVACAO_CONF_FISICA SET
                                                         BL = @bl,
 	                                                    CPF_CONFERENTE = @cpfConferente, 
@@ -370,13 +429,18 @@
 	                                                    QTD_VOLUMES_DIVERGENTES = @quantidadeVolumesDivergentes, 
                                                         TIPO_CONFERENCIA = @tipo
 	                                                 WHERE ID  = @ID";
+
         public const string CadastroAdicional = @"INSERT INTO TB_EFETIVACAO_CONF_FISICA_ADC (ID_CONFERENCIA,NOME, CPF, QUALIFICACAO, TIPO) VALUES (@idConferencia,@nome, @cpf, @qualificacao, @tipo)";
+
         public const string CarregarCadastrosAdicionais = @"SELECT ID, 
                                                                    ID_CONFERENCIA as IdConferencia, NOME, CPF, QUALIFICACAO, TIPO
                                                             FROM TB_EFETIVACAO_CONF_FISICA_ADC 
                                                             WHERE ID_CONFERENCIA = @idConferencia";
+
         public const string ExlcuirCadastroAdicional = @"DELETE FROM TB_EFETIVACAO_CONF_FISICA_ADC WHERE ID = @id";
+
         public const string CarregarTiposLacres = @"SELECT * FROM TB_TIPO_LACRE";
+
         public const string CarregarLacresConferencia = @"SELECT tlc.ID, 
                                                     	   tlc.ID_CONFERENCIA as IdConferencia, 
                                                     	   tlc.NUMERO_LACRE as Numero, 
@@ -386,17 +450,21 @@
                                                     FROM TB_LACRES_CONFERENCIA tlc 
                                                     INNER JOIN TB_TIPO_LACRE ttl ON ttl.ID = tlc.ID_TIPO_LACRE 
                                                     WHERE ID_CONFERENCIA = @idConferencia";
+
         public const string CadastrarLacreConferencia = @"INSERT INTO TB_LACRES_CONFERENCIA (ID_CONFERENCIA, NUMERO_LACRE, ID_TIPO_LACRE, LACRE_FECHAMENTO) 
                                                                                      VALUES (@idCOnferencia, @numero, @tipo, @lacreFechamento)";
+
         public const string AtualizarLacreConferencia = @"UPDATE TB_LACRES_CONFERENCIA SET 
                                                                                        ID_CONFERENCIA = @idConferencia, 
                                                                                        NUMERO_LACRE= @numero, 
                                                                                        ID_TIPO_LACRE=@tipo,
                                                                                        LACRE_FECHAMENTO= @lacreFechamento
                                                           WHERE ID = @id";
+
         public const string ExcluirLacreConferencia = @"DELETE FROM TB_LACRES_CONFERENCIA WHERE ID = @id ";
 
         public const string CarregarTiposDocumentos = @"SELECT * FROM TB_TIPO_DOCUMENTO_CONFERENCIA";
+
         public const string CarregarDocumentosConferencia = @"SELECT tdc.Id, 
                                                     	   tdc.ID_CONFERENCIA as IdConferencia,
                                                     	   tdc.NUMERO,
@@ -405,11 +473,13 @@
                                                     	FROM TB_DOCUMENTOS_CONFERENCIA tdc 
                                                     	INNER JOIN TB_TIPO_DOCUMENTO_CONFERENCIA ttdc ON tdc.TIPO = ttdc.ID
                                                     	WHERE tdc.ID_CONFERENCIA = @idConferencia";
+
         public const string AtualizarDocumentosConferencia = @"UPDATE TB_DOCUMENTOS_CONFERENCIA 
                                                                		SET ID_CONFERENCIA = @idCOnferencia,
                                                                		    NUMERO = @numero,
                                                                		    TIPO = @tipo
                                                                WHERE ID = @id";
+
         public const string CadastrarDocumentosConferencia = @"INSERT INTO TB_DOCUMENTOS_CONFERENCIA (ID_CONFERENCIA, NUMERO, TIPO)
                                                                 VALUES(@idConferencia, @numero, @tipo);
                                                                 
@@ -417,9 +487,11 @@
                                                                 FROM TB_DOCUMENTOS_CONFERENCIA 
                                                                 WHERE ID_CONFERENCIA = @idConferencia;
                                                                 ";
+
         public const string ExcluirDocumentosConferencia = @"DELETE FROM TB_DOCUMENTOS_CONFERENCIA WHERE ID = @id";
 
         public const string CarregarTiposAvarias = @"SELECT Id, Codigo, Descricao FROM TB_TIPOS_AVARIAS";
+
         public const string BuscarAvariasConferencia = @"SELECT tac.ID,
 		                                                   tac.ID_CONFERENCIA as IdConferencia, 
 		                                                   tac.QUANTIDADE_AVARIADA as QuantidadeAvariada, 
@@ -435,6 +507,7 @@
 		                                                INNER JOIN TB_AVARIA_CONFERENCIA_TIPO_AVARIA tacta on tac.ID = tacta.ID_AVARIA_CONFERENCIA 
 		                                                INNER JOIN TB_TIPOS_AVARIAS tta ON tacta.ID_TIPO_AVARIA = tta.ID 
 		                                                WHERE tac.ID_CONFERENCIA = @idConferencia";
+
         public const string CadastrarAvariaConferencia = @"INSERT INTO
                                                                TB_AVARIAS_CONFERENCIA (
                                                                    ID_CONFERENCIA,
@@ -445,6 +518,7 @@
                                                                    OBSERVACAO
                                                                )
                                                            VALUES (@IdConferencia, @QuantidadeAvariada, @PesoAvariado, @IdEmbalagem, @Conteiner, @Observacao)";
+
         public const string AtualizarAvariaConferencia = @"UPDATE TB_AVARIAS_CONFERENCIA
 	                                                        SET QUANTIDADE_AVARIADA = @quantidadeAvariada, 
 	                                                        	PESO_AVARIADO = @pesoAvariado, 
@@ -452,6 +526,7 @@
 	                                                        	CONTEINER = @conteiner,
 	                                                        	OBSERVACAO = @observacao
 	                                                        WHERE ID = @id";
+
         public const string CadastrarTiposAvariaConferencia = @"INSERT INTO TB_AVARIA_CONFERENCIA_TIPO_AVARIA (ID_AVARIA_CONFERENCIA, ID_TIPO_AVARIA)
                                                                 VALUES (@IdAvariaConferencia, @IdTipoAvaria)";
         public const string ExcluirTiposAvariasConferencia = @"DELETE FROM TB_AVARIA_CONFERENCIA_TIPO_AVARIA WHERE ID_AVARIA_CONFERENCIA = @idAvariaConferencia";
@@ -459,8 +534,56 @@
         public const string CarregarTiposEmbalages = @"SELECT dte.AUTONUM_EMB as Id, 
                                                      	      dte.CODE as Codigo,
                                                      	      dte.DESCR as Descricao
-                                                      FROM DTE_TB_EMBALAGENS dte";
-        public const string FinalizarConferencia = @"UPDATE SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA SET TERMINO = GETDATE() WHERE ID = @idConferencia";
+                                                      FROM SGIPA.dbo.DTE_TB_EMBALAGENS dte";
+
+        public const string CarregarTiposEmbalagensRedex = @"SELECT dte.AUTONUM_EMB as Id, 
+                                                     	      dte.AUTONUM_EMB as Codigo,
+                                                     	      dte.DESCRICAO_EMB as Descricao
+                                                      FROM   TB_CAD_EMBALAGENS dte WHERE dte.COD_SISCOMEX > '0'";
+
+        public const string FinalizarConferencia = @"UPDATE TB_EFETIVACAO_CONF_FISICA SET TERMINO = GETDATE() WHERE ID = @idConferencia";
+        #region REDEX
+        public const string BuscarConferenciaRedexPorIdContainer = @"SELECT DISTINCT 
+     CONF.ID AS ID,
+     CONF.TIPO_CONFERENCIA as Tipo,
+     CONF.EMBALAGEM,
+     0 AS QUANTIDADE,
+     CONF.BL,
+     '' AS VIAGEM,
+     CONF.AUTONUM_PATIO AS CNTR,
+     P.ID_CONTEINER as NumeroConteiner,
+     CONF.INICIO,
+     CONF.TERMINO,
+     CONF.NOME_CLIENTE as NomeCliente,
+     CONF.TELEFONE_CONFERENTE as TelefoneConferente,
+     CONF.CPF_CLIENTE as CpfCliente,
+     CONF.QTDE_AVARIADA as QuantidadeAvariada,
+     CONF.OBS_AVARIA as ObservacaoAvaria,
+     CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
+     -- 🔄 Aqui convertemos 2 -> TRUE e qualquer outro valor -> FALSE
+     CASE 
+         WHEN CONF.DIVERGENCIA_QUALIFICACAO = 2 THEN CAST(1 AS BIT)
+         ELSE CAST(0 AS BIT)
+     END as DivergenciaQualificacao,
+     CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
+     CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
+     CONF.CONFREMOTA as ConferenciaRemota,
+     CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
+     CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
+     CONF.QTD_AJUDANTES as QuantidadeAjudantes,
+     CONF.QTD_OPERADORES as QuantidadeOperadores,
+     CONF.MOVIMENTACAO as Movimentacao,
+     CONF.DESUNITIZACAO as Desunitizacao,
+     CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
+     CASE 
+         WHEN ISNULL(CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
+         WHEN ISNULL(CONF.AUTONUM_PATIO, 0) <> 0 THEN 'CONTEINER'
+    END AS TipoCarga
+ FROM Redex.dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
+ LEFT JOIN Redex.dbo.TB_PATIO P ON CONF.autonum_patio = P.AUTONUM_PATIO 
+ WHERE P.AUTONUM_PATIO = @idConteiner
+ ORDER BY CONF.ID DESC";
+        #endregion
         #endregion
         #region DESCARGA_EXPORTACAO
         public const string CarregarRegistro = @"SELECT
@@ -1518,7 +1641,7 @@
                                                     GROUP BY 
                                                         A.lote;";
 
-            public const string GeMarcantePatio = @"SELECT 
+        public const string GeMarcantePatio = @"SELECT 
                                                             a.volumes AS Volumes, 
                                                             b.os AS Os
                                                         FROM 
@@ -1810,12 +1933,69 @@ INSERT INTO REDEX.dbo.tb_talie (
                 ELSE 'Pendente'
             END as StatusBaixa,
             '24H' as Validade,
-            tpb.DT_PAGAMENTO as DataPagamento
+            tgb.DT_GR as DataPagamento,
+            tpb.BL,
+            tpb.SEQ_GR as GR
         FROM TB_PIX_BL tpb
             INNER JOIN TB_CAD_PARCEIROS tcp ON tpb.Autonum_Empresa = tcp.AUTONUM 
+            LEFT JOIN SGIPA.dbo.TB_GR_BL tgb ON tpb.SEQ_GR = tgb.SEQ_GR	
         ORDER BY tpb.DATA_CADASTRO DESC
         OFFSET @Skip ROWS
         FETCH NEXT @Take ROWS ONLY";
+
+        public const string ListarPixComFiltro = @"SELECT 
+            tpb.NUM_PIX as Id,
+            tcp.RAZAO as Cliente,
+            tpb.DATA_CADASTRO as DataCriacao,
+            tpb.VALOR_PIX as Valor,
+            CASE 
+                WHEN tpb.SEQ_GR > 0 THEN 'true'
+                ELSE 'false'
+            END as Status,
+            CASE 
+                WHEN tpb.SEQ_GR > 0 THEN 'Baixa realizada'
+                ELSE 'Pendente'
+            END as StatusBaixa,
+            '24H' as Validade,
+            tgb.DT_GR as DataPagamento,
+            tpb.BL,
+            tpb.SEQ_GR as GR
+        FROM TB_PIX_BL tpb
+            INNER JOIN TB_CAD_PARCEIROS tcp ON tpb.Autonum_Empresa = tcp.AUTONUM 
+            LEFT JOIN SGIPA.dbo.TB_GR_BL tgb ON tpb.SEQ_GR = tgb.SEQ_GR
+        WHERE 1=1
+            {0} -- Filtro de Status
+            {1} -- Filtro de Data
+        ORDER BY tpb.DATA_CADASTRO DESC
+        OFFSET @Skip ROWS
+        FETCH NEXT @Take ROWS ONLY";
+
+        public const string ContarPixComFiltro = @"SELECT COUNT(*) 
+        FROM TB_PIX_BL tpb
+            INNER JOIN TB_CAD_PARCEIROS tcp ON tpb.Autonum_Empresa = tcp.AUTONUM 
+        WHERE 1=1
+            {0} -- Filtro de Status
+            {1} -- Filtro de Data";
+
+        public const string ContarPixAtivosComFiltro = @"SELECT COUNT(*) 
+        FROM TB_PIX_BL tpb
+            INNER JOIN TB_CAD_PARCEIROS tcp ON tpb.Autonum_Empresa = tcp.AUTONUM 
+        WHERE (tpb.SEQ_GR = 0 OR tpb.SEQ_GR IS NULL)
+            AND tpb.DATA_CADASTRO >= DATEADD(HOUR, -24, GETDATE())
+            {0} -- Filtro de Data";
+
+        public const string ContarPixPagosComFiltro = @"SELECT COUNT(*) 
+        FROM TB_PIX_BL tpb
+            INNER JOIN TB_CAD_PARCEIROS tcp ON tpb.Autonum_Empresa = tcp.AUTONUM 
+        WHERE tpb.SEQ_GR > 0
+            {0} -- Filtro de Data";
+
+        public const string ContarPixCanceladosComFiltro = @"SELECT COUNT(*) 
+        FROM TB_PIX_BL tpb
+            INNER JOIN TB_CAD_PARCEIROS tcp ON tpb.Autonum_Empresa = tcp.AUTONUM 
+        WHERE (tpb.SEQ_GR = 0 OR tpb.SEQ_GR IS NULL)
+            AND tpb.DATA_CADASTRO < DATEADD(HOUR, -24, GETDATE())
+            {0} -- Filtro de Data";
         #endregion
     }
 }
