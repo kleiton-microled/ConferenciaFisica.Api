@@ -1,5 +1,6 @@
 using ConferenciaFisica.Contracts.Common;
 using ConferenciaFisica.Application.Common.Models;
+using ConferenciaFisica.Contracts.DTOs;
 using ConferenciaFisica.Application.UseCases.PixMonitoring.Interfaces;
 using ConferenciaFisica.Domain.Entities;
 using ConferenciaFisica.Domain.Repositories;
@@ -92,6 +93,67 @@ namespace ConferenciaFisica.Application.UseCases.PixMonitoring
             catch (Exception ex)
             {
                 return ServiceResult<int>.Failure($"Erro ao obter total de PIX cancelados: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<PaginationResult<PixPagamento>>> ListPixWithFilterAsync(PixFiltroInput filtro)
+        {
+            try
+            {
+                var pixPagamentos = await _pixPagamentoRepository.ListarComFiltroAsync(filtro);
+                
+                if (pixPagamentos == null || !pixPagamentos.Data.Any())
+                {
+                    return ServiceResult<PaginationResult<PixPagamento>>.Success(pixPagamentos, "Nenhum pagamento PIX encontrado com os filtros aplicados.");
+                }
+
+                return ServiceResult<PaginationResult<PixPagamento>>.Success(pixPagamentos, "Pagamentos PIX filtrados com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<PaginationResult<PixPagamento>>.Failure($"Erro ao listar pagamentos PIX com filtro: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<int>> GetTotalPixAtivosComFiltroAsync(PixFiltroInput filtro)
+        {
+            try
+            {
+                var totalPixAtivos = await _pixPagamentoRepository.GetTotalPixAtivosComFiltroAsync(filtro);
+                
+                return ServiceResult<int>.Success(totalPixAtivos, $"Total de PIX ativos com filtro: {totalPixAtivos}");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<int>.Failure($"Erro ao obter total de PIX ativos com filtro: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<int>> GetTotalPixPagosComFiltroAsync(PixFiltroInput filtro)
+        {
+            try
+            {
+                var totalPixPagos = await _pixPagamentoRepository.GetTotalPixPagosComFiltroAsync(filtro);
+                
+                return ServiceResult<int>.Success(totalPixPagos, $"Total de PIX pagos com filtro: {totalPixPagos}");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<int>.Failure($"Erro ao obter total de PIX pagos com filtro: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<int>> GetTotalPixCanceladosComFiltroAsync(PixFiltroInput filtro)
+        {
+            try
+            {
+                var totalPixCancelados = await _pixPagamentoRepository.GetTotalPixCanceladosComFiltroAsync(filtro);
+                
+                return ServiceResult<int>.Success(totalPixCancelados, $"Total de PIX cancelados com filtro: {totalPixCancelados}");
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<int>.Failure($"Erro ao obter total de PIX cancelados com filtro: {ex.Message}");
             }
         }
     }

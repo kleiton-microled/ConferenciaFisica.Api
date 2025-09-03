@@ -10,5 +10,7 @@ namespace ConferenciaFisica.Domain.Entities
         public string StatusBaixa { get; set; }
         public string Validade { get; set; }
         public DateTime? DataPagamento { get; set; }
+        public int BL { get; set; }
+        public int GR { get; set; }
     }
 } 
