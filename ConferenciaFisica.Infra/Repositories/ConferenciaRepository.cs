@@ -133,6 +133,7 @@ namespace ConferenciaFisica.Infra.Repositories
             parameters.Add("Desunitizacao", command.Desunitizacao);
             parameters.Add("QuantidadeDocumentos", command.QuantidadeDocumentos);
             parameters.Add("autonumAgendaPosicao", command.AutonumAgendaPosicao);
+            parameters.Add("tipoConferencia", 1);
 
             var ret = await connection.ExecuteAsync(query, parameters);
             return ret > 0;

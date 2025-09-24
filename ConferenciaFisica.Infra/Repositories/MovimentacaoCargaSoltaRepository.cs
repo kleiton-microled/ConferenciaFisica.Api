@@ -33,7 +33,7 @@ namespace ConferenciaFisica.Infra.Repositories
             using var connection = await _connectionFactory.CreateConnectionAsync() as SqlConnection;
             await using var transaction = await connection.BeginTransactionAsync();
 
-            var autonumPcs = await connection.QueryFirstOrDefaultAsync<int>(SqlQueries.BuscarIdPatioCs, new {idRegistro = carga.Registro}, transaction);
+            var autonumPcs = await connection.QueryFirstOrDefaultAsync<int>(SqlQueries.BuscarIdPatioCs, new { idMarcante = carga.IdMarcante}, transaction);
 
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("autonumPatioCs", autonumPcs);

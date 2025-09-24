@@ -143,48 +143,50 @@
  	CONF.ID = @id";
 
         public const string BUscarConferenciaPorLote = @"SELECT DISTINCT
-                                                        	CONF.ID AS ID,
-                                                        	CONF.TIPO_CONFERENCIA as Tipo,
-                                                        	CONF.EMBALAGEM,
-                                                        	CONF.BL,
-                                                        	BL.VIAGEM,
-                                                        	CONF.CNTR,
-                                                        	CONF.INICIO,
-                                                        	CONF.TERMINO,
-                                                        	CONF.NOME_CLIENTE as NomeCliente,
-                                                        	CONF.TELEFONE_CONFERENTE as TelefoneConferente,
-                                                        	CONF.CPF_CLIENTE as CpfCliente,
-                                                        	CONF.QTDE_AVARIADA as QuantidadeAvariada,
-                                                        	CONF.OBS_AVARIA as ObservacaoAvaria,
-                                                            CONF.OBS_DIVERGENCIA as ObservacaoDivergencias,
-                                                        	CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
-                                                        	-- 🔄 Aqui convertemos 2 -> TRUE e qualquer outro valor -> FALSE
-                                                        	CASE
-                                                        		WHEN CONF.DIVERGENCIA_QUALIFICACAO = 2 THEN CAST(1 AS BIT)
-                                                        		ELSE CAST(0 AS BIT)
-                                                        	END as DivergenciaQualificacao,
-                                                        	CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
-                                                        	CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
-                                                        	CONF.CONFREMOTA as ConferenciaRemota,
-                                                        	CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
-                                                        	CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
-                                                        	CONF.QTD_AJUDANTES as QuantidadeAjudantes,
-                                                        	CONF.QTD_OPERADORES as QuantidadeOperadores,
-                                                        	CONF.MOVIMENTACAO as Movimentacao,
-                                                        	CONF.DESUNITIZACAO as Desunitizacao,
-                                                        	CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
-                                                        	CASE
-                                                        		WHEN ISNULL (CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
-                                                        		WHEN ISNULL (CONF.CNTR, 0) <> 0 THEN 'CONTEINER'
-                                                        		ELSE 'REDEX'
-                                                        	END AS TipoCarga
-                                                        FROM
-                                                        	dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
-                                                        	LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.AUTONUM 
-                                                        WHERE
-                                                        	CONF.BL = @idLote --1601734
-                                                        ORDER BY
-                                                        	CONF.ID DESC";
+	CONF.ID AS ID,
+	CONF.TIPO_CONFERENCIA as Tipo,
+	CONF.EMBALAGEM,
+	CONF.BL,
+	BL.VIAGEM,
+	CONF.CNTR,
+	CONF.INICIO,
+	CONF.TERMINO,
+	CONF.NOME_CLIENTE as NomeCliente,
+	CONF.TELEFONE_CONFERENTE as TelefoneConferente,
+	CONF.CPF_CLIENTE as CpfCliente,
+	CONF.QTDE_AVARIADA as QuantidadeAvariada,
+	CONF.OBS_AVARIA as ObservacaoAvaria,
+	CONF.OBS_DIVERGENCIA as ObservacaoDivergencias,
+	CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
+	-- 🔄 Aqui convertemos 2 -> TRUE e qualquer outro valor -> FALSE
+	CASE
+		WHEN CONF.DIVERGENCIA_QUALIFICACAO = 2 THEN CAST(1 AS BIT)
+		ELSE CAST(0 AS BIT)
+	END as DivergenciaQualificacao,
+	CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
+	CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
+	CONF.CONFREMOTA as ConferenciaRemota,
+	CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
+	CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
+	CONF.QTD_AJUDANTES as QuantidadeAjudantes,
+	CONF.QTD_OPERADORES as QuantidadeOperadores,
+	CONF.MOVIMENTACAO as Movimentacao,
+	CONF.DESUNITIZACAO as Desunitizacao,
+	CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
+	CASE
+		WHEN ISNULL (CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
+		WHEN ISNULL (CONF.CNTR, 0) <> 0 THEN 'CONTEINER'
+		ELSE 'REDEX'
+	END AS TipoCarga,
+    tap.DT_PREVISTA as DataPrevista
+FROM
+	TB_EFETIVACAO_CONF_FISICA AS CONF
+	LEFT JOIN TB_CNTR_BL BL ON CONF.CNTR = BL.AUTONUM
+    INNER JOIN SGIPA.dbo.TB_AGENDAMENTO_POSICAO tap ON CONF.AUTONUM_AGENDA_POSICAO = tap.AUTONUM 
+WHERE
+	CONF.BL = @idLote
+ORDER BY
+	CONF.ID DESC";
 
         public const string BuscarConferenciaPorAgendamento = @"SELECT DISTINCT 
                                                                      '' AS NumeroBl,
@@ -834,7 +836,7 @@
 
         public const string ListarArmazensPorPatio = @"SELECT tai.AUTONUM as Id,
 		                                                  tai.DESCR as Descricao
-		                                               FROM TB_ARMAZENS_IPA tai 
+		                                               FROM SGIPA.dbo.TB_ARMAZENS_IPA tai 
 		                                               WHERE tai.DT_SAIDA is NULL AND tai.FLAG_HISTORICO =0 and tai.PATIO = @patio";
 
         public const string GravarMarcante = @"UPDATE REDEX.dbo.TB_MARCANTES_RDX 
@@ -1246,10 +1248,10 @@
         public const string BuscarIdPatioCs = @"SELECT
                                                 	tpc.AUTONUM_PCS as Autonum
                                                 FROM
-                                                	redex.dbo.TB_PATIO_CS tpc
+                                                	redex.dbo.TB_MARCANTES_RDX tpc
                                                 where
-                                                	tpc.AUTONUM_REGCS = @idRegistro";
-        public const string BuscarIdConferentePeloNome = @"SELECT tcu.AUTONUM_USU as IdConferente FROM REDEX.dbo.TB_CAD_USUARIOS tcu WHERE tcu.USUARIO = @usuario";
+                                                	tpc.AUTONUM = @idMarcante";
+        public const string BuscarIdConferentePeloNome = @"SELECT tcu.AUTONUM_EQP as IdConferente FROM REDEX.dbo.TB_EQUIPE tcu WHERE tcu.NOME_EQP = @usuario";
         #endregion
 
         #region ESTUFAGEM CONTEINER

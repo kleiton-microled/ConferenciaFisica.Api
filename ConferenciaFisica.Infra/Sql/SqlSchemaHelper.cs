@@ -70,6 +70,7 @@ namespace ConferenciaFisica.Infra.Sql
             {
                 // Para REDEX, NÃO inclui a coluna BL
                 return $@"INSERT INTO {tableName} (
+                    TIPO_CONFERENCIA,
                     AUTONUM_PATIO,
                     INICIO,
                     CPF_CONFERENTE,
@@ -94,6 +95,7 @@ namespace ConferenciaFisica.Infra.Sql
                     AUTONUM_AGENDA_POSICAO
                 )
                 VALUES (
+                    @tipoConferencia,
                     @Cntr,
                     GETDATE(),
                     @CpfConferente,
@@ -148,7 +150,7 @@ namespace ConferenciaFisica.Infra.Sql
                     AUTONUM_AGENDA_POSICAO
                 )
                 VALUES (
-                    null,
+                    @tipoConferencia,
                     @Cntr,
                     @Bl,
                     GETDATE(),
