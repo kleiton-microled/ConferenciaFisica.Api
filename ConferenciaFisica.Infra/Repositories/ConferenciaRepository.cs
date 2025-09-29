@@ -207,6 +207,7 @@ namespace ConferenciaFisica.Infra.Repositories
             parameters.Add("quantidadeOperadores", command.QuantidadeOperadores);
             parameters.Add("movimentacao", command.Movimentacao);
             parameters.Add("desunitizacao", command.Desunitizacao);
+            parameters.Add("porcentagemDesunitizacao", command.PorcentagemDesunitizacao);
             parameters.Add("quantidadeDocumentos", command.QuantidadeDocumentos);
             parameters.Add("quantidadeVolumesDivergentes", command.QuantidadeVolumesDivergentes);
             parameters.Add("tipo", command.Tipo);
@@ -593,6 +594,32 @@ namespace ConferenciaFisica.Infra.Repositories
             }
 
 
+        }
+
+        public async Task<string> BuscarCpfConferente(string conferente)
+        {
+            try
+            {
+                using var connection = _connectionFactory.CreateConnection();
+
+                string query = SqlSchemaHelper.ReplaceSchema(
+                    _schemaService.GetCurrentSchema() != "REDEX" ? SqlQueries.BuscarCpfConferente : SqlQueries.BuscarCpfConferente, _schemaService);
+
+                var ret = await connection.QueryFirstOrDefaultAsync<string>(query, new { conferente });
+
+                if (ret is null)
+                {
+                    query = SqlSchemaHelper.ReplaceSchema(SqlQueries.BuscarConferenciaPorId, _schemaService);
+                    ret = await connection.QueryFirstOrDefaultAsync<string>(query, new { conferente });
+                }
+
+                return ret;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
     }
 }

@@ -193,7 +193,6 @@ namespace ConferenciaFisica.Api.Controllers
 
             return Ok(resultado);
         }
-
         #endregion
     }
 }

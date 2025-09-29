@@ -30,6 +30,17 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
 
         }
 
+        public async Task<ServiceResult<string>> BusrcarCpfConferente(string usuario)
+        {
+            var data = await _conferenciaRepository.BuscarCpfConferente(usuario);
+            if (string.IsNullOrEmpty(data))
+            {
+                return ServiceResult<string>.Success(data, "Conferente não encontrada.");
+            }
+
+            return ServiceResult<string>.Success(data, "Conferente localizado com sucesso.");
+        }
+
         public async Task<ServiceResult<Domain.Entities.Conferencia>> ExecuteAsync(string idConteiner, string idLote)
         {
             if (string.IsNullOrEmpty(idConteiner) && string.IsNullOrEmpty(idLote))

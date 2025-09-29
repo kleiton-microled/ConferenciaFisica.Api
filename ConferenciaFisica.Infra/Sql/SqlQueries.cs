@@ -3,52 +3,51 @@
     public static class SqlQueries
     {
         #region CONFERENCIA FISICA
-        public const string BuscarConferenciaPorIdContainer = @"SELECT DISTINCT 
-                                                                    CONF.ID AS ID,
-                                                                    CONF.TIPO_CONFERENCIA as Tipo,
-                                                                    CONF.EMBALAGEM,
-                                                                    C.QUANTIDADE,
-                                                                    CONF.BL,
-                                                                    BL.VIAGEM,
-                                                                    CONF.CNTR,
-                                                                    BL.ID_CONTEINER as NumeroConteiner,
-                                                                    CONF.INICIO,
-                                                                    CONF.TERMINO,
-                                                                    CONF.NOME_CLIENTE as NomeCliente,
-                                                                    CONF.TELEFONE_CONFERENTE as TelefoneConferente,
-                                                                    CONF.CPF_CLIENTE as CpfCliente,
-                                                                    CONF.QTDE_AVARIADA as QuantidadeAvariada,
-                                                                    CONF.OBS_AVARIA as ObservacaoAvaria,
-                                                                    CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
-                                                                    
-                                                                    -- 🔄 Aqui convertemos 2 -> TRUE e qualquer outro valor -> FALSE
-                                                                    CASE 
-                                                                        WHEN CONF.DIVERGENCIA_QUALIFICACAO = 2 THEN CAST(1 AS BIT)
-                                                                        ELSE CAST(0 AS BIT)
-                                                                    END as DivergenciaQualificacao,
-                                                                
-                                                                    CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
-                                                                    CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
-                                                                    CONF.CONFREMOTA as ConferenciaRemota,
-                                                                    CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
-                                                                    CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
-                                                                    CONF.QTD_AJUDANTES as QuantidadeAjudantes,
-                                                                    CONF.QTD_OPERADORES as QuantidadeOperadores,
-                                                                    CONF.MOVIMENTACAO as Movimentacao,
-                                                                    CONF.DESUNITIZACAO as Desunitizacao,
-                                                                    CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
-                                                                
-                                                                    CASE 
-                                                                        WHEN ISNULL(CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
-                                                                        WHEN ISNULL(CONF.CNTR, '') <> '' THEN 'CONTEINER'
-                                                                        ELSE 'REDEX'
-                                                                    END AS TipoCarga
-                                                                
-                                                                FROM dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
-                                                                LEFT JOIN dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.ID_CONTEINER
-                                                                LEFT JOIN dbo.TB_CARGA_CNTR C ON BL.ID_CONTEINER = C.ID_CONTEINER
-                                                                WHERE BL.AUTONUM = @idConteiner
-                                                                ORDER BY CONF.ID DESC;
+        public const string BuscarConferenciaPorIdContainer = @"SELECT DISTINCT
+    CONF.ID AS ID,
+    CONF.TIPO_CONFERENCIA as Tipo,
+    CONF.EMBALAGEM,
+    C.QUANTIDADE,
+    CONF.BL,
+    BL.VIAGEM,
+    CONF.CNTR,
+    BL.ID_CONTEINER as NumeroConteiner,
+    CONF.INICIO,
+    CONF.TERMINO,
+    CONF.NOME_CLIENTE as NomeCliente,
+    CONF.TELEFONE_CONFERENTE as TelefoneConferente,
+    CONF.CPF_CLIENTE as CpfCliente,
+    CONF.QTDE_AVARIADA as QuantidadeAvariada,
+    CONF.OBS_AVARIA as ObservacaoAvaria,
+    CONF.DIVERGENCIA_QTDE as QuantidadeDivergente,
+    -- 🔄 Aqui convertemos 2 -> TRUE e qualquer outro valor -> FALSE
+    CASE
+        WHEN CONF.DIVERGENCIA_QUALIFICACAO = 2 THEN CAST(1 AS BIT)
+        ELSE CAST(0 AS BIT)
+    END as DivergenciaQualificacao,
+    CONF.OBS_DIVERGENCIA as ObservacaoDivergencia,
+    CONF.RETIRADA_AMOSTRA as RetiradaAmostra,
+    CONF.CONFREMOTA as ConferenciaRemota,
+    CONF.QTD_VOLUMES_DIVERGENTES as QuantidadeVolumesDivergentes,
+    CONF.QTD_REPRESENTANTES as QuantidadeRepresentantes,
+    CONF.QTD_AJUDANTES as QuantidadeAjudantes,
+    CONF.QTD_OPERADORES as QuantidadeOperadores,
+    CONF.MOVIMENTACAO as Movimentacao,
+    CONF.DESUNITIZACAO as Desunitizacao,
+    CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
+    CASE
+        WHEN ISNULL (CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'
+        WHEN ISNULL (CONF.CNTR, 0) <> 0 THEN 'CONTEINER'
+        ELSE 'REDEX'
+    END AS TipoCarga
+FROM
+    SGIPA.dbo.TB_EFETIVACAO_CONF_FISICA AS CONF
+    LEFT JOIN SGIPA.dbo.TB_CNTR_BL BL ON CONF.CNTR = BL.AUTONUM
+    LEFT JOIN SGIPA.dbo.TB_CARGA_CNTR C ON BL.ID_CONTEINER = C.ID_CONTEINER
+WHERE
+    CONF.CNTR = @idConteiner --737903
+ORDER BY
+    CONF.ID DESC;
 
                                                                   ";
 
@@ -82,6 +81,7 @@
                                                         	CONF.QTD_OPERADORES as QuantidadeOperadores,
                                                         	CONF.MOVIMENTACAO as Movimentacao,
                                                         	CONF.DESUNITIZACAO as Desunitizacao,
+                                                            CONF.PORCENTAGEM_DESUNITIZACAO as PorcentagemDesunitizacao,
                                                         	CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
                                                         	CASE
                                                         		WHEN ISNULL(CONF.BL,
@@ -127,6 +127,7 @@
  	CONF.QTD_OPERADORES as QuantidadeOperadores,
  	CONF.MOVIMENTACAO as Movimentacao,
  	CONF.DESUNITIZACAO as Desunitizacao,
+    CONF.PORCENTAGEM_DESUNITIZACAO as PorcentagemDesunitizacao,
  	CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
  	CASE
  		WHEN ISNULL(CONF.BL,
@@ -153,6 +154,8 @@
 	CONF.TERMINO,
 	CONF.NOME_CLIENTE as NomeCliente,
 	CONF.TELEFONE_CONFERENTE as TelefoneConferente,
+    CONF.CPF_CONFERENTE as CpfConferente,
+	CONF.NOME_CONFERENTE as NomeConferente,
 	CONF.CPF_CLIENTE as CpfCliente,
 	CONF.QTDE_AVARIADA as QuantidadeAvariada,
 	CONF.OBS_AVARIA as ObservacaoAvaria,
@@ -544,6 +547,8 @@ ORDER BY
                                                       FROM   TB_CAD_EMBALAGENS dte WHERE dte.COD_SISCOMEX > '0'";
 
         public const string FinalizarConferencia = @"UPDATE TB_EFETIVACAO_CONF_FISICA SET TERMINO = GETDATE() WHERE ID = @idConferencia";
+        
+        public const string BuscarCpfConferente = @"SELECT tcu.CPF FROM TB_CAD_USUARIOS tcu WHERE tcu.USUARIO = @conferente";
         #region REDEX
         public const string BuscarConferenciaRedexPorIdContainer = @"SELECT DISTINCT 
      CONF.ID AS ID,
@@ -576,6 +581,7 @@ ORDER BY
      CONF.QTD_OPERADORES as QuantidadeOperadores,
      CONF.MOVIMENTACAO as Movimentacao,
      CONF.DESUNITIZACAO as Desunitizacao,
+     CONF.PORCENTAGEM_DESUNITIZACAO as PorcentagemDesunitizacao,
      CONF.QTD_DOCUMENTOS as QuantidadeDocumentos,
      CASE 
          WHEN ISNULL(CONF.BL, 0) <> 0 THEN 'CARGA SOLTA'

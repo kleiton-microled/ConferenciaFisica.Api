@@ -40,6 +40,7 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia
                                                        request.QuantidadeOperadores,
                                                        request.Movimentacao, 
                                                        request.Desuniticacao, 
+                                                       request.PorcentagemDesunitizacao,
                                                        request.QuantidadeDocumentos, 
                                                        request.AutonumAgendaPosicao);
 

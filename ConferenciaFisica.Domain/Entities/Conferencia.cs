@@ -31,6 +31,7 @@
         public int? QuantidadeVolumesDivergentes { get; set; }
         public int? Movimentacao { get; set; }
         public int? Desunitizacao { get; set; }
+        public int? PorcentagemDesunitizacao { get; set; }
     }
 
 }

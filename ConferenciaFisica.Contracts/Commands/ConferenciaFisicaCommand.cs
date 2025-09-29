@@ -6,7 +6,7 @@
             string? nomeConferente, string? telefoneConferente, string? cpfCliente, string? nomeCliente, int? qtdeDivergente, bool divergenciaQualificacao, 
             string? observacaoDivergencias, int? retiradaAmostra, int? embalagem, bool? conferenciaRemota, string? operacao, 
             int? qtdeVolumesDivergentes, int? qtdeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 
-            int? movimentacao, int? desuniticacao, int? quantidadeDocumentos, int? autonumAgendaPosicao)
+            int? movimentacao, int? desuniticacao, int? porcentagemDesunitizacao, int? quantidadeDocumentos, int? autonumAgendaPosicao)
         {
             Id = id;
             Tipo = tipo;
@@ -32,6 +32,7 @@
             QuantidadeOperadores = quantidadeOperadores;
             Movimentacao = movimentacao;
             Desunitizacao = desuniticacao;
+            PorcentagemDesunitizacao = porcentagemDesunitizacao;
             QuantidadeDocumentos = quantidadeDocumentos;
             AutonumAgendaPosicao = autonumAgendaPosicao;
         }
@@ -61,6 +62,7 @@
         public int? QuantidadeOperadores { get; set; } = 0;
         public int? Movimentacao { get; set; }
         public int? Desunitizacao { get; set; }
+        public int? PorcentagemDesunitizacao { get; set; }
         public int? QuantidadeDocumentos { get; set; }
         public int? AutonumAgendaPosicao { get; set; }
 
@@ -68,13 +70,13 @@
                                                    string? telefoneConferente, string? cpfCliente, string? nomeCliente, int? qtdeDivergente, bool divergenciaQualificacao, 
                                                    string? observacaoDivergencias, int? retiradaAmostra, int? embalagem, bool? conferenciaRemota, string    ? operacao, 
                                                    int? qtdeVolumesDivergentes, int? qtdeRepresentantes, int? quantidadeAjudantes, int? quantidadeOperadores, 
-                                                   int? movimentacao, int? desuniticacao, int? quantidadeDocumentos, int? autonumAgendaPosicao)
+                                                   int? movimentacao, int? desuniticacao, int? porcentagemDesunitizacao, int? quantidadeDocumentos, int? autonumAgendaPosicao)
         {
             return new ConferenciaFisicaCommand(id,tipo,cntr, bl, inicio, termino, cpfConferente, nomeConferente, telefoneConferente, 
                                                 cpfCliente, nomeCliente, qtdeDivergente, divergenciaQualificacao, 
                                                 observacaoDivergencias, retiradaAmostra, embalagem, conferenciaRemota, operacao, 
                                                 qtdeVolumesDivergentes, qtdeRepresentantes, quantidadeAjudantes, quantidadeOperadores,
-                                                movimentacao, desuniticacao,quantidadeDocumentos, autonumAgendaPosicao);
+                                                movimentacao, desuniticacao, porcentagemDesunitizacao, quantidadeDocumentos, autonumAgendaPosicao);
         }
     }
 }

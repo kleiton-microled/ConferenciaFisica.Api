@@ -34,6 +34,7 @@ namespace ConferenciaFisica.Domain.Repositories
         Task<bool> AtualizarDocumentosConferencia(DocumentoConferenciaCommand command);
         Task<bool> ExcluirDocumentosConferencia(int id, int? idConferencia);
         Task<bool> FinalizarConferencia(int idConferencia);
+        Task<string> BuscarCpfConferente(string conferente);
 
     }
 }

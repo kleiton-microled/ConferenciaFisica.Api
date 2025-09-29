@@ -6,5 +6,7 @@ namespace ConferenciaFisica.Application.UseCases.Conferencia.Interfaces
     {
         Task<ServiceResult<Domain.Entities.Conferencia>> ExecuteAsync(string idConteiner, string idLote);
         Task<ServiceResult<Domain.Entities.Conferencia>> BuscarPorId(int id);
+        Task<ServiceResult<string>> BusrcarCpfConferente(string usuario);
+
     }
 }

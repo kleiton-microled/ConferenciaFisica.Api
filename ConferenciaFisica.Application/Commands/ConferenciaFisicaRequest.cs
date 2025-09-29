@@ -75,6 +75,8 @@ namespace ConferenciaFisica.Application.Commands
 
         [JsonPropertyName("desunitizacao")]
         public int? Desuniticacao { get; set; }
+        [JsonPropertyName("porcentagemDesunitizacao")]
+        public int? PorcentagemDesunitizacao { get; set; }
 
         [JsonPropertyName("qtdDocumento")]
         public int? QuantidadeDocumentos { get; set; }

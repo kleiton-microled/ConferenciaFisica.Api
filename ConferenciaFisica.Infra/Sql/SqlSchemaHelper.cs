@@ -91,6 +91,7 @@ namespace ConferenciaFisica.Infra.Sql
                     QTD_OPERADORES,
                     MOVIMENTACAO,
                     DESUNITIZACAO,
+                    PORCENTAGEM_DESUNITIZACAO,
                     QTD_DOCUMENTOS,
                     AUTONUM_AGENDA_POSICAO
                 )
@@ -116,6 +117,7 @@ namespace ConferenciaFisica.Infra.Sql
                     @QuantidadeOperadores,
                     @Movimentacao,
                     @Desunitizacao,
+                    @PorcentagemDesunitizacao,
                     @QuantidadeDocumentos,
                     @autonumAgendaPosicao
                 )";
@@ -146,6 +148,7 @@ namespace ConferenciaFisica.Infra.Sql
                     QTD_OPERADORES,
                     MOVIMENTACAO,
                     DESUNITIZACAO,
+                    PORCENTAGEM_DESUNITIZACAO,
                     QTD_DOCUMENTOS,
                     AUTONUM_AGENDA_POSICAO
                 )
@@ -172,6 +175,7 @@ namespace ConferenciaFisica.Infra.Sql
                     @QuantidadeOperadores,
                     @Movimentacao,
                     @Desunitizacao,
+                    @PorcentagemDesunitizacao,
                     @QuantidadeDocumentos,
                     @autonumAgendaPosicao
                 )";
@@ -206,6 +210,7 @@ namespace ConferenciaFisica.Infra.Sql
                     QTD_OPERADORES = @quantidadeOperadores,
                     MOVIMENTACAO = @movimentacao,
                     DESUNITIZACAO = @desunitizacao,
+                    PORCENTAGEM_DESUNITIZACAO = @porcentagemDesunitizacao,
                     QTD_DOCUMENTOS = @quantidadeDocumentos,
                     QTD_VOLUMES_DIVERGENTES = @quantidadeVolumesDivergentes, 
                     TIPO_CONFERENCIA = @tipo
@@ -232,6 +237,7 @@ namespace ConferenciaFisica.Infra.Sql
                     QTD_OPERADORES = @quantidadeOperadores,
                     MOVIMENTACAO = @movimentacao,
                     DESUNITIZACAO = @desunitizacao,
+                    PORCENTAGEM_DESUNITIZACAO = @porcentagemDesunitizacao,
                     QTD_DOCUMENTOS = @quantidadeDocumentos,
                     QTD_VOLUMES_DIVERGENTES = @quantidadeVolumesDivergentes, 
                     TIPO_CONFERENCIA = @tipo

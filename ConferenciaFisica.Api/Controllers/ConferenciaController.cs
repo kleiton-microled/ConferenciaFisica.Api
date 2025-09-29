@@ -276,5 +276,13 @@ namespace ConferenciaFisica.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("/cpf-conferente")]
+        public async Task<IActionResult> GetCpfConferente(string conferente)
+        {
+            var ret = await _buscarConferenciaUseCase.BusrcarCpfConferente(conferente);
+            
+            return Ok(ret);
+        }
+
     }
 }
